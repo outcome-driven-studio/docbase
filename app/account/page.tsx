@@ -59,8 +59,8 @@ export default async function AccountPage({
               </div>
               <div className="ml-3">
                 <p className="text-sm text-yellow-700">
-                  Your database tables haven't been created yet. You need to run
-                  the migrations on your Supabase instance.
+                  Your database tables haven&apos;t been created yet. You need
+                  to run the migrations on your Supabase instance.
                 </p>
               </div>
             </div>
@@ -76,7 +76,7 @@ export default async function AccountPage({
                 </h3>
                 <ol className="list-decimal list-inside space-y-2 mt-2 text-sm">
                   <li>
-                    Make sure you're logged in:{" "}
+                    Make sure you&apos;re logged in:{" "}
                     <code className="bg-gray-100 px-2 py-1 rounded">
                       npx supabase login
                     </code>

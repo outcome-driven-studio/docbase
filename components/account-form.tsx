@@ -86,6 +86,8 @@ export default function AccountForm({ account }: { account: User | null }) {
   }, [account])
 
   async function fetchEntities() {
+    if (!account) return
+
     const { data: contactData, error: contactError } = await supabase
       .from("contacts")
       .select(
@@ -126,6 +128,14 @@ export default function AccountForm({ account }: { account: User | null }) {
   }
 
   async function onSubmit(data: AccountFormValues) {
+    if (!account) {
+      toast({
+        description: "User account not found",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
       const accountUpdates = {
         email: account.email,
@@ -174,6 +184,8 @@ export default function AccountForm({ account }: { account: User | null }) {
   async function processContact(
     data: AccountFormValues
   ): Promise<string | null> {
+    if (!account) return null
+
     const contactData = {
       name: data.name,
       email: account.email,

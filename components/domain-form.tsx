@@ -65,6 +65,15 @@ export default function DomainForm({
   })
 
   const onSubmit = async (data: DomainFormValues) => {
+    if (!account) {
+      toast({
+        title: "Error",
+        description: "User account not found",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsLoading(true)
     try {
       let domainId = domain?.id
