@@ -1,0 +1,38 @@
+import { Resend } from "resend"
+
+import { logger } from "@/lib/logger"
+import { EmailTemplate } from "@/components/templates/email-investment"
+
+const resendApiKey = process.env.RESEND_API_KEY || "build-placeholder"
+const resend = new Resend(resendApiKey)
+
+export async function POST(req: Request) {
+  const body = await req.json()
+  const { emailContent, to, cc, subject } = body
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "Docbase <noreply@docs.vibetm.ai>",
+      to: to,
+      cc: cc,
+      subject: subject,
+      react: EmailTemplate({ emailContent }),
+    })
+
+    if (error) {
+      return new Response(JSON.stringify({ error }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      })
+    }
+
+    return new Response(JSON.stringify(data), {
+      headers: { "Content-Type": "application/json" },
+    })
+  } catch (error) {
+    return new Response(JSON.stringify({ error }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    })
+  }
+}
