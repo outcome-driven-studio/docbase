@@ -1,23 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import {
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  ZoomIn,
-  ZoomOut,
-} from "lucide-react"
-import { Document, Page, pdfjs } from "react-pdf"
+import { Download } from "lucide-react"
 
-import "react-pdf/dist/Page/AnnotationLayer.css"
-import "react-pdf/dist/Page/TextLayer.css"
 import { clientLogger } from "@/lib/client-logger"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/use-toast"
-
-// Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
 interface SecurePDFViewerProps {
   linkId: string
@@ -30,45 +18,7 @@ export default function SecurePDFViewer({
   filename,
   allowDownload,
 }: SecurePDFViewerProps) {
-  const [numPages, setNumPages] = useState<number>(0)
-  const [pageNumber, setPageNumber] = useState<number>(1)
-  const [scale, setScale] = useState<number>(1.0)
   const [loading, setLoading] = useState<boolean>(true)
-
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-    setNumPages(numPages)
-    setLoading(false)
-  }
-
-  function onDocumentLoadError(error: Error) {
-    clientLogger.error("Error loading PDF", { error })
-    toast({
-      title: "Error",
-      description: "Failed to load document",
-      variant: "destructive",
-    })
-    setLoading(false)
-  }
-
-  function changePage(offset: number) {
-    setPageNumber((prevPageNumber) => prevPageNumber + offset)
-  }
-
-  function previousPage() {
-    changePage(-1)
-  }
-
-  function nextPage() {
-    changePage(1)
-  }
-
-  function zoomIn() {
-    setScale((prevScale) => Math.min(prevScale + 0.2, 3.0))
-  }
-
-  function zoomOut() {
-    setScale((prevScale) => Math.max(prevScale - 0.2, 0.5))
-  }
 
   async function handleDownload() {
     try {
@@ -100,7 +50,7 @@ export default function SecurePDFViewer({
     }
   }
 
-  // Disable right-click and keyboard shortcuts
+  // Disable right-click on the iframe
   const disableContextMenu = (e: React.MouseEvent) => {
     e.preventDefault()
   }
@@ -110,36 +60,10 @@ export default function SecurePDFViewer({
       {/* Controls */}
       <div className="sticky top-0 z-10 w-full bg-background border-b p-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <Button
-            onClick={previousPage}
-            disabled={pageNumber <= 1}
-            variant="outline"
-            size="sm"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm">
-            Page {pageNumber} of {numPages}
-          </span>
-          <Button
-            onClick={nextPage}
-            disabled={pageNumber >= numPages}
-            variant="outline"
-            size="sm"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+          <span className="text-sm font-medium">{filename}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button onClick={zoomOut} variant="outline" size="sm">
-            <ZoomOut className="h-4 w-4" />
-          </Button>
-          <span className="text-sm">{Math.round(scale * 100)}%</span>
-          <Button onClick={zoomIn} variant="outline" size="sm">
-            <ZoomIn className="h-4 w-4" />
-          </Button>
-
           {allowDownload && (
             <Button onClick={handleDownload} variant="default" size="sm">
               <Download className="h-4 w-4 mr-2" />
@@ -149,35 +73,26 @@ export default function SecurePDFViewer({
         </div>
       </div>
 
-      {/* PDF Viewer */}
+      {/* PDF Viewer - Using native browser viewer */}
       <div
-        className="flex flex-col items-center w-full py-8 bg-gray-100 dark:bg-gray-900 min-h-screen"
+        className="flex flex-col items-center w-full bg-gray-100 dark:bg-gray-900 min-h-screen"
         onContextMenu={disableContextMenu}
-        style={{
-          userSelect: "none",
-          WebkitUserSelect: "none",
-        }}
       >
         {loading && (
-          <div className="text-center py-8">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <p className="text-muted-foreground">Loading document...</p>
           </div>
         )}
 
-        <Document
-          file={`/api/view-document/${linkId}`}
-          onLoadSuccess={onDocumentLoadSuccess}
-          onLoadError={onDocumentLoadError}
-          loading={null}
-          className="shadow-lg"
-        >
-          <Page
-            pageNumber={pageNumber}
-            scale={scale}
-            renderTextLayer={false}
-            renderAnnotationLayer={false}
-          />
-        </Document>
+        <iframe
+          src={`/api/view-document/${linkId}#toolbar=1&navpanes=0&scrollbar=1`}
+          className="w-full h-screen border-0"
+          title={filename}
+          onLoad={() => setLoading(false)}
+          style={{
+            minHeight: "calc(100vh - 80px)",
+          }}
+        />
       </div>
     </div>
   )

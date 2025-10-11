@@ -134,9 +134,10 @@ All planned features have been successfully implemented. The application now pro
 
 #### 7. Dependencies
 
-- **Package**: `react-pdf` and `pdfjs-dist`
-- **Purpose**: PDF rendering in the browser
-- **Status**: ✅ Installed successfully
+- **Package**: Native browser PDF viewer (iframe-based)
+- **Purpose**: PDF rendering in the browser without external dependencies
+- **Status**: ✅ Implemented successfully
+- **Note**: Switched from react-pdf to native browser viewer for better Next.js compatibility and reliability
 
 ### Security Features Implemented
 
