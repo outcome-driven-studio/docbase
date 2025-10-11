@@ -25,11 +25,27 @@ export default async function EditLink({ params }: { params: { id: string } }) {
     })
     .single()) as { data: Link | null }
 
-    const { data: account, error } = await supabase
+  let { data: account } = await supabase
     .from("users")
     .select()
-    .eq("id", user?.id)
+    .eq("id", user.id)
     .single()
+
+  // Create user record if it doesn't exist (fallback)
+  if (!account) {
+    const { data: newAccount } = await supabase
+      .from("users")
+      .upsert(
+        {
+          id: user.id,
+          email: user.email,
+        },
+        { onConflict: "id" }
+      )
+      .select()
+      .single()
+    account = newAccount
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -49,3 +65,4 @@ export default async function EditLink({ params }: { params: { id: string } }) {
     </div>
   )
 }
+
