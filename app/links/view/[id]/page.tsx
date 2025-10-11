@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/server"
 import { Database } from "@/types/supabase"
 import { logger } from "@/lib/logger"
 import { Button } from "@/components/ui/button"
-import ViewLinkForm from "@/components/view-link-form"
+import ViewLinkPage from "@/components/view-link-page"
 
 type Link = Database["public"]["Tables"]["links"]["Row"] & {
   creator_name: string | null
@@ -80,8 +80,7 @@ export default async function Doc({ params }: { params: { id: string } }) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">{link.filename}</h1>
-      <ViewLinkForm link={link} account={account} />
+      <ViewLinkPage link={link} account={account} />
     </div>
   )
 }

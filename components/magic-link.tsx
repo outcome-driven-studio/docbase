@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import { createClient } from "@/utils/supabase/client"
-import { Icons } from "./icons"
 
 import AuthRefresh from "./auth-refresh"
+import { Icons } from "./icons"
 import { Button } from "./ui/button"
 import {
   Card,
@@ -22,10 +22,10 @@ export default function MagicLink({ redirect }: { redirect: string }) {
   const [isLoading, setIsLoading] = useState(false)
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      signInWithEmail(email);
+    if (e.key === "Enter") {
+      signInWithEmail(email)
     }
-  };
+  }
 
   async function signInWithEmail(email: string) {
     setIsLoading(true)
@@ -79,11 +79,15 @@ export default function MagicLink({ redirect }: { redirect: string }) {
               autoComplete="off"
             />
             <Button
-              className="w-full"
+              className="w-full mt-2"
               onClick={() => signInWithEmail(email)}
               disabled={isLoading}
             >
-              {isLoading ? <Icons.spinner className="mr-2 h-4 w-4 animate-spin" /> : "Send Magic Link"}
+              {isLoading ? (
+                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Send Magic Link"
+              )}
             </Button>
           </div>
         </CardContent>

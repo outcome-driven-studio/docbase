@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 
 import { Database } from "@/types/supabase"
+import { clientLogger } from "@/lib/client-logger"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -19,7 +20,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
-import { clientLogger } from "@/lib/client-logger"
 
 const linkFormSchema = z.object({
   email: z
@@ -37,9 +37,11 @@ type User = Database["public"]["Tables"]["users"]["Row"]
 export default function ViewLinkForm({
   link,
   account,
+  onAuthenticated,
 }: {
   link: Link
   account: User | null
+  onAuthenticated: () => void
 }) {
   const form = useForm<LinkFormValues>({
     resolver: zodResolver(linkFormSchema),
@@ -73,12 +75,8 @@ export default function ViewLinkForm({
       }, interval)
 
       const openLinkTimer = setTimeout(() => {
-        if (link.url) {
-          window.open(link.url, "_blank")
-        } else {
-          clientLogger.error('Link URL is null')
-        }
         setShowProgressBar(false)
+        onAuthenticated()
       }, duration)
 
       return () => {
@@ -86,16 +84,9 @@ export default function ViewLinkForm({
         clearTimeout(openLinkTimer)
       }
     }
-  }, [showProgressBar, link.url])
+  }, [showProgressBar, onAuthenticated])
 
   async function onSubmit(data: LinkFormValues) {
-    if (!link.url) {
-      toast({
-        description: "Link is not valid",
-      })
-      return
-    }
-
     try {
       // Log viewer
       const updates = {
@@ -111,8 +102,11 @@ export default function ViewLinkForm({
           if (!data.password || !link.password) {
             throw new Error("Password is required")
           }
-          
-          const isPasswordCorrect = bcrypt.compareSync(data.password, link.password)
+
+          const isPasswordCorrect = bcrypt.compareSync(
+            data.password,
+            link.password
+          )
           if (!isPasswordCorrect) {
             throw new Error("Incorrect password")
           }
@@ -141,24 +135,24 @@ export default function ViewLinkForm({
         })
       }
     } catch (error: any) {
-      clientLogger.error('Error in onSubmit', { error })
+      clientLogger.error("Error in onSubmit", { error })
       toast({
         title: "Error",
         description: error.message || "An unexpected error occurred",
       })
-    } 
+    }
   }
 
   if (showProgressBar) {
     return (
       <div className="container mx-auto px-4 py-8 flex justify-center items-center flex-col min-h-[80vh]">
         <div className="max-w-md w-full text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            Opening Your Document
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+            Preparing Your Document
           </h1>
-          <p className="text-gray-600 mb-6">
-            Please wait while we authenticate and prepare your document. It will
-            open in a new tab or begin downloading shortly.
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Please wait while we authenticate and prepare your secure document
+            viewer.
           </p>
           <div className="w-full bg-gray-200 rounded-full h-2.5">
             <div

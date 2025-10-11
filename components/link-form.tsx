@@ -36,6 +36,7 @@ const linkFormSchema = z
   .object({
     protectWithPassword: z.boolean(),
     protectWithExpiration: z.boolean(),
+    allowDownload: z.boolean(),
     password: z.string().optional(),
     expires: z.date().nullable(),
     filename: z.string().min(1, "Filename is required"),
@@ -88,12 +89,16 @@ export default function LinkForm({
   const [protectWithExpiration, setProtectWithExpiration] = useState<boolean>(
     !!link?.expires
   )
+  const [allowDownload, setAllowDownload] = useState<boolean>(
+    link?.allow_download !== false
+  )
 
   const form = useForm<LinkFormValues>({
     resolver: zodResolver(linkFormSchema),
     defaultValues: {
       protectWithPassword: !!link?.password,
       protectWithExpiration: !!link?.expires,
+      allowDownload: link?.allow_download !== false,
       password: link?.password ? "********" : "",
       expires: link?.expires ? new Date(link.expires) : null,
       filename: link?.filename || "",
@@ -197,6 +202,11 @@ export default function LinkForm({
             : null,
           filename_arg: data.filename,
         })
+        // Update allow_download separately since it's not in the RPC
+        await supabase
+          .from("links")
+          .update({ allow_download: data.allowDownload })
+          .eq("id", link.id)
       } else {
         // Insert new link
         result = await supabase.from("links").insert({
@@ -207,6 +217,7 @@ export default function LinkForm({
             ? data.expires?.toISOString()
             : null,
           filename: data.filename,
+          allow_download: data.allowDownload,
           created_by: account.id,
         })
       }
@@ -463,6 +474,27 @@ export default function LinkForm({
               )}
             />
           )}
+          <FormItem className="flex flex-col rounded-lg border p-4">
+            <div className="flex flex-row items-center justify-between">
+              <div className="space-y-0.5 flex-grow">
+                <FormLabel className="text-base pr-2">Allow Download</FormLabel>
+                <FormDescription className="pr-4">
+                  When disabled, viewers can only view the document in the
+                  browser but cannot download it
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={allowDownload}
+                  onCheckedChange={(checked) => {
+                    setAllowDownload(checked)
+                    form.setValue("allowDownload", checked)
+                  }}
+                />
+              </FormControl>
+            </div>
+            <FormMessage />
+          </FormItem>
           <div className="space-y-4">
             <div
               {...getRootProps()}

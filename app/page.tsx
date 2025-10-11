@@ -8,22 +8,14 @@ export default function IndexPage() {
   return (
     <div className="flex flex-col mih-h-dvh">
       <main className="container mx-auto my-48 flex-grow">
-        <section className="text-center">
-          <h1 className="text-5xl font-bold">
-            {siteConfig.tagline}
-          </h1>
-          <p className="text-lg mt-4">
+        <section className="text-center max-w-3xl mx-auto">
+          <h1 className="text-5xl font-semibold mb-2">{siteConfig.tagline}</h1>
+          <p className="text-md mt-4 max-w-xl mx-auto">
             {siteConfig.description}
           </p>
-          <div className="mt-4 flex justify-center gap-4">
+          <div className="mt-8 flex justify-center gap-4">
             <Link href="/links">
-              <Button
-                className="transition-opacity hover:opacity-70"
-                style={{
-                  background:
-                    "linear-gradient(48deg, #74EBD5 0%, #9FACE6 100%)",
-                }}
-              >
+              <Button className="transition-opacity hover:opacity-70 bg-primary text-primary-foreground">
                 Get Started
               </Button>
             </Link>

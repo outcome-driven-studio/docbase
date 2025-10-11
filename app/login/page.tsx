@@ -1,8 +1,8 @@
-import Link from "next/link";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LoginForm } from "@/components/login-form";
-import MagicLink from "@/components/magic-link";
-import { login } from "./actions";
+import Link from "next/link"
+
+import AnimatedLoginTabs from "@/components/animated-login-tabs"
+
+import { login } from "./actions"
 
 export default async function Login() {
   return (
@@ -12,18 +12,7 @@ export default async function Login() {
           <h1 className="text-xl md:text-2xl font-semibold tracking-tight">
             Sign in to your account
           </h1>
-          <Tabs defaultValue="magic-link" className="w-full max-w-[400px] pt-4">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="magic-link">Magic Link</TabsTrigger>
-              <TabsTrigger value="email">Email</TabsTrigger>
-            </TabsList>
-            <TabsContent value="magic-link">
-              <MagicLink redirect="/account"/>
-            </TabsContent>
-            <TabsContent value="email">
-              <LoginForm login={login} />
-            </TabsContent>
-          </Tabs>
+          <AnimatedLoginTabs login={login} />
         </div>
         <p className="px-4 md:px-8 text-center text-sm text-muted-foreground">
           Need an account?{" "}
@@ -36,5 +25,5 @@ export default async function Login() {
         </p>
       </div>
     </div>
-  );
+  )
 }
