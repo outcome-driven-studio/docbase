@@ -125,26 +125,29 @@ export default function AccountForm({ account }: { account: User | null }) {
         })),
       ]
       setEntities(entities)
-
-      // Auto-select the first entity if there's only one, or the last used one
-      if (entities.length > 0 && !selectedEntity) {
-        const firstEntity = entities[0]
-        setSelectedEntity(firstEntity.id)
-        setShowAdditionalFields(true)
-
-        // Populate form with first entity's data
-        form.reset({
-          ...form.getValues(),
-          type: firstEntity.type,
-          entity_name: firstEntity.name || "",
-          byline: firstEntity.byline || "",
-          street: firstEntity.street || "",
-          city_state_zip: firstEntity.city_state_zip || "",
-          state_of_incorporation: firstEntity.state_of_incorporation || "",
-        })
-      }
     }
   }
+
+  // Auto-select first entity when entities are loaded
+  useEffect(() => {
+    if (entities.length > 0 && !selectedEntity) {
+      const firstEntity = entities[0]
+      setSelectedEntity(firstEntity.id)
+      setShowAdditionalFields(true)
+      
+      // Populate form with first entity's data
+      form.reset({
+        ...form.getValues(),
+        type: firstEntity.type,
+        entity_name: firstEntity.name || "",
+        byline: firstEntity.byline || "",
+        street: firstEntity.street || "",
+        city_state_zip: firstEntity.city_state_zip || "",
+        state_of_incorporation: firstEntity.state_of_incorporation || "",
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entities])
 
   async function onSubmit(data: AccountFormValues) {
     if (!account) {

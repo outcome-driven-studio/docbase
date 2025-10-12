@@ -12,7 +12,7 @@ export default async function Login() {
           <h1 className="text-xl font-semibold tracking-tight md:text-2xl">
             Sign in to your account
           </h1>
-          <AnimatedLoginTabs login={login} />
+          <AnimatedLoginTabs login={login} redirect="/links" />
         </div>
         <p className="px-4 text-center text-sm text-muted-foreground md:px-8">
           Need an account?{" "}

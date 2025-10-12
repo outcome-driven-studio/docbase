@@ -24,5 +24,5 @@ export async function login(formData: LoginFormData) {
     }
   }
   revalidatePath("/", "layout")
-  redirect("/account")
+  redirect("/links")
 }

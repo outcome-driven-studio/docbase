@@ -11,9 +11,10 @@ interface AnimatedLoginTabsProps {
     email: string
     password: string
   }) => Promise<{ errorMessage?: string }>
+  redirect?: string
 }
 
-export default function AnimatedLoginTabs({ login }: AnimatedLoginTabsProps) {
+export default function AnimatedLoginTabs({ login, redirect = "/links" }: AnimatedLoginTabsProps) {
   const [activeTab, setActiveTab] = useState("magic-link")
   const [containerHeight, setContainerHeight] = useState<number>(0)
   const magicLinkRef = useRef<HTMLDivElement>(null)
@@ -58,7 +59,7 @@ export default function AnimatedLoginTabs({ login }: AnimatedLoginTabsProps) {
           className="absolute inset-0 duration-300 data-[state=active]:animate-in data-[state=inactive]:animate-out data-[state=active]:fade-in-50 data-[state=inactive]:fade-out-0 data-[state=active]:slide-in-from-left-4 data-[state=inactive]:slide-out-to-right-4"
         >
           <div ref={magicLinkRef}>
-            <MagicLink redirect="/account" />
+            <MagicLink redirect={redirect} />
           </div>
         </TabsContent>
         <TabsContent
