@@ -54,12 +54,14 @@ does not exist in type 'FileOptions'.
 ### Technical Details
 
 **Upload Progress:**
+
 - Supabase JS client doesn't support `onUploadProgress` callbacks
 - Changed to simple loading state with spinning indicator
 - Shows "Uploading file..." with animated spinner
 - Still disables upload zone and button during upload
 
 **Type Safety Fixes:**
+
 1. Added null check: `if (link.url) { window.open(link.url, "_blank") }`
 2. Fixed disabled expression: `(!!link && !file && !form.formState.isDirty)` ensures boolean return
 
@@ -72,6 +74,7 @@ does not exist in type 'FileOptions'.
 ✅ **Type safe** - All null checks in place
 
 **Remaining Warnings:**
+
 - Only Tailwind CSS class order/shorthand suggestions (cosmetic, non-blocking)
 - React Hook dependency warnings (pre-existing, non-critical)
 
