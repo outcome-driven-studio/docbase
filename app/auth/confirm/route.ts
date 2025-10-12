@@ -37,7 +37,8 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const redirectTo = next && next !== "/" ? next : "/account"
+  // Default to /links instead of /account (signup explicitly sets /account)
+  const redirectTo = next && next !== "/" ? next : "/links"
   const fullNextUrl = new URL(redirectTo, siteUrl)
 
   console.log("Redirect URL:", fullNextUrl.href)
