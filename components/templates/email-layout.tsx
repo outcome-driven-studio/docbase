@@ -137,7 +137,8 @@ export const EmailLayout: React.FC<Readonly<EmailLayoutProps>> = ({
                       margin: 0,
                     }}
                   >
-                    If you didn't request this email, you can safely ignore it.
+                    If you didn&apos;t request this email, you can safely ignore
+                    it.
                   </p>
                 </td>
               </tr>
