@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { selectStyles } from "@/utils/select-styles"
 import { createClient } from "@/utils/supabase/client"
@@ -57,6 +57,22 @@ export function MessageForm({
   const [isSendingEmail, setIsSendingEmail] = useState(false)
   const subjectInputRef = useRef<HTMLInputElement>(null)
   const [recipients, setRecipients] = useState<Recipient[]>([])
+
+  // Pre-populate recipient when selectedContactEmail is provided
+  useEffect(() => {
+    if (selectedContactEmail && contacts) {
+      const contact = contacts.find((c) => c.email === selectedContactEmail)
+      if (contact) {
+        setRecipients([
+          {
+            value: contact.email,
+            label: contact.name || contact.email,
+            isEmail: true,
+          },
+        ])
+      }
+    }
+  }, [selectedContactEmail, contacts])
 
   const customComponents = {
     MultiValue: ({ children, removeProps, ...props }: any) => {

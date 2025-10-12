@@ -203,7 +203,7 @@ export function MessagesTable({
   return (
     <div className="flex h-screen overflow-hidden">
       <div
-        className={`flex flex-col max-w-3xl mx-auto ${
+        className={`mx-auto flex max-w-3xl flex-col ${
           selectedMessage ? "w-1/2 border-r" : "w-full"
         }`}
       >

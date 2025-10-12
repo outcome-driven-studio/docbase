@@ -169,7 +169,7 @@ export function GroupsDialog({
         </DialogHeader>
         <div className="space-y-2">
           {groups.map((group) => (
-            <div key={group.id} className="flex items-center space-x-2 mb-4">
+            <div key={group.id} className="mb-4 flex items-center space-x-2">
               <Popover
                 open={openColorPicker === group.id}
                 onOpenChange={(open) =>
