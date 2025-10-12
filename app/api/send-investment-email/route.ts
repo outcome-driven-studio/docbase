@@ -11,8 +11,12 @@ export async function POST(req: Request) {
   const { emailContent, to, cc, subject } = body
 
   try {
+    // Extract domain from NEXT_PUBLIC_SITE_URL for from address
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+    const domain = new URL(siteUrl).hostname
+
     const { data, error } = await resend.emails.send({
-      from: "Docbase <noreply@docs.vibetm.ai>",
+      from: `Docbase <noreply@${domain}>`,
       to: to,
       cc: cc,
       subject: subject,

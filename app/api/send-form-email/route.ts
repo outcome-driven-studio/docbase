@@ -71,8 +71,12 @@ export async function POST(req: Request) {
       street: fund.street || null,
     }
 
+    // Extract domain from NEXT_PUBLIC_SITE_URL for from address
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+    const domain = new URL(siteUrl).hostname
+
     const { data, error } = await resend.emails.send({
-      from: "Docbase <noreply@docs.vibetm.ai>",
+      from: `Docbase <noreply@${domain}>`,
       to: email,
       bcc: investor.email,
       subject: `${fund.name || "Unknown Fund"} wants to make an investment`,

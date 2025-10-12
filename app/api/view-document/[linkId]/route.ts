@@ -20,15 +20,23 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Fetch the link to verify access
-    const { data: link, error: linkError } = await supabase
-      .from("links")
-      .select("id, created_by, expires, password")
-      .eq("id", linkId)
+    // Fetch the link using RPC (bypasses RLS with SECURITY DEFINER)
+    const { data: linkData, error: linkError } = await supabase
+      .rpc("select_link", {
+        link_id: linkId,
+      })
       .single()
 
-    if (linkError || !link) {
+    if (linkError || !linkData) {
       logger.error("Link not found", { linkError })
+      return NextResponse.json({ error: "Link not found" }, { status: 404 })
+    }
+
+    // linkData is an array, get first item
+    const link = Array.isArray(linkData) ? linkData[0] : linkData
+
+    if (!link) {
+      logger.error("Link not found - empty result")
       return NextResponse.json({ error: "Link not found" }, { status: 404 })
     }
 

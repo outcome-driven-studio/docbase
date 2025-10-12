@@ -82,9 +82,12 @@ export async function POST(request: Request) {
       redirectTo
     )}`
 
+    // Extract domain from site URL for from address
+    const domain = new URL(siteUrl).hostname
+
     // Send the email with Resend
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: "Docbase <noreply@docs.vibetm.ai>",
+      from: `Docbase <noreply@${domain}>`,
       to: email,
       subject: "Your Docbase Link",
       html: `

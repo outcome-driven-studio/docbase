@@ -3,6 +3,7 @@
   "version": "0.0.2",
   "private": true,
   "scripts": {
+    "setup": "node setup.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

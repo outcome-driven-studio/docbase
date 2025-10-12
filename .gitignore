@@ -12,28 +12,61 @@ coverage
 .next/
 out/
 build
+dist/
+
+# production
+*.tsbuildinfo
+next-env.d.ts
 
 # misc
 .DS_Store
 *.pem
+.vscode/
+.idea/
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+lerna-debug.log*
 
 # local env files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env
+.env*.local
+.env.development
+.env.production
+.env.test
 
 # turbo
 .turbo
 
+# panda
 .contentlayer
-.env
-## Panda
 styled-system
 styled-system-studio
+
+# supabase
+.supabase/
+**/supabase/.branches
+**/supabase/.temp
+
+# logs
+logs
+*.log
+
+# temporary files
+*.tmp
+*.temp
+.cache/
+
+# internal documentation (not for public repo)
+projectplan.md
+DEPLOYMENT_GUIDE.md
+DEPLOYMENT_CHECKLIST.md
+QUICK_START_DEPLOYMENT.md
+START_HERE.md
+READY_TO_DEPLOY.md
+AUTH_SETUP.md
+CHANGES_SUMMARY.md
+OPENSOURCE_READY.md
