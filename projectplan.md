@@ -1,94 +1,113 @@
-# Project Plan: Fix Analytics Page Error
+# Project Plan: Show Current File in Link Edit
 
 ## Overview
 
-Fix the "Error fetching analytics" error that occurs when viewing analytics for a link. The issue is that the required RPC function `get_link_analytics` is missing from the database.
+When editing a link, users cannot see what the current file/document is. Add a visual indicator showing the current file before the upload area, so users know what file they're replacing.
 
 ## Todo Items
 
-- [x] Identify the missing RPC function
-- [x] Create the `get_link_analytics` database function
-- [ ] Apply the migration to the database
+- [x] Add current file display section in link-form.tsx
+- [x] Show filename and URL when editing an existing link
+- [x] Style it to be clearly distinguishable from the upload area
 
 ## Implementation Details
 
 ### Issue
 
-When accessing `/analytics/[link-id]`, the page shows "Error fetching analytics".
+In the Edit Link page, users see:
 
-**Root Cause**:
+- Form fields (password, expiration, filename, etc.)
+- File upload drop zone
+- BUT no indication of what the current file is
 
-- The analytics page calls `supabase.rpc("get_link_analytics", ...)` (line 17 in `app/analytics/[id]/page.tsx`)
-- This RPC function doesn't exist in any of the database migrations
-- The database returns an error, triggering the error page
+This is confusing because:
+
+- Users don't know what file they're about to replace
+- There's no way to see the current file path or name (other than the editable filename field)
+- The UX provides no visual cues about the existing document
 
 ### Solution
 
-Create a new migration file that defines the `get_link_analytics` RPC function.
+Add a "Current File" section above the upload drop zone when editing (when `link` exists):
 
-**Function Requirements:**
+- Display the current filename
+- Show the file URL (or storage path)
+- Add a visual icon (File icon)
+- Style it clearly as information, not an input
 
-- Takes a `link_id` as parameter
-- Returns:
-  - `all_viewers`: Total count of views (bigint)
-  - `unique_viewers`: Count of unique emails (bigint)
-  - `all_views`: JSON array of viewer data (email, viewed_at, id)
-- Uses LEFT JOIN to handle links with zero views
-- Orders views by most recent first
+### Files to Modify
 
-### Files Created
-
-1. **Create**: `supabase/migrations/20241220000006_add_analytics_function.sql` - New migration with the RPC function
-
-## How to Apply
-
-Run this command to apply the new migration:
-
-```bash
-npx supabase db push
-```
-
-Or if using Supabase Dashboard:
-
-1. Go to SQL Editor
-2. Copy the contents of the migration file
-3. Run the SQL
+1. **Modify**: `components/link-form.tsx` - Add current file display section
 
 ## Review Section
 
 ### Changes Made
 
-1. **Created `supabase/migrations/20241220000006_add_analytics_function.sql`**
-   - Defines `get_link_analytics(link_id_arg uuid)` RPC function
-   - Returns analytics data: all_viewers, unique_viewers, all_views
-   - Uses LEFT JOIN to support links with zero views
-   - Returns empty JSON array `[]` when no views exist
-   - Uses json_agg to build array of viewer objects
-   - Filters null values with FILTER clause
+1. **Modified `components/link-form.tsx`**
+   - Added `FileText`, `Copy`, and `ExternalLink` icon imports from lucide-react
+   - Added "Current File" section that displays when editing an existing link
+   - Shows:
+     - File icon for visual recognition
+     - "Current File" label
+     - Filename (from link.filename)
+     - Two action buttons:
+       - **Copy button** (📋) - Copies the shareable link to clipboard
+       - **Open button** (🔗) - Opens the actual file in a new tab
+     - Helper text: "Upload a new file below to replace the current one, or leave empty to keep it"
+   - Updated upload drop zone text to say "upload a replacement file" when editing
+   - Styled with muted background and border to distinguish from input areas
 
 ### Technical Details
 
-**SQL Function Implementation:**
+**Visual Design:**
 
-```sql
--- Returns a single row with:
-all_viewers: COUNT(v.id) - total views
-unique_viewers: COUNT(DISTINCT v.email) - unique viewers by email
-all_views: JSON array of {id, email, viewed_at} ordered by date DESC
+- Uses `bg-muted/50` for subtle background
+- FileText icon in muted color for visual hierarchy
+- Filename displayed prominently (no URL clutter)
+- Two ghost buttons on the right for quick actions
+- Helper text clarifies that uploading is optional when editing
+- Clean horizontal layout with actions aligned to the right
+
+**Conditional Rendering:**
+
+```tsx
+{
+  link && (
+    <div className="rounded-lg border bg-muted/50 p-4">
+      // Current file display
+    </div>
+  )
+}
 ```
 
-**Key Features:**
+Only shows when editing (when `link` prop exists), not when creating new links.
 
-- SECURITY DEFINER: Runs with function owner's permissions
-- COALESCE: Returns empty array when no views exist
-- FILTER (WHERE v.id IS NOT NULL): Prevents null entries
-- ORDER BY v.viewed_at DESC: Shows most recent views first
+**User Experience Improvements:**
+
+- Clear visual separation between "what you have" and "what you can upload"
+- Quick action buttons for common tasks:
+  - Copy the shareable link (not the storage URL)
+  - Open and preview the actual file
+- Makes it obvious that uploading a new file is optional
+- Filename is clearly visible (not just in the editable input)
+- Cleaner interface without showing long URLs
 
 ### Result
 
-✅ Once migration is applied, the analytics page will work correctly
+✅ When editing a link, users now see:
 
-- Shows total views count
-- Shows unique viewers count
-- Displays list of all views with email and timestamp
-- Handles links with zero views gracefully
+1. A clearly labeled "Current File" section showing:
+   - The filename
+   - **Copy Link button** - Copies the shareable link (`/links/view/[id]`) to clipboard with toast confirmation
+   - **Open File button** - Opens the actual file/document in a new tab for preview
+   - Helper text explaining they can upload a replacement
+2. The upload area below with updated text "upload a replacement file"
+
+**Benefits:**
+
+- ✨ Cleaner UI - No long URLs cluttering the interface
+- 🔗 Quick access - One click to copy the shareable link
+- 👁️ Preview - One click to view the actual document
+- 📋 Better UX - Toast notification confirms link was copied
+
+This eliminates the confusion about what file is currently being used and provides actionable buttons for quick tasks.

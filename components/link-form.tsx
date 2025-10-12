@@ -6,7 +6,7 @@ import { createClient } from "@/utils/supabase/client"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as bcrypt from "bcryptjs"
 import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, Copy, ExternalLink, FileText } from "lucide-react"
 import { useDropzone } from "react-dropzone"
 import { useForm } from "react-hook-form"
 import { v4 as uuidv4 } from "uuid"
@@ -496,6 +496,52 @@ export default function LinkForm({
             <FormMessage />
           </FormItem>
           <div className="space-y-4">
+            {link && (
+              <div className="rounded-lg border bg-muted/50 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Current File</p>
+                      <p className="text-sm text-muted-foreground">
+                        {link.filename}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          `${process.env.NEXT_PUBLIC_SITE_URL}/links/view/${link.id}`
+                        )
+                        toast({
+                          description: "Link copied to clipboard",
+                        })
+                      }}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        window.open(link.url, "_blank")
+                      }}
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Upload a new file below to replace the current one, or leave
+                  empty to keep it
+                </p>
+              </div>
+            )}
             <div
               {...getRootProps()}
               className={cn(
@@ -508,6 +554,8 @@ export default function LinkForm({
                   ? "Drop the file here ..."
                   : file
                   ? `File selected: ${file.name}`
+                  : link
+                  ? "Drag & drop or click to upload a replacement file"
                   : "Drag & drop or click to upload a file"}
               </p>
             </div>
