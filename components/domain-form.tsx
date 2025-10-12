@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { createClient } from "@/utils/supabase/client"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { InfoIcon } from "lucide-react"
+import { InfoIcon, RefreshCw } from "lucide-react"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
@@ -27,6 +27,13 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Tooltip,
   TooltipContent,
@@ -53,6 +60,10 @@ export default function DomainForm({
   domain: Domain | null
 }) {
   const [isLoading, setIsLoading] = useState(false)
+  const [isFetchingDomains, setIsFetchingDomains] = useState(false)
+  const [availableDomains, setAvailableDomains] = useState<
+    Array<{ id: string; name: string; status: string }>
+  >([])
   const supabase = createClient()
 
   const form = useForm<DomainFormValues>({
@@ -63,6 +74,54 @@ export default function DomainForm({
       senderName: domain?.sender_name || "",
     },
   })
+
+  const fetchDomainsFromResend = async (apiKey: string) => {
+    if (!apiKey) return
+
+    setIsFetchingDomains(true)
+    try {
+      const response = await fetch("/api/fetch-resend-domains", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey }),
+      })
+
+      const result = await response.json()
+
+      if (result.error) {
+        toast({
+          title: "Error fetching domains",
+          description: result.error,
+          variant: "destructive",
+        })
+        return
+      }
+
+      setAvailableDomains(result.domains || [])
+
+      if (result.domains && result.domains.length > 0) {
+        toast({
+          description: `Found ${result.domains.length} domain(s) in your Resend account`,
+        })
+      } else {
+        toast({
+          title: "No domains found",
+          description:
+            "Please add a domain in Resend Dashboard first, then fetch again.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      clientLogger.error("Error fetching Resend domains", { error })
+      toast({
+        title: "Error",
+        description: "Failed to fetch domains from Resend",
+        variant: "destructive",
+      })
+    } finally {
+      setIsFetchingDomains(false)
+    }
+  }
 
   const onSubmit = async (data: DomainFormValues) => {
     if (!account) {
@@ -155,42 +214,28 @@ export default function DomainForm({
             ? "Update your domain settings"
             : "Configure your domain for sending emails"}
         </CardDescription>
+        {!domain && (
+          <div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              <strong>Before you start:</strong> You must first add and verify
+              your domain in{" "}
+              <a
+                href="https://resend.com/domains"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium underline"
+              >
+                Resend Dashboard
+              </a>
+              . This ensures your emails are properly authenticated and
+              delivered.
+            </p>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="domainName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Domain Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Enter the domain name you want to use for sending emails
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="senderName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Sender Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Enter the name you want to use for sending emails
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="apiKey"
@@ -224,21 +269,117 @@ export default function DomainForm({
                       </TooltipProvider>
                     </div>
                   </FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
-                  <FormDescription>Enter your Resend API key</FormDescription>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <Input
+                        type="password"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e)
+                          setAvailableDomains([]) // Clear domains when API key changes
+                        }}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fetchDomainsFromResend(field.value)}
+                      disabled={!field.value || isFetchingDomains}
+                    >
+                      {isFetchingDomains ? (
+                        <RefreshCw className="size-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="size-4" />
+                      )}
+                      <span className="ml-2">Fetch Domains</span>
+                    </Button>
+                  </div>
+                  <FormDescription>
+                    Enter your Resend API key, then click &quot;Fetch
+                    Domains&quot;
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <FormField
+              control={form.control}
+              name="domainName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Domain Name</FormLabel>
+                  <FormControl>
+                    {availableDomains.length > 0 ? (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a verified domain" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableDomains.map((d) => (
+                            <SelectItem key={d.id} value={d.name}>
+                              {d.name}
+                              {d.status === "verified" && (
+                                <span className="ml-2 text-xs text-green-600">
+                                  ✓ Verified
+                                </span>
+                              )}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input
+                        {...field}
+                        disabled
+                        placeholder="Fetch domains from Resend first"
+                      />
+                    )}
+                  </FormControl>
+                  <FormDescription>
+                    {availableDomains.length > 0
+                      ? "Select a domain from your Resend account"
+                      : "Enter your API key and click 'Fetch Domains' to see available domains"}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="senderName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sender Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    The name that will appear in the &quot;From&quot; field of
+                    your emails
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || (!domain && availableDomains.length === 0)}
+            >
               {isLoading
                 ? "Saving..."
                 : domain
                 ? "Update Domain"
-                : "Create Domain"}
+                : "Save Domain"}
             </Button>
+            {!domain && availableDomains.length === 0 && (
+              <p className="text-center text-sm text-muted-foreground">
+                Please enter API key and fetch domains first
+              </p>
+            )}
           </form>
         </Form>
       </CardContent>

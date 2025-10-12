@@ -125,6 +125,24 @@ export default function AccountForm({ account }: { account: User | null }) {
         })),
       ]
       setEntities(entities)
+
+      // Auto-select the first entity if there's only one, or the last used one
+      if (entities.length > 0 && !selectedEntity) {
+        const firstEntity = entities[0]
+        setSelectedEntity(firstEntity.id)
+        setShowAdditionalFields(true)
+
+        // Populate form with first entity's data
+        form.reset({
+          ...form.getValues(),
+          type: firstEntity.type,
+          entity_name: firstEntity.name || "",
+          byline: firstEntity.byline || "",
+          street: firstEntity.street || "",
+          city_state_zip: firstEntity.city_state_zip || "",
+          state_of_incorporation: firstEntity.state_of_incorporation || "",
+        })
+      }
     }
   }
 
@@ -174,10 +192,12 @@ export default function AccountForm({ account }: { account: User | null }) {
         description: "Account updated",
       })
       setShowAdditionalFields(false)
+      router.refresh()
     } catch (error) {
       clientLogger.error("Error updating account", { error })
       toast({
         description: "Error updating account",
+        variant: "destructive",
       })
     }
   }
