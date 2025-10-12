@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/utils/supabase/server"
+
+import { logger } from "@/lib/logger"
 import { ContactsTable } from "@/components/contacts"
 import { NewContactButton } from "@/components/new-contact"
-import { logger } from "@/lib/logger"
 
 export default async function Contacts() {
   const supabase = createClient()
@@ -40,14 +41,14 @@ export default async function Contacts() {
     .from("domains")
     .select("*")
     .eq("user_id", user.id)
-    .single()
+    .maybeSingle()
 
   if (contactsError || groupsError || contactGroupsError || domainError) {
-    logger.error('Error fetching data', {
+    logger.error("Error fetching data", {
       contactsError,
       groupsError,
       contactGroupsError,
-      domainError
+      domainError,
     })
   }
 

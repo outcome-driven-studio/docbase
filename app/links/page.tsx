@@ -8,7 +8,17 @@ import { Links } from "@/components/links"
 
 export const dynamic = "force-dynamic"
 
-export default async function LinksPage() {
+export default async function LinksPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined }
+}) {
+  // If there's a code parameter, redirect to /auth/confirm to handle it
+  if (searchParams.code) {
+    const code = searchParams.code as string
+    redirect(`/auth/confirm?code=${code}&next=${encodeURIComponent("/links")}`)
+  }
+
   const supabase = createClient()
   const {
     data: { user },

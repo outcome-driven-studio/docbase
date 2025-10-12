@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/utils/supabase/server"
+
+import { logger } from "@/lib/logger"
 import { MessagesTable } from "@/components/messages"
 import { NewMessageButton } from "@/components/new-message"
-import { logger } from "@/lib/logger"
 
 export default async function Messages() {
   const supabase = createClient()
@@ -17,7 +18,7 @@ export default async function Messages() {
   const { data: messages, error } = await supabase
     .from("messages")
     .select("*")
-    .eq("sender_id", user.id)
+    .eq("created_by", user.id)
     .order("created_at", { ascending: false })
 
   const { data: account } = await supabase
@@ -42,18 +43,18 @@ export default async function Messages() {
     .select("contact_id, group_id")
     .in("contact_id", contacts?.map((c) => c.id) || [])
 
-    const { data: domain, error: domainError } = await supabase
+  const { data: domain, error: domainError } = await supabase
     .from("domains")
     .select("*")
     .eq("user_id", user.id)
     .maybeSingle()
 
   if (contactsError || groupsError || contactGroupsError || domainError) {
-    logger.error('Error fetching data', {
+    logger.error("Error fetching data", {
       contactsError,
       groupsError,
       contactGroupsError,
-      domainError
+      domainError,
     })
   }
 
@@ -81,7 +82,7 @@ export default async function Messages() {
   }))
 
   if (error) {
-    logger.error('Error fetching messages', { error })
+    logger.error("Error fetching messages", { error })
   }
 
   return messages && messages.length > 0 ? (

@@ -19,6 +19,7 @@ import { toast } from "./ui/use-toast"
 import "react-quill/dist/quill.snow.css"
 import "@/styles/quill-custom.css"
 import { isValidEmail } from "@/utils/validation"
+
 import { clientLogger } from "@/lib/client-logger"
 
 type Group = { value: string; label: string; color: string }
@@ -145,6 +146,20 @@ export function MessageForm({
         })
         .slice(0, 50)
 
+      // Validate that we have recipients
+      if (to.length === 0) {
+        throw new Error("Please select at least one recipient")
+      }
+
+      // Validate subject and body
+      if (!subject.trim()) {
+        throw new Error("Please enter a subject")
+      }
+
+      if (!body.trim()) {
+        throw new Error("Please enter a message")
+      }
+
       const response = await fetch("/api/send-email", {
         method: "POST",
         headers: {
@@ -161,7 +176,7 @@ export function MessageForm({
 
       if (!response.ok) {
         const errorData = await response.json()
-        clientLogger.error('Error response', { errorData })
+        clientLogger.error("Error response", { errorData })
         throw new Error(errorData.error || "Failed to send email")
       }
 
@@ -169,16 +184,18 @@ export function MessageForm({
       const { data: messageData, error: messageError } = await supabase
         .from("messages")
         .insert({
-          sender_id: account.id,
-          recipient: Array.isArray(to) ? to.join(", ") : to,
+          created_by: account.id,
+          from: `${domain.sender_name} <noreply@${domain.domain_name}>`,
+          to: Array.isArray(to) ? to.join(", ") : to,
           subject,
-          body,
-          status: "sent",
+          message: body,
         })
         .select()
 
       if (messageError) {
-        clientLogger.error('Error inserting message into database', { messageError })
+        clientLogger.error("Error inserting message into database", {
+          messageError,
+        })
         throw new Error("Failed to save message in database")
       }
 
@@ -186,20 +203,8 @@ export function MessageForm({
         throw new Error("No data returned after inserting message")
       }
 
-      // Update user's messages array
-      const newMessageId = messageData[0].id
-      const { error: userUpdateError } = await supabase.rpc(
-        "append_message_to_user",
-        {
-          user_id: account.id,
-          message_id: newMessageId,
-        }
-      )
-
-      if (userUpdateError) {
-        clientLogger.error('Error updating user messages array', { userUpdateError })
-        // Consider whether you want to throw an error here or just log it
-      }
+      // Message saved successfully - no need to update user array
+      // Messages can be queried by created_by field
 
       toast({
         description: "Your message has been sent",
@@ -207,7 +212,7 @@ export function MessageForm({
 
       onClose()
     } catch (error) {
-      clientLogger.error('Error sending email', { error })
+      clientLogger.error("Error sending email", { error })
       toast({
         variant: "destructive",
         description: `Failed to send email: ${

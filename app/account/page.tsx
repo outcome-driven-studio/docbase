@@ -158,7 +158,7 @@ export default async function AccountPage({
     .from("domains")
     .select()
     .eq("user_id", user.id)
-    .single()
+    .maybeSingle()
 
   domain = domainData
 

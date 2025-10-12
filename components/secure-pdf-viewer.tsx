@@ -85,7 +85,9 @@ export default function SecurePDFViewer({
         )}
 
         <iframe
-          src={`/api/view-document/${linkId}#toolbar=1&navpanes=0&scrollbar=1`}
+          src={`/api/view-document/${linkId}#toolbar=${
+            allowDownload ? "1" : "0"
+          }&navpanes=0&scrollbar=1`}
           className="h-screen w-full border-0"
           title={filename}
           onLoad={() => setLoading(false)}

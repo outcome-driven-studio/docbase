@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { createClient } from "@/utils/supabase/client"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { InfoIcon, RefreshCw } from "lucide-react"
 import { useForm } from "react-hook-form"
+import { v4 as uuidv4 } from "uuid"
 import * as z from "zod"
 
 import { Database } from "@/types/supabase"
@@ -75,6 +76,14 @@ export default function DomainForm({
     },
   })
 
+  // Auto-fetch domains when editing existing domain
+  useEffect(() => {
+    if (domain?.api_key) {
+      fetchDomainsFromResend(domain.api_key)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [domain])
+
   const fetchDomainsFromResend = async (apiKey: string) => {
     if (!apiKey) return
 
@@ -135,65 +144,64 @@ export default function DomainForm({
 
     setIsLoading(true)
     try {
-      let domainId = domain?.id
+      // Find the selected domain from the fetched list to get its ID
+      const selectedDomain = availableDomains.find(
+        (d) => d.name === data.domainName
+      )
+      const resendDomainId = selectedDomain?.id
 
-      // Check if the domain name is being changed
-      if (!domain || data.domainName !== domain.domain_name) {
-        // Create the domain using the Resend API only if it's new or the name has changed
-        const response = await fetch("/api/create-domain", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        })
-
-        const result = await response.json()
-
-        if (result.error) {
-          throw new Error(result.error || "Failed to create domain")
-        }
-
-        if (!result.id) {
-          throw new Error("Invalid domain data received from API")
-        }
-
-        domainId = result.id
+      if (!resendDomainId && availableDomains.length > 0) {
+        throw new Error("Please select a domain from the list.")
       }
 
-      // Update or insert the domain in the database
-      const { error } = domain
-        ? await supabase
-            .from("domains")
-            .update({
-              domain_name: data.domainName,
-              sender_name: data.senderName,
-              api_key: data.apiKey,
-            })
-            .eq("id", domain.id)
-        : await supabase.from("domains").insert({
-            id: domainId,
-            created_at: new Date().toISOString(),
+      // Always check database for existing domain to avoid duplicate key errors
+      const { data: existingDomain } = await supabase
+        .from("domains")
+        .select("id")
+        .eq("user_id", account.id)
+        .maybeSingle()
+
+      let error
+
+      if (existingDomain) {
+        // User already has a domain - UPDATE it
+        const result = await supabase
+          .from("domains")
+          .update({
             domain_name: data.domainName,
-            user_id: account.id,
             sender_name: data.senderName,
             api_key: data.apiKey,
           })
+          .eq("user_id", account.id)
+        error = result.error
+      } else {
+        // User doesn't have a domain yet - INSERT new one
+        // Generate our own UUID instead of using Resend's domain ID
+        const result = await supabase.from("domains").insert({
+          id: uuidv4(),
+          created_at: new Date().toISOString(),
+          domain_name: data.domainName,
+          user_id: account.id,
+          sender_name: data.senderName,
+          api_key: data.apiKey,
+        })
+        error = result.error
+      }
 
       if (error) {
         throw error
       }
 
       toast({
-        title: domain ? "Domain updated" : "Domain created and saved",
+        title: domain ? "Domain updated" : "Domain saved",
         description: domain
-          ? "Your domain has been successfully updated."
-          : "Your domain has been successfully created and saved to your profile.",
+          ? "Your domain settings have been successfully updated."
+          : "Your domain has been saved. Emails will now be sent from this domain.",
       })
     } catch (error) {
-      clientLogger.error("Error creating/updating domain", { error })
+      clientLogger.error("Error saving domain", { error })
       toast({
-        title: "Error creating domain",
+        title: "Error saving domain",
         description:
           error instanceof Error
             ? error.message
@@ -214,7 +222,7 @@ export default function DomainForm({
             ? "Update your domain settings"
             : "Configure your domain for sending emails"}
         </CardDescription>
-        {!domain && (
+        {!domain && availableDomains.length === 0 && (
           <div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
               <strong>Before you start:</strong> You must first add and verify
@@ -229,6 +237,14 @@ export default function DomainForm({
               </a>
               . This ensures your emails are properly authenticated and
               delivered.
+            </p>
+          </div>
+        )}
+        {domain && (
+          <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              ✓ Your domain is configured. You can update the settings below or
+              fetch domains to select a different one.
             </p>
           </div>
         )}
@@ -291,7 +307,7 @@ export default function DomainForm({
                       ) : (
                         <RefreshCw className="size-4" />
                       )}
-                      <span className="ml-2">Fetch Domains</span>
+                      <span className="ml-2">Domains</span>
                     </Button>
                   </div>
                   <FormDescription>

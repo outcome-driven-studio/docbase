@@ -85,6 +85,12 @@ export async function POST(request: Request) {
     // Extract domain from site URL for from address
     const domain = new URL(siteUrl).hostname
 
+    // For localhost, use a test email format. For production, use actual domain
+    const fromEmail =
+      domain === "localhost"
+        ? "Docbase <onboarding@resend.dev>" // Resend's test email
+        : `Docbase <noreply@${domain}>`
+
     // Send the email with Resend using beautiful template
     const emailHtml = `
       <!DOCTYPE html>
@@ -152,7 +158,7 @@ export async function POST(request: Request) {
     `
 
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: `Docbase <noreply@${domain}>`,
+      from: fromEmail,
       to: email,
       subject: "View Your Shared Document",
       html: emailHtml,

@@ -169,7 +169,7 @@ export function GroupsDialog({
         </DialogHeader>
         <div className="space-y-2">
           {groups.map((group) => (
-            <div key={group.id} className="flex items-center space-x-2">
+            <div key={group.id} className="flex items-center space-x-2 mb-4">
               <Popover
                 open={openColorPicker === group.id}
                 onOpenChange={(open) =>
@@ -178,7 +178,7 @@ export function GroupsDialog({
               >
                 <PopoverTrigger asChild>
                   <Button
-                    className="size-8 shrink-0 rounded-full p-0"
+                    className="size-6 h-6 shrink-0 rounded-full p-0"
                     style={{ backgroundColor: group.color }}
                     aria-label={`Change color for ${
                       group.name || "Unnamed group"

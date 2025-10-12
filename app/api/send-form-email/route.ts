@@ -75,8 +75,14 @@ export async function POST(req: Request) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
     const domain = new URL(siteUrl).hostname
 
+    // For localhost, use Resend's test email
+    const fromEmail =
+      domain === "localhost"
+        ? "Docbase <onboarding@resend.dev>"
+        : `Docbase <noreply@${domain}>`
+
     const { data, error } = await resend.emails.send({
-      from: `Docbase <noreply@${domain}>`,
+      from: fromEmail,
       to: email,
       bcc: investor.email,
       subject: `${fund.name || "Unknown Fund"} wants to make an investment`,
