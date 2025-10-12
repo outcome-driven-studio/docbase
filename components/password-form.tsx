@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { z } from "zod"
 
+import { clientLogger } from "@/lib/client-logger"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -24,7 +25,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
-import { clientLogger } from "@/lib/client-logger"
 
 type PasswordFormValues = {
   password: string
@@ -61,7 +61,7 @@ export default function PasswordTabContent() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ password: data.password }),
-        credentials: 'include',
+        credentials: "include",
       })
 
       if (!response.ok) {
@@ -71,7 +71,7 @@ export default function PasswordTabContent() {
 
       toast({ description: "Password saved!" })
     } catch (error) {
-      clientLogger.error('Failed to set password', { error })
+      clientLogger.error("Failed to set password", { error })
       toast({
         description:
           error instanceof Error ? error.message : "Failed to set password",
@@ -85,7 +85,10 @@ export default function PasswordTabContent() {
     <Card>
       <CardHeader>
         <CardTitle>Password</CardTitle>
-        <CardDescription>Set or change your password here</CardDescription>
+        <CardDescription>
+          Optional: Set a password if you want to use email/password login
+          instead of magic links
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
         <Form {...passwordForm}>

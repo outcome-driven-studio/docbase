@@ -255,47 +255,85 @@ export default function AccountForm({ account }: { account: User | null }) {
       contact_id: contactId,
     }
 
-    const { data: existingFund, error: existingFundError } = await supabase
-      .from("funds")
-      .select()
-      .eq("name", data.entity_name)
+    // Check if we're editing an existing fund or creating a new one
+    const isEditing =
+      selectedEntity &&
+      selectedEntity !== "add-new-fund" &&
+      selectedEntity !== "add-new-company"
 
-    if (existingFundError) {
-      clientLogger.error("Error checking existing fund", { existingFundError })
-      return true
-    }
+    if (isEditing) {
+      // Update existing fund
+      const { error: updateError } = await supabase
+        .from("funds")
+        .update(fundUpdates)
+        .eq("id", selectedEntity)
 
-    if (existingFund && existingFund.length > 0) {
-      form.setError("entity_name", {
-        type: "manual",
-        message: "A fund with this name already exists",
-      })
-      return true
-    }
+      if (updateError) {
+        clientLogger.error("Error updating fund", { updateError })
+        return true
+      }
 
-    const { data: newFund, error: newFundError } = await supabase
-      .from("funds")
-      .insert(fundUpdates)
-      .select()
-
-    if (newFundError) {
-      clientLogger.error("Error creating fund", { newFundError })
-      return true
-    } else {
-      setEntities((prevEntities) => [
-        ...prevEntities,
-        {
-          id: newFund[0].id,
-          name: data.entity_name || null,
-          type: "fund" as const,
-          byline: data.byline || null,
-          street: data.street || null,
-          city_state_zip: data.city_state_zip || null,
-          contact_id: contactId,
-        },
-      ])
-      setSelectedEntity(undefined)
+      // Update local state
+      setEntities((prevEntities) =>
+        prevEntities.map((entity) =>
+          entity.id === selectedEntity
+            ? {
+                ...entity,
+                name: data.entity_name || null,
+                byline: data.byline || null,
+                street: data.street || null,
+                city_state_zip: data.city_state_zip || null,
+              }
+            : entity
+        )
+      )
       return false
+    } else {
+      // Creating a new fund - check for duplicates
+      const { data: existingFund, error: existingFundError } = await supabase
+        .from("funds")
+        .select()
+        .eq("name", data.entity_name)
+
+      if (existingFundError) {
+        clientLogger.error("Error checking existing fund", {
+          existingFundError,
+        })
+        return true
+      }
+
+      if (existingFund && existingFund.length > 0) {
+        form.setError("entity_name", {
+          type: "manual",
+          message: "A fund with this name already exists",
+        })
+        return true
+      }
+
+      const { data: newFund, error: newFundError } = await supabase
+        .from("funds")
+        .insert(fundUpdates)
+        .select()
+
+      if (newFundError) {
+        clientLogger.error("Error creating fund", { newFundError })
+        return true
+      } else {
+        setEntities((prevEntities) => [
+          ...prevEntities,
+          {
+            id: newFund[0].id,
+            name: data.entity_name || null,
+            type: "fund" as const,
+            byline: data.byline || null,
+            street: data.street || null,
+            city_state_zip: data.city_state_zip || null,
+            contact_id: contactId,
+          },
+        ])
+        setSelectedEntity(undefined)
+        return false
+      }
     }
   }
 
@@ -311,47 +349,83 @@ export default function AccountForm({ account }: { account: User | null }) {
       contact_id: contactId,
     }
 
-    const { data: existingCompany, error: existingCompanyError } =
-      await supabase.from("companies").select().eq("name", data.entity_name)
+    // Check if we're editing an existing company or creating a new one
+    const isEditing =
+      selectedEntity &&
+      selectedEntity !== "add-new-fund" &&
+      selectedEntity !== "add-new-company"
 
-    if (existingCompanyError) {
-      clientLogger.error("Error checking existing company", {
-        existingCompanyError,
-      })
-      return true
-    }
+    if (isEditing) {
+      // Update existing company
+      const { error: updateError } = await supabase
+        .from("companies")
+        .update(companyUpdates)
+        .eq("id", selectedEntity)
 
-    if (existingCompany && existingCompany.length > 0) {
-      form.setError("entity_name", {
-        type: "manual",
-        message: "A company with this name already exists",
-      })
-      return true
-    }
+      if (updateError) {
+        clientLogger.error("Error updating company", { updateError })
+        return true
+      }
 
-    const { data: newCompany, error: newCompanyError } = await supabase
-      .from("companies")
-      .insert(companyUpdates)
-      .select()
-
-    if (newCompanyError) {
-      clientLogger.error("Error creating company", { newCompanyError })
-      return true
-    } else {
-      setEntities((prevEntities) => [
-        ...prevEntities,
-        {
-          id: newCompany[0].id,
-          name: data.entity_name || null,
-          type: "company" as const,
-          street: data.street || null,
-          city_state_zip: data.city_state_zip || null,
-          state_of_incorporation: data.state_of_incorporation || null,
-          contact_id: contactId,
-        },
-      ])
-      setSelectedEntity(undefined)
+      // Update local state
+      setEntities((prevEntities) =>
+        prevEntities.map((entity) =>
+          entity.id === selectedEntity
+            ? {
+                ...entity,
+                name: data.entity_name || null,
+                street: data.street || null,
+                city_state_zip: data.city_state_zip || null,
+                state_of_incorporation: data.state_of_incorporation || null,
+              }
+            : entity
+        )
+      )
       return false
+    } else {
+      // Creating a new company - check for duplicates
+      const { data: existingCompany, error: existingCompanyError } =
+        await supabase.from("companies").select().eq("name", data.entity_name)
+
+      if (existingCompanyError) {
+        clientLogger.error("Error checking existing company", {
+          existingCompanyError,
+        })
+        return true
+      }
+
+      if (existingCompany && existingCompany.length > 0) {
+        form.setError("entity_name", {
+          type: "manual",
+          message: "A company with this name already exists",
+        })
+        return true
+      }
+
+      const { data: newCompany, error: newCompanyError } = await supabase
+        .from("companies")
+        .insert(companyUpdates)
+        .select()
+
+      if (newCompanyError) {
+        clientLogger.error("Error creating company", { newCompanyError })
+        return true
+      } else {
+        setEntities((prevEntities) => [
+          ...prevEntities,
+          {
+            id: newCompany[0].id,
+            name: data.entity_name || null,
+            type: "company" as const,
+            street: data.street || null,
+            city_state_zip: data.city_state_zip || null,
+            state_of_incorporation: data.state_of_incorporation || null,
+            contact_id: contactId,
+          },
+        ])
+        setSelectedEntity(undefined)
+        return false
+      }
     }
   }
 

@@ -42,7 +42,6 @@ export default function MagicLink({ redirect }: { redirect: string }) {
       },
     })
     setIsLoading(false)
-    setEmail("")
     if (error) {
       toast({
         title: "Failed to send magic link",

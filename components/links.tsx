@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { isTyping } from "@/utils/is-typing"
 import { createClient } from "@/utils/supabase/client"
 import { MenuIcon } from "lucide-react"
-import { isTyping } from "@/utils/is-typing"
 
 import { Database } from "@/types/supabase"
 import { Button } from "@/components/ui/button"
@@ -34,7 +34,7 @@ import { toast } from "./ui/use-toast"
 
 type User = Database["public"]["Tables"]["users"]["Row"]
 type Link = Database["public"]["Tables"]["links"]["Row"] & {
-  view_count: number
+  views: number
 }
 
 export function Links({ links, account }: { links: Link[]; account: User }) {
@@ -87,7 +87,7 @@ export function Links({ links, account }: { links: Link[]; account: User }) {
       month: "2-digit",
       day: "2-digit",
       year: "2-digit",
-      timeZone: "UTC"
+      timeZone: "UTC",
     })
   }
 
@@ -135,7 +135,7 @@ export function Links({ links, account }: { links: Link[]; account: User }) {
                         href={`/analytics/${link.id}`}
                         className="hover:text-blue-500"
                       >
-                        {link.view_count}
+                        {link.views}
                       </Link>
                     </TooltipTrigger>
                     <TooltipContent>

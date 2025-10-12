@@ -3,10 +3,12 @@ import { Github } from "lucide-react"
 
 import { siteConfig } from "@/config/site"
 import { Button } from "@/components/ui/button"
+import { GridBackground } from "@/components/grid-background"
 
 export default function IndexPage() {
   return (
     <div className="flex flex-col mih-h-dvh">
+      <GridBackground />
       <main className="container mx-auto my-48 flex-grow">
         <section className="text-center max-w-3xl mx-auto">
           <h1 className="text-5xl font-semibold mb-2">{siteConfig.tagline}</h1>

@@ -1,17 +1,25 @@
 "use client"
 
-import React, { useState, useCallback } from 'react'
+import React, { useCallback, useState } from "react"
+import { useRouter } from "next/navigation"
+import { getColorForGroup } from "@/utils/group-colors"
+import { selectStyles } from "@/utils/select-styles"
 import { createClient } from "@/utils/supabase/client"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { User } from "lucide-react"
+import { User, X } from "lucide-react"
 import { useForm } from "react-hook-form"
-import CreatableSelect from 'react-select/creatable'
+import CreatableSelect from "react-select/creatable"
+import { v4 as uuidv4 } from "uuid"
 import * as z from "zod"
+
 import { Database } from "@/types/supabase"
+import { clientLogger } from "@/lib/client-logger"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,14 +27,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
+
 import { Icons } from "./icons"
-import { useRouter } from 'next/navigation'
-import { selectStyles } from '@/utils/select-styles'
-import { Badge } from "@/components/ui/badge"
-import { X } from "lucide-react"
-import { getColorForGroup } from "@/utils/group-colors"
-import { v4 as uuidv4 } from 'uuid';
-import { clientLogger } from "@/lib/client-logger"
 
 const memberFormSchema = z.object({
   email: z
@@ -35,7 +37,9 @@ const memberFormSchema = z.object({
     })
     .email(),
   name: z.string().optional(),
-  groups: z.array(z.object({ value: z.string(), label: z.string(), color: z.string() })),
+  groups: z.array(
+    z.object({ value: z.string(), label: z.string(), color: z.string() })
+  ),
 })
 
 type Contact = Database["public"]["Tables"]["contacts"]["Row"]
@@ -44,23 +48,27 @@ type User = Database["public"]["Tables"]["users"]["Row"]
 type MemberFormValues = z.infer<typeof memberFormSchema>
 
 type ContactFormProps = {
-  existingContact?: Contact & { groups: { value: string, label: string, color: string }[] }
+  existingContact?: Contact & {
+    groups: { value: string; label: string; color: string }[]
+  }
   account: User
-  groups: { value: string, label: string, color: string }[]
-  onSuccess?: () => void  
+  groups: { value: string; label: string; color: string }[]
+  onSuccess?: () => void
 }
 
 export function ContactForm({
   existingContact,
   account,
   groups,
-  onSuccess,  
+  onSuccess,
 }: ContactFormProps) {
   const supabase = createClient()
   const [isLoading, setIsLoading] = React.useState(false)
   const router = useRouter()
   const [localGroups, setLocalGroups] = useState(groups)
-  const [selectedGroups, setSelectedGroups] = useState(existingContact?.groups || [])
+  const [selectedGroups, setSelectedGroups] = useState(
+    existingContact?.groups || []
+  )
 
   const form = useForm<MemberFormValues>({
     resolver: zodResolver(memberFormSchema),
@@ -72,45 +80,50 @@ export function ContactForm({
   })
 
   const getNextColor = useCallback(() => {
-    return getColorForGroup(localGroups.length);
-  }, [localGroups]);
+    return getColorForGroup(localGroups.length)
+  }, [localGroups])
 
   const handleCreateGroup = async (inputValue: string) => {
-    const newColor = getNextColor();
-    const newGroupId = uuidv4();
-    
+    const newColor = getNextColor()
+    const newGroupId = uuidv4()
+
     // Insert the new group into the database
     const { data: insertedGroup, error } = await supabase
       .from("groups")
-      .insert({ id: newGroupId, name: inputValue, color: newColor, created_by: account.id })
+      .insert({
+        id: newGroupId,
+        name: inputValue,
+        color: newColor,
+        created_by: account.id,
+      })
       .select()
-      .single();
+      .single()
 
     if (error) {
-      clientLogger.error('Error creating group', { error });
+      clientLogger.error("Error creating group", { error })
       toast({
         description: "Failed to create new group. Please try again.",
         variant: "destructive",
-      });
-      return null;
+      })
+      return null
     }
 
-    const newGroup = { 
+    const newGroup = {
       value: insertedGroup.id,
-      label: inputValue, 
-      color: newColor 
-    };
-    const updatedGroups = [...localGroups, newGroup];
-    setLocalGroups(updatedGroups);
-    
+      label: inputValue,
+      color: newColor,
+    }
+    const updatedGroups = [...localGroups, newGroup]
+    setLocalGroups(updatedGroups)
+
     // Update the selected groups
-    const updatedSelectedGroups = [...selectedGroups, newGroup];
-    setSelectedGroups(updatedSelectedGroups);
-    
+    const updatedSelectedGroups = [...selectedGroups, newGroup]
+    setSelectedGroups(updatedSelectedGroups)
+
     // Update the form value
-    form.setValue('groups', updatedSelectedGroups);
-    
-    return newGroup;
+    form.setValue("groups", updatedSelectedGroups)
+
+    return newGroup
   }
 
   const customComponents = {
@@ -120,7 +133,7 @@ export function ContactForm({
           className="flex items-center gap-1 m-1"
           style={{
             backgroundColor: props.data.color,
-            color: 'white',
+            color: "white",
           }}
         >
           {children}
@@ -128,9 +141,9 @@ export function ContactForm({
             <X size={14} />
           </span>
         </Badge>
-      );
+      )
     },
-  };
+  }
 
   async function onSubmit(data: MemberFormValues) {
     try {
@@ -163,10 +176,7 @@ export function ContactForm({
       }
 
       // Update contact groups
-      await supabase
-        .from("contact_groups")
-        .delete()
-        .eq("contact_id", contactId)
+      await supabase.from("contact_groups").delete().eq("contact_id", contactId)
 
       if (data.groups.length > 0) {
         const contactGroups = data.groups.map((group) => ({
@@ -184,10 +194,10 @@ export function ContactForm({
           ? "Contact updated successfully"
           : "New contact added",
       })
-      if (onSuccess) onSuccess() 
+      if (onSuccess) onSuccess()
       router.refresh()
     } catch (error) {
-      clientLogger.error('Error adding/updating contact', { error })
+      clientLogger.error("Error adding/updating contact", { error })
       toast({
         description: "An error occurred. Please try again.",
         variant: "destructive",
@@ -199,7 +209,10 @@ export function ContactForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full max-w-md mx-auto">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 w-full max-w-md mx-auto"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -239,8 +252,8 @@ export function ContactForm({
                   options={localGroups}
                   value={selectedGroups}
                   onChange={(newValue) => {
-                    setSelectedGroups(newValue as any);
-                    field.onChange(newValue);
+                    setSelectedGroups(newValue as any)
+                    field.onChange(newValue)
                   }}
                   className="basic-multi-select"
                   classNamePrefix="select"
@@ -248,8 +261,12 @@ export function ContactForm({
                   isDisabled={isLoading}
                   styles={selectStyles}
                   components={customComponents}
+                  placeholder="Select or create groups..."
                 />
               </FormControl>
+              <FormDescription>
+                Type to create a new group or select existing ones
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

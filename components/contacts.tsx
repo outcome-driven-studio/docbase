@@ -5,9 +5,19 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { isTyping } from "@/utils/is-typing"
 import { createClient } from "@/utils/supabase/client"
-import { Mail, MailPlus, MenuIcon, Plus, UserPlus, X, Info } from "lucide-react"
+import {
+  Folder,
+  Info,
+  Mail,
+  MailPlus,
+  MenuIcon,
+  Plus,
+  UserPlus,
+  X,
+} from "lucide-react"
 
 import { Database } from "@/types/supabase"
+import { clientLogger } from "@/lib/client-logger"
 import { useDomainCheck } from "@/hooks/use-domain-check"
 import {
   Table,
@@ -37,14 +47,13 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
 import { ToastAction } from "./ui/toast"
-import { toast } from "./ui/use-toast"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip"
-import { clientLogger } from "@/lib/client-logger"
+import { toast } from "./ui/use-toast"
 
 type Contact = Database["public"]["Tables"]["contacts"]["Row"] & {
   groups: Group[]
@@ -163,7 +172,7 @@ export function ContactsTable({
         router.refresh()
       }
     } catch (error) {
-      clientLogger.error('Error deleting contact', { error })
+      clientLogger.error("Error deleting contact", { error })
       toast({
         title: "Error",
         description:
@@ -210,9 +219,12 @@ export function ContactsTable({
           Contacts
         </h1>
         <div className="flex space-x-2">
+          <Button variant="ghost" onClick={() => setIsGroupsDialogOpen(true)}>
+            <Folder className="w-4 h-4" />
+            <span className="hidden sm:inline-block ml-2">Manage Groups</span>
+          </Button>
           <Button
             variant="ghost"
-            className="w-[150px]"
             onClick={() => setIsNewContactDialogOpen(true)}
           >
             <Plus className="w-4 h-4" />
@@ -228,7 +240,7 @@ export function ContactsTable({
                 <TableHead className="w-1/4">Name</TableHead>
                 <TableHead className="w-1/4">Email</TableHead>
                 <TableHead
-                  className="w-1/4 cursor-pointer"
+                  className="w-1/4 cursor-pointer hover:text-primary hover:underline transition-colors"
                   onClick={() => setIsGroupsDialogOpen(true)}
                 >
                   <div className="flex items-center gap-1">
@@ -236,10 +248,10 @@ export function ContactsTable({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground" />
+                          <Info className="h-4 w-4 text-muted-foreground hover:text-primary" />
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Click to edit groups</p>
+                          <p>Click to manage groups</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
