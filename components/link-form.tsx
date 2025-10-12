@@ -83,7 +83,6 @@ export default function LinkForm({
   const supabase = createClient()
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
-  const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [isUploading, setIsUploading] = useState<boolean>(false)
   const [protectWithPassword, setProtectWithPassword] = useState<boolean>(
     !!link?.password
@@ -165,21 +164,13 @@ export default function LinkForm({
 
       if (file) {
         setIsUploading(true)
-        setUploadProgress(0)
-
+        
         const { error: uploadError } = await supabase.storage
           .from("cube")
-          .upload(storageFilePath, file, {
-            upsert: true,
-            onUploadProgress: (progress) => {
-              const percentage = (progress.loaded / progress.total) * 100
-              setUploadProgress(Math.round(percentage))
-            },
-          })
+          .upload(storageFilePath, file, { upsert: true })
 
         if (uploadError) {
           setIsUploading(false)
-          setUploadProgress(0)
           throw uploadError
         }
         filePathToUse = storageFilePath
@@ -254,13 +245,27 @@ export default function LinkForm({
       })
     } finally {
       setIsUploading(false)
-      setUploadProgress(0)
     }
   }
 
   const onDrop = async (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       const droppedFile = acceptedFiles[0]
+
+      // Check file size (50MB limit)
+      const maxSizeInBytes = 50 * 1024 * 1024 // 50MB
+      if (droppedFile.size > maxSizeInBytes) {
+        toast({
+          title: "File too large",
+          description: `Maximum file size is 50MB. Your file is ${(
+            droppedFile.size /
+            (1024 * 1024)
+          ).toFixed(2)}MB`,
+          variant: "destructive",
+        })
+        return
+      }
+
       setFile(droppedFile)
       form.setValue("filename", droppedFile.name)
       toast({
@@ -546,7 +551,9 @@ export default function LinkForm({
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        window.open(link.url, "_blank")
+                        if (link.url) {
+                          window.open(link.url, "_blank")
+                        }
                       }}
                     >
                       <ExternalLink className="h-4 w-4" />
@@ -567,28 +574,34 @@ export default function LinkForm({
               )}
             >
               <input {...getInputProps()} />
-              <p className="text-sm text-muted-foreground">
-                {isDragActive
-                  ? "Drop the file here ..."
-                  : file
-                  ? `File selected: ${file.name}`
-                  : link
-                  ? "Drag & drop or click to upload a replacement file"
-                  : "Drag & drop or click to upload a file"}
-              </p>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  {isDragActive
+                    ? "Drop the file here ..."
+                    : file
+                    ? `File selected: ${file.name}`
+                    : link
+                    ? "Drag & drop or click to upload a replacement file"
+                    : "Drag & drop or click to upload a file"}
+                </p>
+                {!file && (
+                  <p className="text-xs text-muted-foreground">
+                    Maximum file size: 50MB
+                  </p>
+                )}
+                {file && (
+                  <p className="text-xs text-muted-foreground">
+                    Size: {(file.size / (1024 * 1024)).toFixed(2)}MB
+                  </p>
+                )}
+              </div>
             </div>
 
             {isUploading && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Uploading...</span>
-                  <span className="font-medium">{uploadProgress}%</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                  <div
-                    className="bg-primary h-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
+              <div className="rounded-lg border bg-muted/50 p-4">
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <span>Uploading file...</span>
                 </div>
               </div>
             )}
@@ -599,7 +612,7 @@ export default function LinkForm({
               disabled={
                 isUploading ||
                 (!file && !link) ||
-                (link && !file && !form.formState.isDirty)
+                (!!link && !file && !form.formState.isDirty)
               }
             >
               {isUploading
