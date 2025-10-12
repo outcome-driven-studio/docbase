@@ -83,6 +83,8 @@ export default function LinkForm({
   const supabase = createClient()
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
+  const [uploadProgress, setUploadProgress] = useState<number>(0)
+  const [isUploading, setIsUploading] = useState<boolean>(false)
   const [protectWithPassword, setProtectWithPassword] = useState<boolean>(
     !!link?.password
   )
@@ -162,14 +164,26 @@ export default function LinkForm({
       let filePathToUse = link ? link.id : storageFilePath
 
       if (file) {
+        setIsUploading(true)
+        setUploadProgress(0)
+
         const { error: uploadError } = await supabase.storage
           .from("cube")
-          .upload(storageFilePath, file, { upsert: true })
+          .upload(storageFilePath, file, {
+            upsert: true,
+            onUploadProgress: (progress) => {
+              const percentage = (progress.loaded / progress.total) * 100
+              setUploadProgress(Math.round(percentage))
+            },
+          })
 
         if (uploadError) {
+          setIsUploading(false)
+          setUploadProgress(0)
           throw uploadError
         }
         filePathToUse = storageFilePath
+        setIsUploading(false)
       }
 
       let expirationSeconds: number
@@ -238,6 +252,9 @@ export default function LinkForm({
         description: error.message || "An error occurred while saving the link",
         variant: "destructive",
       })
+    } finally {
+      setIsUploading(false)
+      setUploadProgress(0)
     }
   }
 
@@ -545,7 +562,8 @@ export default function LinkForm({
             <div
               {...getRootProps()}
               className={cn(
-                "border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer"
+                "border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer",
+                isUploading && "pointer-events-none opacity-50"
               )}
             >
               <input {...getInputProps()} />
@@ -560,8 +578,35 @@ export default function LinkForm({
               </p>
             </div>
 
-            <Button type="submit" className="w-full" disabled={!file && !link}>
-              {link ? "Update Link" : "Create Link"}
+            {isUploading && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Uploading...</span>
+                  <span className="font-medium">{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-primary h-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={
+                isUploading ||
+                (!file && !link) ||
+                (link && !file && !form.formState.isDirty)
+              }
+            >
+              {isUploading
+                ? "Uploading..."
+                : link
+                ? "Update Link"
+                : "Create Link"}
             </Button>
           </div>
         </form>

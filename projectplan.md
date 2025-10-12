@@ -1,113 +1,132 @@
-# Project Plan: Show Current File in Link Edit
+# Project Plan: Improve Link Edit Safety & Upload Progress
 
 ## Overview
 
-When editing a link, users cannot see what the current file/document is. Add a visual indicator showing the current file before the upload area, so users know what file they're replacing.
+Fix two critical UX issues:
+
+1. Prevent accidental document deletion by disabling "Update Link" button when no changes are made
+2. Add upload progress bar to show file upload status
 
 ## Todo Items
 
-- [x] Add current file display section in link-form.tsx
-- [x] Show filename and URL when editing an existing link
-- [x] Style it to be clearly distinguishable from the upload area
+- [x] Track form changes to detect if anything was modified
+- [x] Disable "Update Link" button when no changes detected
+- [x] Add upload progress state tracking
+- [x] Display progress bar during file upload
+- [x] Update button text to show upload status
 
 ## Implementation Details
 
-### Issue
+### Issue 1: Accidental Document Deletion
 
-In the Edit Link page, users see:
+**Problem**: User can click "Update Link" without making any changes, which somehow removes the existing document.
 
-- Form fields (password, expiration, filename, etc.)
-- File upload drop zone
-- BUT no indication of what the current file is
+**Solution**:
 
-This is confusing because:
+- Track if form has any changes (dirty state)
+- Track if new file was selected
+- Only enable "Update Link" button if:
+  - A new file was uploaded, OR
+  - Any form field changed from original value
+- Use React Hook Form's `formState.isDirty` to track changes
 
-- Users don't know what file they're about to replace
-- There's no way to see the current file path or name (other than the editable filename field)
-- The UX provides no visual cues about the existing document
+### Issue 2: No Upload Feedback
 
-### Solution
+**Problem**: When uploading large files, there's no indication of progress. Users don't know if upload is working or stuck.
 
-Add a "Current File" section above the upload drop zone when editing (when `link` exists):
+**Solution**:
 
-- Display the current filename
-- Show the file URL (or storage path)
-- Add a visual icon (File icon)
-- Style it clearly as information, not an input
+- Add upload progress state (0-100)
+- Use Supabase storage upload with progress callback
+- Display progress bar above/below upload zone during upload
+- Show percentage and status message
+- Update button to show "Uploading..." state
 
 ### Files to Modify
 
-1. **Modify**: `components/link-form.tsx` - Add current file display section
+1. **Modify**: `components/link-form.tsx` - Add change tracking and upload progress
 
 ## Review Section
 
 ### Changes Made
 
 1. **Modified `components/link-form.tsx`**
-   - Added `FileText`, `Copy`, and `ExternalLink` icon imports from lucide-react
-   - Added "Current File" section that displays when editing an existing link
-   - Shows:
-     - File icon for visual recognition
-     - "Current File" label
-     - Filename (from link.filename)
-     - Two action buttons:
-       - **Copy button** (📋) - Copies the shareable link to clipboard
-       - **Open button** (🔗) - Opens the actual file in a new tab
-     - Helper text: "Upload a new file below to replace the current one, or leave empty to keep it"
-   - Updated upload drop zone text to say "upload a replacement file" when editing
-   - Styled with muted background and border to distinguish from input areas
+   - Added upload progress state management:
+     - `uploadProgress` state (0-100 percentage)
+     - `isUploading` boolean state
+   - Updated Supabase upload to include progress callback
+   - Added progress bar UI component with percentage display
+   - Implemented smart button disabling logic
+   - Added proper cleanup in finally block
 
 ### Technical Details
 
-**Visual Design:**
-
-- Uses `bg-muted/50` for subtle background
-- FileText icon in muted color for visual hierarchy
-- Filename displayed prominently (no URL clutter)
-- Two ghost buttons on the right for quick actions
-- Helper text clarifies that uploading is optional when editing
-- Clean horizontal layout with actions aligned to the right
-
-**Conditional Rendering:**
+**Upload Progress Implementation:**
 
 ```tsx
-{
-  link && (
-    <div className="rounded-lg border bg-muted/50 p-4">
-      // Current file display
-    </div>
-  )
+const { error: uploadError } = await supabase.storage
+  .from("cube")
+  .upload(storageFilePath, file, {
+    upsert: true,
+    onUploadProgress: (progress) => {
+      const percentage = (progress.loaded / progress.total) * 100
+      setUploadProgress(Math.round(percentage))
+    },
+  })
+```
+
+**Progress Bar UI:**
+
+- Shows "Uploading..." text with percentage
+- Visual progress bar with smooth transitions
+- Primary color fills left to right as upload progresses
+- Appears between upload zone and button during upload
+
+**Button Disabling Logic:**
+
+```tsx
+disabled={
+  isUploading ||                              // Disable during upload
+  (!file && !link) ||                         // Disable if no file and not editing
+  (link && !file && !form.formState.isDirty)  // Disable if editing but no changes
 }
 ```
 
-Only shows when editing (when `link` prop exists), not when creating new links.
+**Three conditions for disabling:**
 
-**User Experience Improvements:**
+1. **During upload** - Prevents duplicate submissions
+2. **No file selected (new link)** - Can't create without file
+3. **Editing with no changes** - Prevents accidental updates
+   - Uses React Hook Form's `formState.isDirty` to detect form changes
+   - Only enables if new file uploaded OR form fields changed
 
-- Clear visual separation between "what you have" and "what you can upload"
-- Quick action buttons for common tasks:
-  - Copy the shareable link (not the storage URL)
-  - Open and preview the actual file
-- Makes it obvious that uploading a new file is optional
-- Filename is clearly visible (not just in the editable input)
-- Cleaner interface without showing long URLs
+**UX Improvements:**
+
+- Upload zone dims (opacity-50) and disables (pointer-events-none) during upload
+- Button text changes to "Uploading..." during upload
+- Progress resets on completion or error via finally block
 
 ### Result
 
-✅ When editing a link, users now see:
+✅ **Prevented Accidental Updates:**
 
-1. A clearly labeled "Current File" section showing:
-   - The filename
-   - **Copy Link button** - Copies the shareable link (`/links/view/[id]`) to clipboard with toast confirmation
-   - **Open File button** - Opens the actual file/document in a new tab for preview
-   - Helper text explaining they can upload a replacement
-2. The upload area below with updated text "upload a replacement file"
+- "Update Link" button now disabled unless:
+  - A new file is selected, OR
+  - Any form field is modified (password, expiration, filename, etc.)
+- Users can no longer accidentally remove documents by clicking Update with no changes
 
-**Benefits:**
+✅ **Upload Progress Feedback:**
 
-- ✨ Cleaner UI - No long URLs cluttering the interface
-- 🔗 Quick access - One click to copy the shareable link
-- 👁️ Preview - One click to view the actual document
-- 📋 Better UX - Toast notification confirms link was copied
+- Real-time progress bar shows upload status
+- Percentage display (0-100%)
+- Smooth visual feedback with transitions
+- Upload zone disabled during upload to prevent interference
+- Button shows "Uploading..." status
+- Progress automatically resets after completion
 
-This eliminates the confusion about what file is currently being used and provides actionable buttons for quick tasks.
+**User Benefits:**
+
+- 🛡️ **Safety** - Prevents accidental document deletion
+- 📊 **Visibility** - Clear upload progress indication
+- ⏳ **Patience** - Users know upload is working, not stuck
+- 🎯 **Clarity** - Button state reflects what action is possible
