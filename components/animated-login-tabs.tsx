@@ -55,7 +55,7 @@ export default function AnimatedLoginTabs({ login }: AnimatedLoginTabsProps) {
       >
         <TabsContent
           value="magic-link"
-          className="absolute inset-0 data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-left-4 data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0 data-[state=inactive]:slide-out-to-right-4 duration-300"
+          className="absolute inset-0 duration-300 data-[state=active]:animate-in data-[state=inactive]:animate-out data-[state=active]:fade-in-50 data-[state=inactive]:fade-out-0 data-[state=active]:slide-in-from-left-4 data-[state=inactive]:slide-out-to-right-4"
         >
           <div ref={magicLinkRef}>
             <MagicLink redirect="/account" />
@@ -63,7 +63,7 @@ export default function AnimatedLoginTabs({ login }: AnimatedLoginTabsProps) {
         </TabsContent>
         <TabsContent
           value="email"
-          className="absolute inset-0 data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-right-4 data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0 data-[state=inactive]:slide-out-to-left-4 duration-300"
+          className="absolute inset-0 duration-300 data-[state=active]:animate-in data-[state=inactive]:animate-out data-[state=active]:fade-in-50 data-[state=inactive]:fade-out-0 data-[state=active]:slide-in-from-right-4 data-[state=inactive]:slide-out-to-left-4"
         >
           <div ref={emailRef}>
             <LoginForm login={login} />

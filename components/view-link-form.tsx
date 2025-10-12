@@ -145,18 +145,18 @@ export default function ViewLinkForm({
 
   if (showProgressBar) {
     return (
-      <div className="container mx-auto px-4 py-8 flex justify-center items-center flex-col min-h-[80vh]">
-        <div className="max-w-md w-full text-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+      <div className="container mx-auto flex min-h-[80vh] flex-col items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md text-center">
+          <h1 className="mb-2 text-2xl font-bold text-gray-800 dark:text-gray-100">
             Preparing Your Document
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="mb-6 text-gray-600 dark:text-gray-400">
             Please wait while we authenticate and prepare your secure document
             viewer.
           </p>
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
+          <div className="h-2.5 w-full rounded-full bg-gray-200">
             <div
-              className="bg-blue-500 h-2.5 rounded-full transition-all duration-100 ease-out"
+              className="h-2.5 rounded-full bg-blue-500 transition-all duration-100 ease-out"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
@@ -166,7 +166,7 @@ export default function ViewLinkForm({
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="mx-auto w-full max-w-2xl">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -174,8 +174,8 @@ export default function ViewLinkForm({
             name="email"
             render={({ field }) => (
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5 flex-grow">
-                  <FormLabel htmlFor="email" className="text-base pr-2">
+                <div className="grow space-y-0.5">
+                  <FormLabel htmlFor="email" className="pr-2 text-base">
                     Email
                   </FormLabel>
                   <FormDescription className="pr-4">
@@ -202,8 +202,8 @@ export default function ViewLinkForm({
               name="password"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5 flex-grow">
-                    <FormLabel htmlFor="password" className="text-base pr-2">
+                  <div className="grow space-y-0.5">
+                    <FormLabel htmlFor="password" className="pr-2 text-base">
                       Password
                     </FormLabel>
                     <FormDescription className="pr-4">

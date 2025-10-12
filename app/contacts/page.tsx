@@ -82,8 +82,8 @@ export default async function Contacts() {
       groups={formattedGroups}
     />
   ) : (
-    <div className="container mx-auto px-4 py-8 flex justify-center items-center flex-col min-h-screen">
-      <h1 className="text-2xl text-center font-bold mb-6">
+    <div className="container mx-auto flex min-h-screen flex-col items-center justify-center px-4 py-8">
+      <h1 className="mb-6 text-center text-2xl font-bold">
         You haven&apos;t created <br /> any contacts yet
       </h1>
       <NewContactButton account={account} groups={formattedGroups} />

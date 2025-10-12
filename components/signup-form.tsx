@@ -167,7 +167,7 @@ export function SignupForm({ signup }: SignupFormProps) {
                   />
                 </div>
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? <Icons.spinner className="mr-2 h-4 w-4 animate-spin" /> : "Sign Up"}
+                  {isLoading ? <Icons.spinner className="mr-2 size-4 animate-spin" /> : "Sign Up"}
                 </Button>
               </div>
             </form>

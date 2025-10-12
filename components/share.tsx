@@ -238,7 +238,7 @@ export function Share({
                   className="px-3"
                 >
                   <span className="sr-only">Copy</span>
-                  <Icons.copy className="h-4 w-4" />
+                  <Icons.copy className="size-4" />
                 </Button>
               </CardContent>
             </Card>

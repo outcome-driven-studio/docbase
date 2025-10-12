@@ -69,8 +69,8 @@ export default async function Doc({ params }: { params: { id: string } }) {
 
   if (!link) {
     return (
-      <div className="container mx-auto px-4 py-8 flex justify-center items-center flex-col min-h-screen">
-        <h1 className="text-2xl text-center font-bold mb-6">Link not found</h1>
+      <div className="container mx-auto flex min-h-screen flex-col items-center justify-center px-4 py-8">
+        <h1 className="mb-6 text-center text-2xl font-bold">Link not found</h1>
         <Link href="/">
           <Button variant="outline">Back Home</Button>
         </Link>

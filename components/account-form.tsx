@@ -83,6 +83,7 @@ export default function AccountForm({ account }: { account: User | null }) {
     if (account) {
       fetchEntities()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account])
 
   async function fetchEntities() {
@@ -541,7 +542,7 @@ export default function AccountForm({ account }: { account: User | null }) {
             <div
               {...getRootProps()}
               className={cn(
-                "border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer"
+                "cursor-pointer rounded-lg border-2 border-dashed border-gray-300 p-6 text-center"
               )}
             >
               <input {...getInputProps()} />
@@ -550,7 +551,7 @@ export default function AccountForm({ account }: { account: User | null }) {
                   "Drop the signature block image here ..."
                 ) : parsingSignature ? (
                   <div className="flex items-center justify-center">
-                    <Icons.spinner className="w-5 h-5 animate-spin" />
+                    <Icons.spinner className="size-5 animate-spin" />
                   </div>
                 ) : signatureFile ? (
                   `File selected: ${signatureFile.name}`
@@ -561,7 +562,7 @@ export default function AccountForm({ account }: { account: User | null }) {
             </div>
           )}
           <div className="flex items-start space-x-2">
-            <div className="flex-grow">
+            <div className="grow">
               <FormField
                 control={form.control}
                 name="entity_name"
@@ -573,7 +574,7 @@ export default function AccountForm({ account }: { account: User | null }) {
                         <Input {...field} />
                       </FormControl>
                       <Icons.trash
-                        className="cursor-pointer w-5 h-5 flex-shrink-0"
+                        className="size-5 shrink-0 cursor-pointer"
                         onClick={() => deleteEntity()}
                       />
                     </div>
@@ -699,7 +700,7 @@ export default function AccountForm({ account }: { account: User | null }) {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-2 w-full"
+            className="w-full space-y-2"
           >
             <FormField
               control={form.control}
@@ -749,8 +750,8 @@ export default function AccountForm({ account }: { account: User | null }) {
                 </FormItem>
               )}
             />
-            <div className="space-y-4 w-full">
-              <div className="space-y-2 w-full">
+            <div className="w-full space-y-4">
+              <div className="w-full space-y-2">
                 <FormLabel>Signature Blocks</FormLabel>
                 <EntitySelector
                   entities={entities}

@@ -49,12 +49,12 @@ export default async function EditLink({ params }: { params: { id: string } }) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">Edit Link</h1>
+      <h1 className="mb-6 text-center text-3xl font-bold">Edit Link</h1>
       {link ? (
         <LinkForm link={link} account={account} />
       ) : (
-        <div className="container mx-auto px-4 py-8 flex justify-center items-center flex-col min-h-screen">
-          <h1 className="text-2xl text-center font-bold mb-6">
+        <div className="container mx-auto flex min-h-screen flex-col items-center justify-center px-4 py-8">
+          <h1 className="mb-6 text-center text-2xl font-bold">
             Oops! This link doesn&apos;t exist
           </h1>
           <Link href="/links">

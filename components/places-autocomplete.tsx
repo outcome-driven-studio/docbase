@@ -138,7 +138,7 @@ export function PlacesAutocomplete({
                 {...field}
                 ref={streetInputRef}
                 id={`${streetName}-input`}
-                className="w-full text-sm mb-2"
+                className="mb-2 w-full text-sm"
                 disabled={disabled || !isGoogleMapsLoaded}
                 value={street}
                 onChange={(e) => handleInputChange(e.target.value, true)}
@@ -176,11 +176,11 @@ export function PlacesAutocomplete({
         )}
       />
       {status === "OK" && showSuggestions && (
-        <ul className="mt-2 bg-white border rounded-md shadow-lg">
+        <ul className="mt-2 rounded-md border bg-white shadow-lg">
           {data.map((suggestion, index) => (
             <li
               key={suggestion.place_id}
-              className={`p-2 cursor-pointer hover:bg-gray-100 text-sm ${
+              className={`cursor-pointer p-2 text-sm hover:bg-gray-100 ${
                 index === selectedIndex ? "bg-gray-100" : ""
               }`}
               onClick={() => handleSelect(suggestion)}

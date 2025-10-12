@@ -56,9 +56,9 @@ export default function SecurePDFViewer({
   }
 
   return (
-    <div className="flex flex-col items-center w-full">
+    <div className="flex w-full flex-col items-center">
       {/* Controls */}
-      <div className="sticky top-0 z-10 w-full bg-background border-b p-4 flex flex-wrap items-center justify-between gap-4">
+      <div className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-between gap-4 border-b bg-background p-4">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{filename}</span>
         </div>
@@ -66,7 +66,7 @@ export default function SecurePDFViewer({
         <div className="flex items-center gap-2">
           {allowDownload && (
             <Button onClick={handleDownload} variant="default" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <Download className="mr-2 size-4" />
               Download
             </Button>
           )}
@@ -75,18 +75,18 @@ export default function SecurePDFViewer({
 
       {/* PDF Viewer - Using native browser viewer */}
       <div
-        className="flex flex-col items-center w-full bg-gray-100 dark:bg-gray-900 min-h-screen"
+        className="flex min-h-screen w-full flex-col items-center bg-gray-100 dark:bg-gray-900"
         onContextMenu={disableContextMenu}
       >
         {loading && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <p className="text-muted-foreground">Loading document...</p>
           </div>
         )}
 
         <iframe
           src={`/api/view-document/${linkId}#toolbar=1&navpanes=0&scrollbar=1`}
-          className="w-full h-screen border-0"
+          className="h-screen w-full border-0"
           title={filename}
           onLoad={() => setLoading(false)}
           style={{

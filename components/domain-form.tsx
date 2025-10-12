@@ -202,7 +202,7 @@ export default function DomainForm({
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger>
-                            <InfoIcon className="h-4 w-4 text-gray-500" />
+                            <InfoIcon className="size-4 text-gray-500" />
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="max-w-xs font-normal">

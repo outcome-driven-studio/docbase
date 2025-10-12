@@ -139,12 +139,12 @@ export function Documents({ documents }: { documents: Document[] }) {
                       variant="ghost"
                       onClick={() => downloadDocument(document.document_url)}
                     >
-                      <Download className="h-4 w-4" />
+                      <Download className="size-4" />
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm">
-                          <MenuIcon className="h-4 w-4" />
+                          <MenuIcon className="size-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">

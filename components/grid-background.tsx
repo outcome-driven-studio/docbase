@@ -19,7 +19,7 @@ export function GridBackground() {
 
   return (
     <div
-      className="fixed inset-0 pointer-events-none"
+      className="pointer-events-none fixed inset-0"
       style={{
         backgroundImage: `
           linear-gradient(to right, hsl(var(--border) / 0.4) 1px, transparent 1px),

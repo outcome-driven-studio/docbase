@@ -42,7 +42,7 @@ export default async function NewLink() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">New Link</h1>
+      <h1 className="mb-6 text-center text-3xl font-bold">New Link</h1>
       <LinkForm link={null} account={account} />
     </div>
   )

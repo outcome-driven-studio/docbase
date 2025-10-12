@@ -42,13 +42,13 @@ export default function Account({
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="mx-auto w-full max-w-2xl">
       <Tabs
         value={activeTab}
         onValueChange={handleTabChange}
         className="w-full"
       >
-        <TabsList className="w-full grid grid-cols-3">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="password">Password</TabsTrigger>
           <TabsTrigger value="domain">Domain</TabsTrigger>

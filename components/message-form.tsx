@@ -62,7 +62,7 @@ export function MessageForm({
       const isEmail = "isEmail" in props.data && props.data.isEmail
       return (
         <Badge
-          className="flex items-center gap-1 m-1"
+          className="m-1 flex items-center gap-1"
           style={{
             backgroundColor: isEmail ? "gray" : props.data.color,
             color: "white",
@@ -221,7 +221,7 @@ export function MessageForm({
   }
 
   return (
-    <div className="flex flex-col gap-2 flex-grow">
+    <div className="flex grow flex-col gap-2">
       {!selectedContactEmail && (
         <div className="space-y-2">
           <Label>To</Label>
@@ -250,7 +250,7 @@ export function MessageForm({
           ref={subjectInputRef}
         />
       </div>
-      <div className="space-y-2 flex-grow">
+      <div className="grow space-y-2">
         <Label>Body</Label>
         <StyledQuillEditor
           value={body}
@@ -265,7 +265,7 @@ export function MessageForm({
           className="w-full"
         >
           {isSendingEmail ? (
-            <Icons.spinner className="h-4 w-4 animate-spin" />
+            <Icons.spinner className="size-4 animate-spin" />
           ) : (
             "Send Email"
           )}

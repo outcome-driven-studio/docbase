@@ -11,8 +11,8 @@ export default function ErrorPage({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-md mx-auto text-center">
-        <h1 className="text-2xl font-bold mb-4">Authentication Error</h1>
+      <div className="mx-auto max-w-md text-center">
+        <h1 className="mb-4 text-2xl font-bold">Authentication Error</h1>
 
         {message && (
           <p className="mb-4 text-gray-600">{decodeURIComponent(message)}</p>
@@ -29,7 +29,7 @@ export default function ErrorPage({
             </p>
             <a
               href={decodeURIComponent(next)}
-              className="text-blue-600 hover:text-blue-800 underline"
+              className="text-blue-600 underline hover:text-blue-800"
             >
               Try again →
             </a>
@@ -39,13 +39,13 @@ export default function ErrorPage({
         <div className="space-y-2">
           <a
             href="/login"
-            className="block w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            className="block w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
             Go to Login
           </a>
           <a
             href="/"
-            className="block w-full bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700"
+            className="block w-full rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
           >
             Go Home
           </a>

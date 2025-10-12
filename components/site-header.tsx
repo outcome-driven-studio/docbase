@@ -16,7 +16,7 @@ export function SiteHeader({ account }: { account: User }) {
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
-          <Link href="/" className="hidden md:flex text-2xl font-semibold mr-6">
+          <Link href="/" className="mr-6 hidden text-2xl font-semibold md:flex">
             <span
               style={{
                 backgroundImage:
@@ -32,10 +32,10 @@ export function SiteHeader({ account }: { account: User }) {
           </Link>
           {account ? (
             <>
-              <div className="md:hidden mr-2">
+              <div className="mr-2 md:hidden">
                 <MainNav account={account} />
               </div>
-              <div className="hidden md:block mt-[2px]">
+              <div className="mt-[2px] hidden md:block">
                 <MainNav account={account} />
               </div>
             </>
@@ -54,7 +54,7 @@ export function SiteHeader({ account }: { account: User }) {
                 variant: "ghost",
               })}
             >
-              <Icons.gitHub className="h-5 w-5" />
+              <Icons.gitHub className="size-5" />
               <span className="sr-only">GitHub</span>
             </div>
           </Link>

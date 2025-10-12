@@ -76,7 +76,7 @@ export function MessagesTable({
                 e.preventDefault();
                 router.push(`/contacts?contactId=${contact.id}`);
               }}
-              className="hover:underline cursor-pointer"
+              className="cursor-pointer hover:underline"
             >
               {contact.name}
             </Link>
@@ -183,13 +183,13 @@ export function MessagesTable({
   return (
     <div className="flex h-screen overflow-hidden">
       <div className={`flex flex-col ${selectedMessage ? 'w-1/2 border-r' : 'w-full'}`}>
-        <div className="p-4 pt-10 border-b flex justify-between items-center flex-shrink-0">
+        <div className="flex shrink-0 items-center justify-between border-b p-4 pt-10">
           {selectedMessage ? (
             <h1 className="text-2xl font-semibold">Messages</h1>
           ) : (
             <>
               <div className="w-[150px]"></div>
-              <h1 className="text-2xl font-semibold flex-grow text-center">Messages</h1>
+              <h1 className="grow text-center text-2xl font-semibold">Messages</h1>
             </>
           )}
           <Button
@@ -197,16 +197,16 @@ export function MessagesTable({
             className="w-[150px]"
             onClick={handleNewMessage}
           >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline-block ml-2">New</span>
+            <Plus className="size-4" />
+            <span className="ml-2 hidden sm:inline-block">New</span>
           </Button>
         </div>
-        <div className="overflow-y-auto flex-grow">
+        <div className="grow overflow-y-auto">
           {messages.map((message, index) => (
             <div
               key={message.id}
               id={`message-${message.id}`}
-              className={`p-4 border-b cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${
+              className={`cursor-pointer border-b p-4 hover:bg-gray-100 dark:hover:bg-gray-800 ${
                 selectedIndex === index ? 'bg-gray-100 dark:bg-gray-800' : ''
               }`}
               onClick={() => {
@@ -216,17 +216,17 @@ export function MessagesTable({
               onMouseEnter={() => setHoveredMessageId(message.id)}
               onMouseLeave={() => setHoveredMessageId(null)}
             >
-              <div className="flex items-center justify-between mb-1">
+              <div className="mb-1 flex items-center justify-between">
                 <span className="font-semibold">{message.subject}</span>
                 <span className="text-sm text-gray-500">
                   {new Date(message.created_at).toLocaleString()}
                 </span>
               </div>
               <div className="flex items-center text-sm text-gray-600">
-                <Mail className="w-4 h-4 mr-2" />
+                <Mail className="mr-2 size-4" />
                 <span>{formatRecipients(message.recipient)}</span>
               </div>
-              <div className="text-sm text-gray-600 mt-1 line-clamp-2">
+              <div className="mt-1 line-clamp-2 text-sm text-gray-600">
                 <SafeHtml html={message.body} />
               </div>
             </div>
@@ -234,19 +234,19 @@ export function MessagesTable({
         </div>
       </div>
       {selectedMessage && (
-        <div className="w-1/2 flex flex-col">
-          <div className="p-4 border-b flex justify-between items-center flex-shrink-0">
+        <div className="flex w-1/2 flex-col">
+          <div className="flex shrink-0 items-center justify-between border-b p-4">
             <h2 className="text-xl font-semibold">{selectedMessage.subject}</h2>
             <button 
               onClick={() => setSelectedMessage(null)}
               className="text-gray-500 hover:text-gray-700"
             >
-              <X className="w-6 h-6" />
+              <X className="size-6" />
             </button>
           </div>
-          <div className="p-4 overflow-y-auto flex-grow">
-            <div className="flex items-center mb-4">
-              <span className="font-medium mr-2">
+          <div className="grow overflow-y-auto p-4">
+            <div className="mb-4 flex items-center">
+              <span className="mr-2 font-medium">
                 {formatRecipients(selectedMessage.recipient)}
               </span>
               <span className="text-sm text-gray-500">
@@ -265,7 +265,7 @@ export function MessagesTable({
           }
         }}
       >
-        <DialogContent className="flex flex-col max-w-2xl w-full">
+        <DialogContent className="flex w-full max-w-2xl flex-col">
           <DialogHeader>
             <DialogTitle>New Message</DialogTitle>
             <DialogDescription>

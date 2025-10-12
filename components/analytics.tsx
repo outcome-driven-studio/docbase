@@ -7,14 +7,14 @@ import { ViewerData } from "@/types/supabase"
 
 export default function Analytics({ allViewers, uniqueViewers, allViews }: { allViewers: number, uniqueViewers: number, allViews: ViewerData[] }) {
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-4">
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+    <div className="mx-auto w-full max-w-2xl space-y-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card className="w-full">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium pr-4">
+            <CardTitle className="pr-4 text-sm font-medium">
               Total Views
             </CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <Activity className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{allViewers}</div>
@@ -22,10 +22,10 @@ export default function Analytics({ allViewers, uniqueViewers, allViews }: { all
         </Card>
         <Card className="w-full">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium pr-4">
+            <CardTitle className="pr-4 text-sm font-medium">
               Unique Views
             </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{uniqueViewers}</div>

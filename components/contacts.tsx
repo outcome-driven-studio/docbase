@@ -196,7 +196,7 @@ export function ContactsTable({
     MultiValue: ({ children, removeProps, ...props }: any) => {
       return (
         <Badge
-          className="flex items-center gap-1 m-1"
+          className="m-1 flex items-center gap-1"
           style={{
             backgroundColor: props.data.color,
             color: "white",
@@ -213,26 +213,26 @@ export function ContactsTable({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center max-w-5xl mx-auto py-4 relative">
+      <div className="relative mx-auto flex max-w-5xl items-center justify-between py-4">
         <div className="w-[150px]" />
-        <h1 className="text-2xl font-bold absolute left-1/2 transform -translate-x-1/2">
+        <h1 className="absolute left-1/2 -translate-x-1/2 text-2xl font-bold">
           Contacts
         </h1>
         <div className="flex space-x-2">
           <Button variant="ghost" onClick={() => setIsGroupsDialogOpen(true)}>
-            <Folder className="w-4 h-4" />
-            <span className="hidden sm:inline-block ml-2">Manage Groups</span>
+            <Folder className="size-4" />
+            <span className="ml-2 hidden sm:inline-block">Manage Groups</span>
           </Button>
           <Button
             variant="ghost"
             onClick={() => setIsNewContactDialogOpen(true)}
           >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline-block ml-2">New</span>
+            <Plus className="size-4" />
+            <span className="ml-2 hidden sm:inline-block">New</span>
           </Button>
         </div>
       </div>
-      <div className="max-w-5xl mx-auto">
+      <div className="mx-auto max-w-5xl">
         <div className="container mx-auto py-10">
           <Table>
             <TableHeader>
@@ -240,7 +240,7 @@ export function ContactsTable({
                 <TableHead className="w-1/4">Name</TableHead>
                 <TableHead className="w-1/4">Email</TableHead>
                 <TableHead
-                  className="w-1/4 cursor-pointer hover:text-primary hover:underline transition-colors"
+                  className="w-1/4 cursor-pointer transition-colors hover:text-primary hover:underline"
                   onClick={() => setIsGroupsDialogOpen(true)}
                 >
                   <div className="flex items-center gap-1">
@@ -248,7 +248,7 @@ export function ContactsTable({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                          <Info className="size-4 text-muted-foreground hover:text-primary" />
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>Click to manage groups</p>
@@ -290,13 +290,13 @@ export function ContactsTable({
                         variant="ghost"
                         onClick={() => handleEmailButtonClick(contact.email)}
                       >
-                        <MailPlus className="h-4 w-4" />
+                        <MailPlus className="size-4" />
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
+                          <Button variant="ghost" className="size-8 p-0">
                             <span className="sr-only">Open menu</span>
-                            <MenuIcon className="h-4 w-4" />
+                            <MenuIcon className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -331,7 +331,7 @@ export function ContactsTable({
               router.refresh()
             }}
           >
-            <DialogContent className="flex flex-col max-w-2xl w-full">
+            <DialogContent className="flex w-full max-w-2xl flex-col">
               <DialogHeader>
                 <DialogTitle>Send Email</DialogTitle>
                 <DialogDescription>

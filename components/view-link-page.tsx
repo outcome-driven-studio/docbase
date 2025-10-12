@@ -36,7 +36,7 @@ export default function ViewLinkPage({
 
   return (
     <div className="w-full">
-      <h1 className="text-3xl font-bold mb-6 text-center">{link.filename}</h1>
+      <h1 className="mb-6 text-center text-3xl font-bold">{link.filename}</h1>
       <ViewLinkForm
         link={link}
         account={account}

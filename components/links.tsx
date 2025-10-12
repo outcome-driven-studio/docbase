@@ -151,7 +151,7 @@ export function Links({ links, account }: { links: Link[]; account: User }) {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm">
-                        <MenuIcon className="h-4 w-4" />
+                        <MenuIcon className="size-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">

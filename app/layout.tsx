@@ -1,16 +1,17 @@
 import "@/styles/globals.css"
 import { Metadata } from "next"
+import Script from "next/script"
 import { createClient } from "@/utils/supabase/server"
+
 import { siteConfig } from "@/config/site"
+import { validateEnvironmentVariables } from "@/lib/env-validation"
 import { fontSans } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
-import { validateEnvironmentVariables } from "@/lib/env-validation"
 import { Toaster } from "@/components/ui/toaster"
+import { CommandMenu } from "@/components/command-menu"
 import { SiteHeader } from "@/components/site-header"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 import { ThemeProvider } from "@/components/theme-provider"
-import { CommandMenu } from "@/components/command-menu"
-import Script from 'next/script'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     images: ["/api/og"],
   },
-};
+}
 
 interface RootLayoutProps {
   children: React.ReactNode
@@ -42,6 +43,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
     <>
       <html lang="en" suppressHydrationWarning>
         <head>
+          {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
           <Script
             src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
             strategy="beforeInteractive"

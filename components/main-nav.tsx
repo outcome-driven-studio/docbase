@@ -29,13 +29,13 @@ export function MainNav({
       className={cn("flex items-center", className)}
       {...props}
     >
-      <div className="hidden md:flex space-x-6 items-center">
+      <div className="hidden items-center space-x-6 md:flex">
         {mainNavItems.map((item, index) => (
           <Link
             key={index}
             href={item.href}
             className={cn(
-              "text-sm font-medium transition-colors hover:text-primary leading-none",
+              "text-sm font-medium leading-none transition-colors hover:text-primary",
               pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground"
             )}
           >
@@ -47,7 +47,7 @@ export function MainNav({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm">
-              <Menu className="h-5 w-5" />
+              <Menu className="size-5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">

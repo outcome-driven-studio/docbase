@@ -130,7 +130,7 @@ export function ContactForm({
     MultiValue: ({ children, removeProps, ...props }: any) => {
       return (
         <Badge
-          className="flex items-center gap-1 m-1"
+          className="m-1 flex items-center gap-1"
           style={{
             backgroundColor: props.data.color,
             color: "white",
@@ -211,7 +211,7 @@ export function ContactForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4 w-full max-w-md mx-auto"
+        className="mx-auto w-full max-w-md space-y-4"
       >
         <FormField
           control={form.control}
@@ -273,7 +273,7 @@ export function ContactForm({
         />
         <Button className="w-full" type="submit">
           {isLoading ? (
-            <Icons.spinner className="w-4 h-4 animate-spin" />
+            <Icons.spinner className="size-4 animate-spin" />
           ) : existingContact ? (
             "Update Contact"
           ) : (

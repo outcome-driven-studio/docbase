@@ -38,15 +38,15 @@ export default async function AccountPage({
     // Database tables don't exist - show setup instructions
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6 text-center text-red-600">
+        <div className="mx-auto max-w-2xl">
+          <h1 className="mb-6 text-center text-3xl font-bold text-red-600">
             Database Setup Required
           </h1>
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+          <div className="mb-6 border-l-4 border-yellow-400 bg-yellow-50 p-4">
             <div className="flex">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <svg
-                  className="h-5 w-5 text-yellow-400"
+                  className="size-5 text-yellow-400"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -66,30 +66,30 @@ export default async function AccountPage({
             </div>
           </div>
 
-          <div className="bg-white shadow rounded-lg p-6 space-y-4">
-            <h2 className="text-xl font-semibold mb-4">Setup Instructions:</h2>
+          <div className="space-y-4 rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-xl font-semibold">Setup Instructions:</h2>
 
             <div className="space-y-3">
               <div>
-                <h3 className="font-semibold text-lg">
+                <h3 className="text-lg font-semibold">
                   Option 1: Using Supabase CLI
                 </h3>
-                <ol className="list-decimal list-inside space-y-2 mt-2 text-sm">
+                <ol className="mt-2 list-inside list-decimal space-y-2 text-sm">
                   <li>
                     Make sure you&apos;re logged in:{" "}
-                    <code className="bg-gray-100 px-2 py-1 rounded">
+                    <code className="rounded bg-gray-100 px-2 py-1">
                       npx supabase login
                     </code>
                   </li>
                   <li>
                     Link to your project:{" "}
-                    <code className="bg-gray-100 px-2 py-1 rounded">
+                    <code className="rounded bg-gray-100 px-2 py-1">
                       npx supabase link
                     </code>
                   </li>
                   <li>
                     Push migrations:{" "}
-                    <code className="bg-gray-100 px-2 py-1 rounded">
+                    <code className="rounded bg-gray-100 px-2 py-1">
                       npx supabase db push
                     </code>
                   </li>
@@ -97,14 +97,14 @@ export default async function AccountPage({
               </div>
 
               <div className="mt-4">
-                <h3 className="font-semibold text-lg">
+                <h3 className="text-lg font-semibold">
                   Option 2: Manual Migration
                 </h3>
-                <ol className="list-decimal list-inside space-y-2 mt-2 text-sm">
+                <ol className="mt-2 list-inside list-decimal space-y-2 text-sm">
                   <li>Go to your Supabase Dashboard → SQL Editor</li>
                   <li>
                     Open the migration file:{" "}
-                    <code className="bg-gray-100 px-2 py-1 rounded">
+                    <code className="rounded bg-gray-100 px-2 py-1">
                       supabase/migrations/20241017001940_initial.sql
                     </code>
                   </li>
@@ -114,13 +114,13 @@ export default async function AccountPage({
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t">
+            <div className="mt-6 border-t pt-4">
               <p className="text-sm text-gray-600">
                 After running the migrations, refresh this page to continue.
               </p>
               <button
                 onClick={() => window.location.reload()}
-                className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
               >
                 Refresh Page
               </button>
@@ -164,7 +164,7 @@ export default async function AccountPage({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">Your Account</h1>
+      <h1 className="mb-6 text-center text-3xl font-bold">Your Account</h1>
       <Account account={account} domain={domain} />
     </div>
   )

@@ -21,8 +21,8 @@ export default async function AnalyticsPage({
   if (error) {
     logger.error('Error fetching analytics', { error })
     return (
-      <div className="container mx-auto px-4 py-8 flex justify-center items-center flex-col min-h-screen">
-        <h1 className="text-2xl text-center font-bold mb-6">
+      <div className="container mx-auto flex min-h-screen flex-col items-center justify-center px-4 py-8">
+        <h1 className="mb-6 text-center text-2xl font-bold">
           Error fetching analytics
         </h1>
         <Link href="/links">
@@ -38,7 +38,7 @@ export default async function AnalyticsPage({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">Your Views</h1>
+      <h1 className="mb-6 text-center text-3xl font-bold">Your Views</h1>
       <Analytics
         allViewers={allViewers}
         uniqueViewers={uniqueViewers}

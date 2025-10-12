@@ -279,13 +279,13 @@ export default function LinkForm({
   })
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="mx-auto w-full max-w-2xl">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormItem className="flex flex-col rounded-lg border p-4">
             <div className="flex flex-row items-center justify-between">
-              <div className="space-y-0.5 flex-grow">
-                <FormLabel className="text-base pr-2">
+              <div className="grow space-y-0.5">
+                <FormLabel className="pr-2 text-base">
                   Password Protected
                 </FormLabel>
                 <FormDescription className="pr-4">
@@ -318,8 +318,8 @@ export default function LinkForm({
                 )}
               >
                 <div className="flex flex-row items-center justify-between">
-                  <div className="space-y-0.5 flex-grow">
-                    <FormLabel htmlFor="password" className="text-base pr-2">
+                  <div className="grow space-y-0.5">
+                    <FormLabel htmlFor="password" className="pr-2 text-base">
                       Password
                     </FormLabel>
                     <FormDescription className="pr-4">
@@ -344,8 +344,8 @@ export default function LinkForm({
           />
           <FormItem className="flex flex-col rounded-lg border p-4">
             <div className="flex flex-row items-center justify-between">
-              <div className="space-y-0.5 flex-grow">
-                <FormLabel className="text-base pr-2">
+              <div className="grow space-y-0.5">
+                <FormLabel className="pr-2 text-base">
                   Set Expiration Date
                 </FormLabel>
                 <FormDescription className="pr-4">
@@ -380,8 +380,8 @@ export default function LinkForm({
               render={({ field }) => (
                 <FormItem className="flex flex-col rounded-lg border p-4">
                   <div className="flex flex-row items-center justify-between">
-                    <div className="space-y-0.5 flex-grow">
-                      <FormLabel htmlFor="expires" className="text-base pr-2">
+                    <div className="grow space-y-0.5">
+                      <FormLabel htmlFor="expires" className="pr-2 text-base">
                         Expires
                       </FormLabel>
                       <FormDescription className="pr-4">
@@ -414,7 +414,7 @@ export default function LinkForm({
                             ) : (
                               <span>Select date</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -441,7 +441,7 @@ export default function LinkForm({
                           }
                           initialFocus
                         />
-                        <div className="p-3 border-t border-border">
+                        <div className="border-t border-border p-3">
                           <Input
                             type="time"
                             value={
@@ -475,8 +475,8 @@ export default function LinkForm({
               render={({ field }) => (
                 <FormItem className="flex flex-col rounded-lg border p-4">
                   <div className="flex flex-row items-center justify-between">
-                    <div className="space-y-0.5 flex-grow">
-                      <FormLabel htmlFor="filename" className="text-base pr-2">
+                    <div className="grow space-y-0.5">
+                      <FormLabel htmlFor="filename" className="pr-2 text-base">
                         Filename
                       </FormLabel>
                       <FormDescription className="pr-4">
@@ -498,8 +498,8 @@ export default function LinkForm({
           )}
           <FormItem className="flex flex-col rounded-lg border p-4">
             <div className="flex flex-row items-center justify-between">
-              <div className="space-y-0.5 flex-grow">
-                <FormLabel className="text-base pr-2">Allow Download</FormLabel>
+              <div className="grow space-y-0.5">
+                <FormLabel className="pr-2 text-base">Allow Download</FormLabel>
                 <FormDescription className="pr-4">
                   When disabled, viewers can only view the document in the
                   browser but cannot download it
@@ -522,7 +522,7 @@ export default function LinkForm({
               <div className="rounded-lg border bg-muted/50 p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-muted-foreground" />
+                    <FileText className="size-5 text-muted-foreground" />
                     <div>
                       <p className="text-sm font-medium">Current File</p>
                       <p className="text-sm text-muted-foreground">
@@ -544,7 +544,7 @@ export default function LinkForm({
                         })
                       }}
                     >
-                      <Copy className="h-4 w-4" />
+                      <Copy className="size-4" />
                     </Button>
                     <Button
                       type="button"
@@ -556,11 +556,11 @@ export default function LinkForm({
                         }
                       }}
                     >
-                      <ExternalLink className="h-4 w-4" />
+                      <ExternalLink className="size-4" />
                     </Button>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-3">
+                <p className="mt-3 text-xs text-muted-foreground">
                   Upload a new file below to replace the current one, or leave
                   empty to keep it
                 </p>
@@ -569,7 +569,7 @@ export default function LinkForm({
             <div
               {...getRootProps()}
               className={cn(
-                "border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer",
+                "cursor-pointer rounded-lg border-2 border-dashed border-gray-300 p-6 text-center",
                 isUploading && "pointer-events-none opacity-50"
               )}
             >
@@ -600,7 +600,7 @@ export default function LinkForm({
             {isUploading && (
               <div className="rounded-lg border bg-muted/50 p-4">
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                  <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <div className="size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                   <span>Uploading file...</span>
                 </div>
               </div>

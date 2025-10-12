@@ -48,8 +48,8 @@ export function UserNav({ account }: { account: User }) {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full m-2">
-          <Avatar className="h-8 w-8">
+        <Button variant="ghost" className="relative m-2 size-8 rounded-full">
+          <Avatar className="size-8">
             <AvatarFallback>
               {account.email?.charAt(0).toUpperCase()}
             </AvatarFallback>
@@ -74,7 +74,7 @@ export function UserNav({ account }: { account: User }) {
                 <Link href={item.href}>
                   <DropdownMenuItem className="cursor-pointer justify-between">
                     <div className="flex items-center">
-                      <item.icon className="mr-2 h-4 w-4" />
+                      <item.icon className="mr-2 size-4" />
                       <span>{item.label}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -96,12 +96,12 @@ export function UserNav({ account }: { account: User }) {
                   <div className="flex items-center">
                     {item.action === "theme" ? (
                       theme === "light" ? (
-                        <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
+                        <Moon className="mr-2 size-4" aria-hidden="true" />
                       ) : (
-                        <Sun className="mr-2 h-4 w-4" aria-hidden="true" />
+                        <Sun className="mr-2 size-4" aria-hidden="true" />
                       )
                     ) : (
-                      <item.icon className="mr-2 h-4 w-4" aria-hidden="true" />
+                      <item.icon className="mr-2 size-4" aria-hidden="true" />
                     )}
                     <span>{item.label}</span>
                   </div>

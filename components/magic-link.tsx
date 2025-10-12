@@ -78,12 +78,12 @@ export default function MagicLink({ redirect }: { redirect: string }) {
               autoComplete="off"
             />
             <Button
-              className="w-full mt-2"
+              className="mt-2 w-full"
               onClick={() => signInWithEmail(email)}
               disabled={isLoading}
             >
               {isLoading ? (
-                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                <Icons.spinner className="mr-2 size-4 animate-spin" />
               ) : (
                 "Send Magic Link"
               )}

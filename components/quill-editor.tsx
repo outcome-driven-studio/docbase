@@ -17,7 +17,7 @@ export const StyledQuillEditor: React.FC<StyledQuillEditorProps> = ({ value, onC
         theme="snow"
         value={value}
         onChange={onChange}
-        className="flex-grow h-full"
+        className="h-full grow"
         placeholder={placeholder}
         modules={{
           toolbar: [

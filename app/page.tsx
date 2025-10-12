@@ -7,17 +7,17 @@ import { GridBackground } from "@/components/grid-background"
 
 export default function IndexPage() {
   return (
-    <div className="flex flex-col mih-h-dvh">
+    <div className="mih-h-dvh flex flex-col">
       <GridBackground />
-      <main className="container mx-auto my-48 flex-grow">
-        <section className="text-center max-w-3xl mx-auto">
-          <h1 className="text-5xl font-semibold mb-2">{siteConfig.tagline}</h1>
-          <p className="text-md mt-4 max-w-xl mx-auto">
+      <main className="container mx-auto my-48 grow">
+        <section className="mx-auto max-w-3xl text-center">
+          <h1 className="mb-2 text-5xl font-semibold">{siteConfig.tagline}</h1>
+          <p className="text-md mx-auto mt-4 max-w-xl">
             {siteConfig.description}
           </p>
           <div className="mt-8 flex justify-center gap-4">
             <Link href="/links">
-              <Button className="transition-opacity hover:opacity-70 bg-primary text-primary-foreground">
+              <Button className="bg-primary text-primary-foreground transition-opacity hover:opacity-70">
                 Get Started
               </Button>
             </Link>
@@ -27,7 +27,7 @@ export default function IndexPage() {
               rel="noopener noreferrer"
             >
               <Button variant="ghost">
-                <Github className="mr-2 h-4 w-4" />
+                <Github className="mr-2 size-4" />
                 GitHub
               </Button>
             </Link>

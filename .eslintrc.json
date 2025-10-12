@@ -25,6 +25,12 @@
     {
       "files": ["*.ts", "*.tsx"],
       "parser": "@typescript-eslint/parser"
+    },
+    {
+      "files": ["components/templates/*.tsx"],
+      "rules": {
+        "@next/next/no-head-element": "off"
+      }
     }
   ]
 }
