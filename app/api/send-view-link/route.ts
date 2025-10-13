@@ -82,14 +82,27 @@ export async function POST(request: Request) {
       redirectTo
     )}`
 
-    // Extract domain from site URL for from address
-    const domain = new URL(siteUrl).hostname
+    // Get user's configured domain from database
+    const { data: userData } = await supabase
+      .from("links")
+      .select("created_by")
+      .eq("id", linkId)
+      .single()
 
-    // For localhost, use a test email format. For production, use actual domain
-    const fromEmail =
-      domain === "localhost"
-        ? "Docbase <onboarding@resend.dev>" // Resend's test email
-        : `Docbase <noreply@${domain}>`
+    let fromEmail = "Docbase <onboarding@resend.dev>" // Default
+
+    if (userData?.created_by) {
+      const { data: userDomain } = await supabase
+        .from("domains")
+        .select("domain_name, sender_name")
+        .eq("user_id", userData.created_by)
+        .maybeSingle()
+
+      if (userDomain?.domain_name) {
+        const senderName = userDomain.sender_name || "Docbase"
+        fromEmail = `${senderName} <noreply@${userDomain.domain_name}>`
+      }
+    }
 
     // Send the email with Resend using beautiful template
     const emailHtml = `

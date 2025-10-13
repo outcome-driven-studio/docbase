@@ -39,6 +39,9 @@ export default function MagicLink({ redirect }: { redirect: string }) {
       options: {
         shouldCreateUser: true,
         emailRedirectTo: redirectUrl,
+        data: {
+          create_workspace: true, // Trigger workspace creation for new users
+        },
       },
     })
     setIsLoading(false)

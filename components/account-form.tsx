@@ -134,7 +134,7 @@ export default function AccountForm({ account }: { account: User | null }) {
       const firstEntity = entities[0]
       setSelectedEntity(firstEntity.id)
       setShowAdditionalFields(true)
-      
+
       // Populate form with first entity's data
       form.reset({
         ...form.getValues(),
@@ -191,11 +191,27 @@ export default function AccountForm({ account }: { account: User | null }) {
         }
       }
 
+      // Mark onboarding as completed
+      await supabase
+        .from("users")
+        .update({ onboarding_completed: true })
+        .eq("id", account.id)
+
       toast({
         description: "Account updated",
       })
       setShowAdditionalFields(false)
-      router.refresh()
+
+      // Check if this was first-time onboarding
+      if (data.name) {
+        toast({
+          title: "Welcome to Docbase!",
+          description: "Your profile is set up. Let's create your first link.",
+        })
+        router.push("/links")
+      } else {
+        router.refresh()
+      }
     } catch (error) {
       clientLogger.error("Error updating account", { error })
       toast({

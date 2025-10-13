@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 
 import { Database } from "@/types/supabase"
@@ -8,10 +10,11 @@ import { ThemeToggle } from "@/components/theme-toggle"
 
 import { MainNav } from "./main-nav"
 import { UserNav } from "./user-nav"
+import { WorkspaceSelector } from "./workspace-selector"
 
 type User = Database["public"]["Tables"]["users"]["Row"]
 
-export function SiteHeader({ account }: { account: User }) {
+export function SiteHeader({ account }: { account: User | null }) {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -37,6 +40,9 @@ export function SiteHeader({ account }: { account: User }) {
               </div>
               <div className="mt-[2px] hidden md:block">
                 <MainNav account={account} />
+              </div>
+              <div className="ml-4 hidden md:block">
+                <WorkspaceSelector />
               </div>
             </>
           ) : null}
