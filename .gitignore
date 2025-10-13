@@ -82,3 +82,6 @@ CHECK_DATABASE_STATUS.sql
 fix_current_user.sql
 reset_and_migrate.sql
 SOCIAL_MEDIA_POSTS.md
+FINAL_SESSION_NOTES.md
+PR_INSTRUCTIONS.md
+SIMPLE_PR_STEPS.md
