@@ -37,9 +37,11 @@ const linkFormSchema = z
     protectWithPassword: z.boolean(),
     protectWithExpiration: z.boolean(),
     allowDownload: z.boolean(),
+    requireSignature: z.boolean(),
     password: z.string().optional(),
     expires: z.date().nullable(),
     filename: z.string().min(1, "Filename is required"),
+    signatureInstructions: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -93,6 +95,9 @@ export default function LinkForm({
   const [allowDownload, setAllowDownload] = useState<boolean>(
     link?.allow_download !== false
   )
+  const [requireSignature, setRequireSignature] = useState<boolean>(
+    false // TODO: Get from link when we add the column
+  )
 
   const form = useForm<LinkFormValues>({
     resolver: zodResolver(linkFormSchema),
@@ -100,9 +105,11 @@ export default function LinkForm({
       protectWithPassword: !!link?.password,
       protectWithExpiration: !!link?.expires,
       allowDownload: link?.allow_download !== false,
+      requireSignature: false, // TODO: Get from link
       password: link?.password ? "********" : "",
       expires: link?.expires ? new Date(link.expires) : null,
       filename: link?.filename || "",
+      signatureInstructions: "", // TODO: Get from link
     },
   })
   const [expiresCalendarOpen, setExpiresCalendarOpen] = useState(false)
@@ -144,6 +151,9 @@ export default function LinkForm({
         throw new Error("User account not found")
       }
 
+      // Note: Storage bucket should be created manually in Supabase Dashboard
+      // No need to check here - let upload fail with clear error if bucket missing
+
       let passwordHash = null
 
       if (data.protectWithPassword) {
@@ -164,7 +174,7 @@ export default function LinkForm({
 
       if (file) {
         setIsUploading(true)
-        
+
         const { error: uploadError } = await supabase.storage
           .from("cube")
           .upload(storageFilePath, file, { upsert: true })
@@ -223,6 +233,8 @@ export default function LinkForm({
             : null,
           filename: data.filename,
           allow_download: data.allowDownload,
+          require_signature: data.requireSignature,
+          signature_instructions: data.signatureInstructions || null,
           created_by: account.id,
         })
       }
@@ -517,6 +529,53 @@ export default function LinkForm({
             </div>
             <FormMessage />
           </FormItem>
+
+          {/* Signature toggle - ONLY for new links (not edits) */}
+          {!link && (
+            <>
+              <FormItem className="flex flex-col rounded-lg border border-purple-200 bg-purple-50/50 p-4 dark:border-purple-900 dark:bg-purple-950/50">
+                <div className="flex flex-row items-center justify-between">
+                  <div className="grow space-y-0.5">
+                    <FormLabel className="pr-2 text-base">
+                      Require Signature ✍️
+                    </FormLabel>
+                    <FormDescription className="pr-4">
+                      Viewers must sign before accessing. Perfect for NDAs,
+                      contracts, and legal agreements.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={requireSignature}
+                      onCheckedChange={(checked) => {
+                        setRequireSignature(checked)
+                        form.setValue("requireSignature", checked)
+                      }}
+                    />
+                  </FormControl>
+                </div>
+              </FormItem>
+
+              {requireSignature && (
+                <FormItem>
+                  <FormLabel>Signature Instructions (Optional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., Please sign to confirm you agree to these terms"
+                      value={form.watch("signatureInstructions") || ""}
+                      onChange={(e) =>
+                        form.setValue("signatureInstructions", e.target.value)
+                      }
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Custom message shown when requesting signature
+                  </FormDescription>
+                </FormItem>
+              )}
+            </>
+          )}
+
           <div className="space-y-4">
             {link && (
               <div className="rounded-lg border bg-muted/50 p-4">

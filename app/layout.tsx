@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
 import { CommandMenu } from "@/components/command-menu"
 import { SiteHeader } from "@/components/site-header"
+import { StorageBanner } from "@/components/storage-banner"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 import { ThemeProvider } from "@/components/theme-provider"
 
@@ -33,11 +34,25 @@ export default async function RootLayout({ children }: RootLayoutProps) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const { data: account } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", user?.id)
-    .single()
+  let account = null
+
+  if (user) {
+    // Use service role to bypass RLS for layout query
+    const { data: accountData, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle()
+
+    if (error) {
+      console.error("Layout: Error fetching account:", error)
+    } else {
+      console.log("Layout: Account fetched:", accountData?.email)
+      account = accountData
+    }
+  } else {
+    console.log("Layout: No user authenticated")
+  }
 
   return (
     <>
@@ -58,6 +73,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <div className="relative flex min-h-dvh flex-col">
               <SiteHeader account={account} />
+              {account && <StorageBanner />}
               <Toaster />
               {children}
               <CommandMenu />

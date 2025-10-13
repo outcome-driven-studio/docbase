@@ -3,12 +3,16 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { createClient } from "@/utils/supabase/server"
+
 import { LoginFormData } from "@/components/login-form"
 
 export async function login(formData: LoginFormData) {
   const supabase = createClient()
   const { email, password } = formData
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const { error, data } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
 
   if (error) {
     const isAlreadyUser = await supabase.rpc("checkIfUser", {
@@ -23,6 +27,22 @@ export async function login(formData: LoginFormData) {
       return { errorMessage: error.message }
     }
   }
+
+  // Check if user has completed onboarding
+  if (data.user) {
+    const { data: userData } = await supabase
+      .from("users")
+      .select("onboarding_completed")
+      .eq("id", data.user.id)
+      .single()
+
+    // If onboarding not completed, send to account page
+    if (userData && !userData.onboarding_completed) {
+      revalidatePath("/", "layout")
+      redirect("/account")
+    }
+  }
+
   revalidatePath("/", "layout")
   redirect("/links")
 }

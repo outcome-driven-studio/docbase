@@ -1,10 +1,11 @@
 import Link from "next/link"
 import { createClient } from "@/utils/supabase/server"
-import { logger } from "@/lib/logger"
 
 import { ViewerData } from "@/types/supabase"
+import { logger } from "@/lib/logger"
 import { Button } from "@/components/ui/button"
 import Analytics from "@/components/analytics"
+import { SignatureStatus } from "@/components/signature-status"
 
 export default async function AnalyticsPage({
   params,
@@ -19,7 +20,7 @@ export default async function AnalyticsPage({
   })
 
   if (error) {
-    logger.error('Error fetching analytics', { error })
+    logger.error("Error fetching analytics", { error })
     return (
       <div className="container mx-auto flex min-h-screen flex-col items-center justify-center px-4 py-8">
         <h1 className="mb-6 text-center text-2xl font-bold">
@@ -37,13 +38,22 @@ export default async function AnalyticsPage({
   const allViews = (data?.[0]?.all_views ?? []) as ViewerData[]
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-6 text-center text-3xl font-bold">Your Views</h1>
-      <Analytics
-        allViewers={allViewers}
-        uniqueViewers={uniqueViewers}
-        allViews={allViews}
-      />
+    <div className="container mx-auto max-w-6xl px-4 py-8">
+      <h1 className="mb-6 text-center text-3xl font-bold">
+        Analytics & Signatures
+      </h1>
+
+      <div className="space-y-6">
+        {/* Signature Status */}
+        <SignatureStatus linkId={id} />
+
+        {/* View Analytics */}
+        <Analytics
+          allViewers={allViewers}
+          uniqueViewers={uniqueViewers}
+          allViews={allViews}
+        />
+      </div>
     </div>
   )
 }

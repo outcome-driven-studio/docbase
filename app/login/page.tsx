@@ -1,10 +1,22 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
+import { createClient } from "@/utils/supabase/server"
 
 import AnimatedLoginTabs from "@/components/animated-login-tabs"
 
 import { login } from "./actions"
 
 export default async function Login() {
+  // Redirect if already logged in
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (user) {
+    redirect("/links")
+  }
+
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4 pt-16 sm:px-6 md:px-8">
       <div className="flex w-full max-w-md flex-col space-y-6 p-4">
