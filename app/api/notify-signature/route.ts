@@ -4,6 +4,10 @@ import { z } from "zod"
 import { createClient } from "@/utils/supabase/server"
 import { NewEmailTemplate } from "@/components/templates/new-email"
 import { logger } from "@/lib/logger"
+import {
+  sendSlackNotification,
+  createSignatureMessage,
+} from "@/lib/slack"
 
 const notifySignatureSchema = z.object({
   linkId: z.string().uuid(),
@@ -62,10 +66,10 @@ export async function POST(req: Request) {
       )
     }
 
-    // Get the creator's domain and API key
+    // Get the creator's domain and API key (also get Slack credentials)
     const { data: domain, error: domainError } = await supabase
       .from("domains")
-      .select("api_key, domain_name, sender_name")
+      .select("api_key, domain_name, sender_name, slack_access_token, slack_channel_id")
       .eq("user_id", creator.id)
       .limit(1)
       .single()
@@ -124,6 +128,36 @@ Your Docbase Team
       creatorEmail: creator.email,
       signerEmail,
     })
+
+    // Send Slack notification if configured (don't fail if Slack notification fails)
+    try {
+      if (domain?.slack_access_token && domain?.slack_channel_id) {
+        const documentName = link.name || link.filename || "Document"
+        const { text, blocks } = createSignatureMessage(
+          documentName,
+          signerName,
+          signerEmail
+        )
+
+        await sendSlackNotification({
+          accessToken: domain.slack_access_token,
+          channelId: domain.slack_channel_id,
+          text,
+          blocks,
+        })
+
+        logger.info("Slack notification sent for signature", {
+          linkId,
+          signerEmail,
+        })
+      }
+    } catch (slackError) {
+      // Log but don't fail the request if Slack notification fails
+      logger.error("Failed to send Slack notification for signature", {
+        error: slackError,
+        linkId,
+      })
+    }
 
     // Check if all parties have signed (both creator and signer)
     const { data: allSignatures } = await supabase

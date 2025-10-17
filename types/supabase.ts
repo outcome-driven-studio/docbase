@@ -171,6 +171,11 @@ export type Database = {
           domain_name: string
           id: string
           sender_name: string | null
+          slack_access_token: string | null
+          slack_channel_id: string | null
+          slack_channel_name: string | null
+          slack_team_id: string | null
+          slack_team_name: string | null
           user_id: string
         }
         Insert: {
@@ -179,6 +184,11 @@ export type Database = {
           domain_name: string
           id?: string
           sender_name?: string | null
+          slack_access_token?: string | null
+          slack_channel_id?: string | null
+          slack_channel_name?: string | null
+          slack_team_id?: string | null
+          slack_team_name?: string | null
           user_id: string
         }
         Update: {
@@ -187,6 +197,11 @@ export type Database = {
           domain_name?: string
           id?: string
           sender_name?: string | null
+          slack_access_token?: string | null
+          slack_channel_id?: string | null
+          slack_channel_name?: string | null
+          slack_team_id?: string | null
+          slack_team_name?: string | null
           user_id?: string
         }
         Relationships: []
@@ -805,6 +820,13 @@ export type Database = {
       checkifuser: {
         Args: { given_mail: string }
         Returns: boolean
+      }
+      cleanup_orphaned_storage_files: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          deleted_file: string
+          status: string
+        }[]
       }
       delete_link: {
         Args: { link_id: string; user_id: string }
