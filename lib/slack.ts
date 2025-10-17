@@ -55,7 +55,7 @@ export function createDocumentViewMessage(
 ) {
   const text = `📄 Someone opened your document: ${documentName}`
 
-  const blocks = [
+  const blocks: any[] = [
     {
       type: "section",
       text: {
@@ -113,7 +113,7 @@ export function createSignatureMessage(
 ) {
   const text = `✍️ ${signerName} signed your document: ${documentName}`
 
-  const blocks = [
+  const blocks: any[] = [
     {
       type: "section",
       text: {
