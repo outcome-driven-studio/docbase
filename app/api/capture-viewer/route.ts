@@ -2,6 +2,10 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { createServiceRoleClient } from "@/utils/supabase/server"
 import { logger } from "@/lib/logger"
+import {
+  sendSlackNotification,
+  createDocumentViewMessage,
+} from "@/lib/slack"
 
 const captureViewerSchema = z.object({
   linkId: z.string().uuid(),
@@ -45,11 +49,11 @@ export async function POST(req: Request) {
     const supabase = createServiceRoleClient()
     console.log("[capture-viewer] Service role client created")
 
-    // Verify link exists
+    // Verify link exists and get link details with creator info
     console.log("[capture-viewer] Querying link:", linkId)
     const { data: link, error: linkError } = await supabase
       .from("links")
-      .select("id, require_email")
+      .select("id, require_email, name, filename, created_by")
       .eq("id", linkId)
       .single()
 
@@ -86,6 +90,46 @@ export async function POST(req: Request) {
 
     console.log("[capture-viewer] Success!")
     logger.info("Viewer email captured", { linkId, email })
+
+    // Send Slack notification if configured (don't fail if Slack notification fails)
+    try {
+      if (link.created_by) {
+        const { data: domain } = await supabase
+          .from("domains")
+          .select("slack_access_token, slack_channel_id")
+          .eq("user_id", link.created_by)
+          .single()
+
+        if (
+          domain?.slack_access_token &&
+          domain?.slack_channel_id
+        ) {
+          const documentName = link.name || link.filename || "Document"
+          const { text, blocks } = createDocumentViewMessage(
+            documentName,
+            email
+          )
+
+          await sendSlackNotification({
+            accessToken: domain.slack_access_token,
+            channelId: domain.slack_channel_id,
+            text,
+            blocks,
+          })
+
+          logger.info("Slack notification sent for document view", {
+            linkId,
+            viewerEmail: email,
+          })
+        }
+      }
+    } catch (slackError) {
+      // Log but don't fail the request if Slack notification fails
+      logger.error("Failed to send Slack notification for document view", {
+        error: slackError,
+        linkId,
+      })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {
