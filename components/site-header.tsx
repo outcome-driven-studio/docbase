@@ -42,9 +42,6 @@ export function SiteHeader({ account }: { account: User | null }) {
               <div className="mt-[2px] hidden md:block">
                 <MainNav account={account} />
               </div>
-              <div className="ml-4 hidden md:block">
-                <WorkspaceSelector />
-              </div>
             </>
           ) : null}
         </div>
