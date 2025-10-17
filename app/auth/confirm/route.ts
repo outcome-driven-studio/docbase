@@ -141,6 +141,7 @@ export async function GET(request: NextRequest) {
 
   console.log("Missing token_hash/code or type, redirecting to error")
   const errorUrl = siteUrl + "/error"
+  const redirectTo = next && next !== "/" ? next : "/links"
   return NextResponse.redirect(
     errorUrl + "?next=" + encodeURIComponent(redirectTo)
   )

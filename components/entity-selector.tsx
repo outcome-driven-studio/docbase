@@ -1,3 +1,4 @@
+import { Database } from "@/types/supabase"
 import { FormDescription } from "./ui/form"
 import {
   Select,
@@ -7,7 +8,11 @@ import {
   SelectValue,
 } from "./ui/select"
 import { Separator } from "./ui/separator"
-import { Entity } from "@/types/supabase"
+
+type Entity = (Database["public"]["Tables"]["funds"]["Row"] | Database["public"]["Tables"]["companies"]["Row"]) & {
+  type: "fund" | "company"
+  contact_id?: string
+}
 
 type EntitySelectorProps = {
   entities: Entity[];

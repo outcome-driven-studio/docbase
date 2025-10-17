@@ -1,11 +1,16 @@
 import Link from "next/link"
 import { createClient } from "@/utils/supabase/server"
 
-import { ViewerData } from "@/types/supabase"
 import { logger } from "@/lib/logger"
 import { Button } from "@/components/ui/button"
 import Analytics from "@/components/analytics"
 import { SignatureStatus } from "@/components/signature-status"
+
+type ViewerData = {
+  id: string
+  email: string
+  viewed_at: string
+}
 
 export default async function AnalyticsPage({
   params,

@@ -59,6 +59,8 @@ export async function POST(req: Request) {
       title: investor.title || null,
       messages: investor.messages || null,
       updated_at: investor.updated_at || null,
+      onboarding_completed: null,
+      storage_bucket_name: null,
     }
 
     const fundData: Database["public"]["Tables"]["funds"]["Row"] = {

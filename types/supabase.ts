@@ -1,77 +1,3 @@
-export type Entity = {
-  id: string
-  name: string | null
-  type: "fund" | "company"
-  street?: string | null
-  city_state_zip?: string | null
-  byline?: string | null
-  state_of_incorporation?: string | null
-  contact_id: string | null
-  contact_name?: string | null
-  contact_email?: string | null
-  contact_title?: string | null // Add this line
-}
-
-export type ViewerData = {
-  email: string
-  viewed_at: string
-}
-
-export type UserInvestment = {
-  id: string
-  purchase_amount: string | null
-  investment_type: string | null
-  valuation_cap: string | null
-  discount: string | null
-  date: string | null
-  founder: {
-    id: string
-    name: string | null
-    title: string | null
-    email: string | null
-    user_id: string | null // Add this line
-  } | null
-  company: {
-    id: string
-    name: string | null
-    street: string | null
-    city_state_zip: string | null
-    state_of_incorporation: string | null
-    contact_id: string | null
-  } | null
-  investor: {
-    id: string
-    name: string | null
-    title: string | null
-    email: string | null
-    user_id: string | null // Add this line
-  } | null
-  fund: {
-    id: string
-    name: string | null
-    byline: string | null
-    street: string | null
-    city_state_zip: string | null
-    contact_id: string | null
-  } | null
-  investor_contact_id: string | null
-  founder_contact_id: string | null
-  side_letter: {
-    id: string
-    side_letter_url: string | null
-    info_rights: boolean | null
-    pro_rata_rights: boolean | null
-    major_investor_rights: boolean | null
-    termination: boolean | null
-    miscellaneous: boolean | null
-  } | null
-  side_letter_id: string | null
-  safe_url: string | null
-  summary: string | null
-  created_by: string | null
-  created_at: string
-}
-
 export type Json =
   | string
   | number
@@ -81,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -91,10 +22,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
+          extensions?: Json
           operationName?: string
           query?: string
           variables?: Json
-          extensions?: Json
         }
         Returns: Json
       }
@@ -143,7 +74,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contacts"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       contact_groups: {
@@ -173,7 +104,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "groups"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       contacts: {
@@ -188,6 +119,7 @@ export type Database = {
           title: string | null
           updated_at: string | null
           user_id: string | null
+          workspace_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -200,6 +132,7 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
           user_id?: string | null
+          workspace_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -212,6 +145,7 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
           user_id?: string | null
+          workspace_id?: string | null
         }
         Relationships: [
           {
@@ -222,12 +156,12 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "contacts_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "contacts_workspace_id_fkey"
+            columns: ["workspace_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       domains: {
@@ -243,7 +177,7 @@ export type Database = {
           api_key?: string | null
           created_at?: string
           domain_name: string
-          id: string
+          id?: string
           sender_name?: string | null
           user_id: string
         }
@@ -255,22 +189,7 @@ export type Database = {
           sender_name?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "domains_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "domains_user_id_fkey1"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       funds: {
         Row: {
@@ -307,7 +226,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contacts"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       groups: {
@@ -317,6 +236,7 @@ export type Database = {
           created_by: string
           id: string
           name: string
+          workspace_id: string | null
         }
         Insert: {
           color?: string | null
@@ -324,6 +244,7 @@ export type Database = {
           created_by: string
           id?: string
           name: string
+          workspace_id?: string | null
         }
         Update: {
           color?: string | null
@@ -331,6 +252,7 @@ export type Database = {
           created_by?: string
           id?: string
           name?: string
+          workspace_id?: string | null
         }
         Relationships: [
           {
@@ -339,7 +261,14 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
+          {
+            foreignKeyName: "groups_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
         ]
       }
       investments: {
@@ -396,6 +325,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "investments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "investments_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -410,6 +346,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "investments_fund_id_fkey"
+            columns: ["fund_id"]
+            isOneToOne: false
+            referencedRelation: "funds"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "investments_investor_contact_id_fkey"
             columns: ["investor_contact_id"]
             isOneToOne: false
@@ -420,23 +363,9 @@ export type Database = {
             foreignKeyName: "investments_side_letter_id_fkey"
             columns: ["side_letter_id"]
             isOneToOne: false
-            referencedRelation: "side_letters"
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "public_investments_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_investments_fund_id_fkey"
-            columns: ["fund_id"]
-            isOneToOne: false
-            referencedRelation: "funds"
-            referencedColumns: ["id"]
-          }
         ]
       }
       links: {
@@ -446,9 +375,17 @@ export type Database = {
           created_by: string | null
           expires: string | null
           filename: string | null
+          groups: string[] | null
           id: string
+          name: string | null
           password: string | null
+          require_email: boolean | null
+          require_signature: boolean | null
+          send_notifications: boolean | null
+          signature_instructions: string | null
+          updated_at: string | null
           url: string | null
+          workspace_id: string | null
         }
         Insert: {
           allow_download?: boolean | null
@@ -456,9 +393,17 @@ export type Database = {
           created_by?: string | null
           expires?: string | null
           filename?: string | null
+          groups?: string[] | null
           id?: string
+          name?: string | null
           password?: string | null
+          require_email?: boolean | null
+          require_signature?: boolean | null
+          send_notifications?: boolean | null
+          signature_instructions?: string | null
+          updated_at?: string | null
           url?: string | null
+          workspace_id?: string | null
         }
         Update: {
           allow_download?: boolean | null
@@ -466,9 +411,17 @@ export type Database = {
           created_by?: string | null
           expires?: string | null
           filename?: string | null
+          groups?: string[] | null
           id?: string
+          name?: string | null
           password?: string | null
+          require_email?: boolean | null
+          require_signature?: boolean | null
+          send_notifications?: boolean | null
+          signature_instructions?: string | null
+          updated_at?: string | null
           url?: string | null
+          workspace_id?: string | null
         }
         Relationships: [
           {
@@ -477,79 +430,161 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
+          {
+            foreignKeyName: "links_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
         ]
       }
       messages: {
         Row: {
-          body: string
           created_at: string
+          created_by: string
+          from: string
           id: string
-          recipient: string
-          sender_id: string
-          status: string
+          link_id: string | null
+          message: string
           subject: string
+          to: string
         }
         Insert: {
-          body: string
           created_at?: string
+          created_by: string
+          from: string
           id?: string
-          recipient: string
-          sender_id: string
-          status?: string
+          link_id?: string | null
+          message: string
           subject: string
+          to: string
         }
         Update: {
-          body?: string
           created_at?: string
+          created_by?: string
+          from?: string
           id?: string
-          recipient?: string
-          sender_id?: string
-          status?: string
+          link_id?: string | null
+          message?: string
           subject?: string
+          to?: string
         }
         Relationships: [
           {
-            foreignKeyName: "messages_sender_id_fkey"
-            columns: ["sender_id"]
+            foreignKeyName: "messages_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
+          {
+            foreignKeyName: "messages_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "links"
+            referencedColumns: ["id"]
+          },
         ]
       }
-      side_letters: {
+      signature_events: {
         Row: {
-          created_at: string
+          created_at: string | null
+          event_type: string
           id: string
-          info_rights: boolean | null
-          major_investor_rights: boolean | null
-          miscellaneous: boolean | null
-          pro_rata_rights: boolean | null
-          side_letter_url: string | null
-          termination: boolean | null
+          ip_address: unknown | null
+          link_id: string
+          metadata: Json | null
+          signature_id: string | null
+          signer_email: string | null
+          user_agent: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
+          event_type: string
           id?: string
-          info_rights?: boolean | null
-          major_investor_rights?: boolean | null
-          miscellaneous?: boolean | null
-          pro_rata_rights?: boolean | null
-          side_letter_url?: string | null
-          termination?: boolean | null
+          ip_address?: unknown | null
+          link_id: string
+          metadata?: Json | null
+          signature_id?: string | null
+          signer_email?: string | null
+          user_agent?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
+          event_type?: string
           id?: string
-          info_rights?: boolean | null
-          major_investor_rights?: boolean | null
-          miscellaneous?: boolean | null
-          pro_rata_rights?: boolean | null
-          side_letter_url?: string | null
-          termination?: boolean | null
+          ip_address?: unknown | null
+          link_id?: string
+          metadata?: Json | null
+          signature_id?: string | null
+          signer_email?: string | null
+          user_agent?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "signature_events_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_events_signature_id_fkey"
+            columns: ["signature_id"]
+            isOneToOne: false
+            referencedRelation: "signatures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signatures: {
+        Row: {
+          consent_accepted: boolean
+          id: string
+          ip_address: unknown | null
+          link_id: string
+          signature_data: string
+          signature_type: string
+          signed_at: string | null
+          signer_email: string
+          signer_name: string
+          user_agent: string | null
+        }
+        Insert: {
+          consent_accepted?: boolean
+          id?: string
+          ip_address?: unknown | null
+          link_id: string
+          signature_data: string
+          signature_type: string
+          signed_at?: string | null
+          signer_email: string
+          signer_name: string
+          user_agent?: string | null
+        }
+        Update: {
+          consent_accepted?: boolean
+          id?: string
+          ip_address?: unknown | null
+          link_id?: string
+          signature_data?: string
+          signature_type?: string
+          signed_at?: string | null
+          signer_email?: string
+          signer_name?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signatures_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "links"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users: {
         Row: {
@@ -558,15 +593,19 @@ export type Database = {
           id: string
           messages: string[] | null
           name: string | null
+          onboarding_completed: boolean | null
+          storage_bucket_name: string | null
           title: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string
           email?: string | null
-          id?: string
+          id: string
           messages?: string[] | null
           name?: string | null
+          onboarding_completed?: boolean | null
+          storage_bucket_name?: string | null
           title?: string | null
           updated_at?: string | null
         }
@@ -576,6 +615,8 @@ export type Database = {
           id?: string
           messages?: string[] | null
           name?: string | null
+          onboarding_completed?: boolean | null
+          storage_bucket_name?: string | null
           title?: string | null
           updated_at?: string | null
         }
@@ -610,7 +651,142 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "links"
             referencedColumns: ["id"]
-          }
+          },
+        ]
+      }
+      workspace_invites: {
+        Row: {
+          accepted: boolean | null
+          created_at: string | null
+          email: string
+          expires_at: string | null
+          id: string
+          invited_by: string
+          role: string
+          workspace_id: string
+        }
+        Insert: {
+          accepted?: boolean | null
+          created_at?: string | null
+          email: string
+          expires_at?: string | null
+          id?: string
+          invited_by: string
+          role: string
+          workspace_id: string
+        }
+        Update: {
+          accepted?: boolean | null
+          created_at?: string | null
+          email?: string
+          expires_at?: string | null
+          id?: string
+          invited_by?: string
+          role?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_invites_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_invites_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_members: {
+        Row: {
+          accepted_at: string | null
+          id: string
+          invited_at: string | null
+          invited_by: string | null
+          role: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          role: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          role?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_members_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_members_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspaces: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          id: string
+          name: string
+          settings: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          id?: string
+          name: string
+          settings?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          name?: string
+          settings?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspaces_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
@@ -618,195 +794,116 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      append_message_to_user: {
-        Args: {
-          user_id: string
-          message_id: string
-        }
-        Returns: undefined
+      check_signature_status: {
+        Args: { link_id_arg: string; viewer_email_arg: string }
+        Returns: {
+          is_signed: boolean
+          requires_signature: boolean
+          signature_id: string
+        }[]
       }
-      checkIfUser: {
-        Args: {
-          given_mail: string
-        }
+      checkifuser: {
+        Args: { given_mail: string }
         Returns: boolean
       }
       delete_link: {
-        Args: {
-          link_id: string
-          user_id: string
-        }
+        Args: { link_id: string; user_id: string }
         Returns: undefined
       }
       get_link_analytics: {
-        Args: {
-          link_id_arg: string
-        }
+        Args: { link_id_arg: string }
         Returns: {
           all_viewers: number
-          unique_viewers: number
           all_views: Json
+          unique_viewers: number
         }[]
       }
       get_link_by_id: {
-        Args: {
-          link_id: string
-        }
+        Args: { link_id: string }
         Returns: {
-          id: string
+          allow_download: boolean
           created_at: string
-          url: string
-          password: string
+          created_by: string
           expires: string
           filename: string
-          created_by: string
+          groups: string[]
+          id: string
+          name: string
+          password: string
+          require_email: boolean
+          send_notifications: boolean
+          updated_at: string
+          url: string
         }[]
       }
-      get_user_documents: {
-        Args: {
-          id_arg: string
-        }
+      get_link_signatures: {
+        Args: { link_id_arg: string }
         Returns: {
+          consent_accepted: boolean
           id: string
-          document_type: string
-          document_url: string
-          document_name: string
-          created_at: string
-        }[]
-      }
-      get_user_investments: {
-        Args: {
-          id_arg: string
-        }
-        Returns: {
-          id: string
-          purchase_amount: string
-          investment_type: string
-          valuation_cap: string
-          discount: string
-          date: string
-          founder: Json
-          company: Json
-          investor: Json
-          fund: Json
-          side_letter: Json
-          side_letter_id: string
-          safe_url: string
-          summary: string
-          created_by: string
-          created_at: string
-        }[]
-      }
-      get_user_investments_by_id: {
-        Args: {
-          id_arg: string
-          investment_id_arg: string
-        }
-        Returns: {
-          id: string
-          purchase_amount: string
-          investment_type: string
-          valuation_cap: string
-          discount: string
-          date: string
-          founder: Json
-          company: Json
-          investor: Json
-          fund: Json
-          side_letter: Json
-          side_letter_id: string
-          safe_url: string
-          summary: string
-          created_by: string
-          created_at: string
-        }[]
-      }
-      get_user_links: {
-        Args: {
-          id_arg: string
-        }
-        Returns: {
-          created_at: string | null
-          created_by: string | null
-          expires: string | null
-          filename: string | null
-          id: string
-          password: string | null
-          url: string | null
+          signature_type: string
+          signed_at: string
+          signer_email: string
+          signer_name: string
         }[]
       }
       get_user_links_with_views: {
-        Args: {
-          id_arg: string
-        }
+        Args: { id_arg: string }
         Returns: {
-          id: string
+          allow_download: boolean
           created_at: string
           created_by: string
-          url: string
-          password: string
           expires: string
           filename: string
-          view_count: number
+          groups: string[]
+          id: string
+          name: string
+          password: string
+          require_email: boolean
+          send_notifications: boolean
+          updated_at: string
+          url: string
+          views: number
         }[]
       }
-      select_investment_entities: {
-        Args: {
-          investment_id: string
-        }
+      get_user_workspaces: {
+        Args: { user_id_arg: string }
         Returns: {
-          fund_name: string
-          company_name: string
-          investor_name: string
-          founder_name: string
+          created_at: string
+          id: string
+          member_count: number
+          name: string
+          role: string
         }[]
       }
       select_link: {
-        Args: {
-          link_id: string
-        }
+        Args: { link_id: string }
         Returns: {
-          id: string
+          allow_download: boolean
           created_at: string
-          url: string
-          password: string
+          created_by: string
+          creator_name: string
           expires: string
           filename: string
-          created_by: string
+          groups: string[]
+          id: string
+          name: string
+          password: string
+          require_email: boolean
+          require_signature: boolean
+          send_notifications: boolean
+          signature_instructions: string
+          updated_at: string
+          url: string
         }[]
       }
-      update_link:
-        | {
-            Args: {
-              link_id: string
-              auth_id: string
-              url_arg: string
-              password_arg: string
-              expires_arg: string
-              filename_arg: string
-            }
-            Returns: undefined
-          }
-        | {
-            Args: {
-              link_id: string
-              user_id: string
-              url_arg: string
-              password_arg: string
-              expires_arg: string
-              filename_arg: string
-            }
-            Returns: undefined
-          }
-      upsert_link_data: {
+      update_link: {
         Args: {
-          id_arg: string
-          filename_arg: string
-          url_arg: string
-          created_by_arg: string
-          created_at_arg: string
-          password_arg: string
           expires_arg: string
+          filename_arg: string
+          link_id: string
+          password_arg: string
+          url_arg: string
           user_id: string
         }
         Returns: undefined
@@ -832,6 +929,7 @@ export type Database = {
           owner: string | null
           owner_id: string | null
           public: boolean | null
+          type: Database["storage"]["Enums"]["buckettype"]
           updated_at: string | null
         }
         Insert: {
@@ -844,6 +942,7 @@ export type Database = {
           owner?: string | null
           owner_id?: string | null
           public?: boolean | null
+          type?: Database["storage"]["Enums"]["buckettype"]
           updated_at?: string | null
         }
         Update: {
@@ -856,7 +955,32 @@ export type Database = {
           owner?: string | null
           owner_id?: string | null
           public?: boolean | null
+          type?: Database["storage"]["Enums"]["buckettype"]
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      buckets_analytics: {
+        Row: {
+          created_at: string
+          format: string
+          id: string
+          type: Database["storage"]["Enums"]["buckettype"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          format?: string
+          id: string
+          type?: Database["storage"]["Enums"]["buckettype"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          format?: string
+          id?: string
+          type?: Database["storage"]["Enums"]["buckettype"]
+          updated_at?: string
         }
         Relationships: []
       }
@@ -887,6 +1011,7 @@ export type Database = {
           created_at: string | null
           id: string
           last_accessed_at: string | null
+          level: number | null
           metadata: Json | null
           name: string | null
           owner: string | null
@@ -901,6 +1026,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           last_accessed_at?: string | null
+          level?: number | null
           metadata?: Json | null
           name?: string | null
           owner?: string | null
@@ -915,6 +1041,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           last_accessed_at?: string | null
+          level?: number | null
           metadata?: Json | null
           name?: string | null
           owner?: string | null
@@ -931,7 +1058,39 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "buckets"
             referencedColumns: ["id"]
-          }
+          },
+        ]
+      }
+      prefixes: {
+        Row: {
+          bucket_id: string
+          created_at: string | null
+          level: number
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          bucket_id: string
+          created_at?: string | null
+          level?: number
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          bucket_id?: string
+          created_at?: string | null
+          level?: number
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prefixes_bucketId_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
         ]
       }
       s3_multipart_uploads: {
@@ -975,7 +1134,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "buckets"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       s3_multipart_uploads_parts: {
@@ -1029,7 +1188,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "s3_multipart_uploads"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
     }
@@ -1037,70 +1196,87 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      can_insert_object: {
-        Args: {
-          bucketid: string
-          name: string
-          owner: string
-          metadata: Json
-        }
+      add_prefixes: {
+        Args: { _bucket_id: string; _name: string }
         Returns: undefined
       }
+      can_insert_object: {
+        Args: { bucketid: string; metadata: Json; name: string; owner: string }
+        Returns: undefined
+      }
+      delete_leaf_prefixes: {
+        Args: { bucket_ids: string[]; names: string[] }
+        Returns: undefined
+      }
+      delete_prefix: {
+        Args: { _bucket_id: string; _name: string }
+        Returns: boolean
+      }
       extension: {
-        Args: {
-          name: string
-        }
+        Args: { name: string }
         Returns: string
       }
       filename: {
-        Args: {
-          name: string
-        }
+        Args: { name: string }
         Returns: string
       }
       foldername: {
-        Args: {
-          name: string
-        }
+        Args: { name: string }
+        Returns: string[]
+      }
+      get_level: {
+        Args: { name: string }
+        Returns: number
+      }
+      get_prefix: {
+        Args: { name: string }
+        Returns: string
+      }
+      get_prefixes: {
+        Args: { name: string }
         Returns: string[]
       }
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>
         Returns: {
-          size: number
           bucket_id: string
+          size: number
         }[]
       }
       list_multipart_uploads_with_delimiter: {
         Args: {
           bucket_id: string
-          prefix_param: string
           delimiter_param: string
           max_keys?: number
           next_key_token?: string
           next_upload_token?: string
+          prefix_param: string
         }
         Returns: {
-          key: string
-          id: string
           created_at: string
+          id: string
+          key: string
         }[]
       }
       list_objects_with_delimiter: {
         Args: {
           bucket_id: string
-          prefix_param: string
           delimiter_param: string
           max_keys?: number
-          start_after?: string
           next_token?: string
+          prefix_param: string
+          start_after?: string
         }
         Returns: {
-          name: string
           id: string
           metadata: Json
+          name: string
           updated_at: string
         }[]
+      }
+      lock_top_prefixes: {
+        Args: { bucket_ids: string[]; names: string[] }
+        Returns: undefined
       }
       operation: {
         Args: Record<PropertyKey, never>
@@ -1108,27 +1284,88 @@ export type Database = {
       }
       search: {
         Args: {
-          prefix: string
           bucketname: string
-          limits?: number
           levels?: number
+          limits?: number
           offsets?: number
+          prefix: string
           search?: string
           sortcolumn?: string
           sortorder?: string
         }
         Returns: {
-          name: string
-          id: string
-          updated_at: string
           created_at: string
+          id: string
           last_accessed_at: string
           metadata: Json
+          name: string
+          updated_at: string
+        }[]
+      }
+      search_legacy_v1: {
+        Args: {
+          bucketname: string
+          levels?: number
+          limits?: number
+          offsets?: number
+          prefix: string
+          search?: string
+          sortcolumn?: string
+          sortorder?: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          last_accessed_at: string
+          metadata: Json
+          name: string
+          updated_at: string
+        }[]
+      }
+      search_v1_optimised: {
+        Args: {
+          bucketname: string
+          levels?: number
+          limits?: number
+          offsets?: number
+          prefix: string
+          search?: string
+          sortcolumn?: string
+          sortorder?: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          last_accessed_at: string
+          metadata: Json
+          name: string
+          updated_at: string
+        }[]
+      }
+      search_v2: {
+        Args: {
+          bucket_name: string
+          levels?: number
+          limits?: number
+          prefix: string
+          sort_column?: string
+          sort_column_after?: string
+          sort_order?: string
+          start_after?: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          key: string
+          last_accessed_at: string
+          metadata: Json
+          name: string
+          updated_at: string
         }[]
       }
     }
     Enums: {
-      [_ in never]: never
+      buckettype: "STANDARD" | "ANALYTICS"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1136,84 +1373,133 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-      PublicSchema["Views"])
-  ? (PublicSchema["Tables"] &
-      PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
     : never
-  : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I
-    }
-    ? I
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
     : never
-  : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U
-    }
-    ? U
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
     : never
-  : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
-    | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-  ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-  : never
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {},
+  },
+  storage: {
+    Enums: {
+      buckettype: ["STANDARD", "ANALYTICS"],
+    },
+  },
+} as const

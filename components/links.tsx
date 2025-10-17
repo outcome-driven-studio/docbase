@@ -206,7 +206,7 @@ export function Links({ links, account }: { links: Link[]; account: User }) {
                         <Link href={`/links/edit/${link.id}`}>Edit</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleDeleteClick(link.id, link.filename)}
+                        onClick={() => handleDeleteClick(link.id, link.filename || "document")}
                       >
                         Delete
                       </DropdownMenuItem>

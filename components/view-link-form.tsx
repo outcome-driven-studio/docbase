@@ -26,9 +26,7 @@ const linkFormSchema = z.object({
   password: z.string().optional(),
 })
 
-type Link = Database["public"]["Tables"]["links"]["Row"] & {
-  require_signature?: boolean
-}
+type Link = Database["public"]["Tables"]["links"]["Row"]
 type LinkFormValues = z.infer<typeof linkFormSchema>
 type User = Database["public"]["Tables"]["users"]["Row"]
 

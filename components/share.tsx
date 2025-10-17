@@ -4,7 +4,12 @@ import { useState } from "react"
 import { createClient } from "@/utils/supabase/client"
 import { useForm } from "react-hook-form"
 
-import { Database, UserInvestment } from "@/types/supabase"
+import { Database } from "@/types/supabase"
+
+type UserInvestment = Database["public"]["Tables"]["investments"]["Row"] & {
+  investor?: Database["public"]["Tables"]["users"]["Row"] | null
+  fund?: Database["public"]["Tables"]["funds"]["Row"] | null
+}
 
 import { Icons } from "./icons"
 import { Button } from "./ui/button"

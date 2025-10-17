@@ -10,10 +10,7 @@ import SecurePDFViewer from "@/components/secure-pdf-viewer"
 import { SignaturePad } from "@/components/signature-pad"
 import ViewLinkForm from "@/components/view-link-form"
 
-type Link = Database["public"]["Tables"]["links"]["Row"] & {
-  require_signature?: boolean
-  signature_instructions?: string | null
-}
+type Link = Database["public"]["Tables"]["links"]["Row"]
 type User = Database["public"]["Tables"]["users"]["Row"]
 
 export default function ViewLinkPage({
