@@ -9,6 +9,7 @@ import { useTheme } from "next-themes"
 import { mainNavItems } from "@/config/main-nav"
 import { menuItems } from "@/config/user-nav"
 import { clientLogger } from "@/lib/client-logger"
+import { useKeyboardShortcuts } from "@/contexts/keyboard-shortcuts-context"
 
 import {
   CommandDialog,
@@ -36,6 +37,7 @@ export function CommandMenu() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const { theme, setTheme } = useTheme()
+  const { enabled: shortcutsEnabled } = useKeyboardShortcuts()
 
   const navigateAndCloseDialog = useCallback(
     (path: string) => {
@@ -55,6 +57,7 @@ export function CommandMenu() {
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
+      if (!shortcutsEnabled) return
       if (!isTyping()) {
         if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
           e.preventDefault()
@@ -82,7 +85,7 @@ export function CommandMenu() {
 
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
-  }, [router, theme, setTheme, navigateAndCloseDialog, handleSignOut])
+  }, [router, theme, setTheme, navigateAndCloseDialog, handleSignOut, shortcutsEnabled])
 
   const handleItemClick = (item: any) => {
     if (item.href) {

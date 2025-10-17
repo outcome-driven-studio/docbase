@@ -32,12 +32,13 @@ export async function login(formData: LoginFormData) {
   if (data.user) {
     const { data: userData } = await supabase
       .from("users")
-      .select("onboarding_completed")
+      .select("onboarding_completed, name, title")
       .eq("id", data.user.id)
       .single()
 
-    // If onboarding not completed, send to account page
-    if (userData && !userData.onboarding_completed) {
+    // If onboarding not completed AND profile is not filled, send to account page
+    // Users with filled profiles (name or title) should go to /links
+    if (userData && !userData.onboarding_completed && !userData.name && !userData.title) {
       revalidatePath("/", "layout")
       redirect("/account")
     }

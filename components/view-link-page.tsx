@@ -10,10 +10,7 @@ import SecurePDFViewer from "@/components/secure-pdf-viewer"
 import { SignaturePad } from "@/components/signature-pad"
 import ViewLinkForm from "@/components/view-link-form"
 
-type Link = Database["public"]["Tables"]["links"]["Row"] & {
-  require_signature?: boolean
-  signature_instructions?: string | null
-}
+type Link = Database["public"]["Tables"]["links"]["Row"]
 type User = Database["public"]["Tables"]["users"]["Row"]
 
 export default function ViewLinkPage({
@@ -102,10 +99,35 @@ export default function ViewLinkPage({
       setIsSigned(true)
       setShowSignatureModal(false)
 
+      // Send notification to document creator (or all parties if counter-signing)
+      try {
+        await fetch("/api/notify-signature", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            linkId: link.id,
+            signerEmail: account.email,
+            signerName: account.name || account.email,
+          }),
+        })
+      } catch (emailError) {
+        console.error("Failed to send notification email:", emailError)
+        // Don't fail the signature process if email fails
+      }
+
+      // Check if all parties have signed (for completion notification)
+      const { data: allSignatures } = await supabase
+        .from("signatures")
+        .select("signer_email")
+        .eq("link_id", link.id)
+
+      const isFullySigned = allSignatures && allSignatures.length >= 2
+
       toast({
         title: "Document signed!",
-        description:
-          "Your signature has been recorded. You can now view the document.",
+        description: isFullySigned
+          ? "All parties have signed. Both parties will be notified."
+          : "Your signature has been recorded. The other party has been notified.",
       })
     } catch (error: any) {
       toast({
@@ -116,8 +138,13 @@ export default function ViewLinkPage({
     }
   }
 
-  // Show document only if authenticated AND (signed OR signature not required)
-  if (isAuthenticated && (isSigned || !link.require_signature)) {
+  // For view-only documents: Show document if authenticated OR if no full auth required
+  // For signature documents: Show document only if authenticated AND signed
+  const canViewDocument =
+    (!link.require_signature && isAuthenticated) || // View-only, email captured
+    (link.require_signature && isAuthenticated && isSigned) // Signature doc, signed
+
+  if (canViewDocument) {
     return (
       <div className="w-full">
         <SecurePDFViewer

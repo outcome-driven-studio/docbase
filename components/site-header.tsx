@@ -7,6 +7,7 @@ import { siteConfig } from "@/config/site"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { KeyboardShortcutsToggle } from "@/components/keyboard-shortcuts-toggle"
 
 import { MainNav } from "./main-nav"
 import { UserNav } from "./user-nav"
@@ -64,6 +65,7 @@ export function SiteHeader({ account }: { account: User | null }) {
               <span className="sr-only">GitHub</span>
             </div>
           </Link>
+          {account && <KeyboardShortcutsToggle />}
           <ThemeToggle />
           {account ? (
             <UserNav account={account} />

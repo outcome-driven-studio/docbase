@@ -3,7 +3,12 @@
 import { Viewers } from "./viewers"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Activity, Users } from "lucide-react"
-import { ViewerData } from "@/types/supabase"
+
+type ViewerData = {
+  id: string
+  email: string
+  viewed_at: string
+}
 
 export default function Analytics({ allViewers, uniqueViewers, allViews }: { allViewers: number, uniqueViewers: number, allViews: ViewerData[] }) {
   return (

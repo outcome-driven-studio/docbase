@@ -1,7 +1,12 @@
 "use client"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { ViewerData } from "@/types/supabase"
+
+type ViewerData = {
+  id: string
+  email: string
+  viewed_at: string
+}
 
 export function Viewers({ allViews }: { allViews: ViewerData[] }) {
   return (

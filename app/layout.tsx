@@ -13,6 +13,7 @@ import { SiteHeader } from "@/components/site-header"
 import { StorageBanner } from "@/components/storage-banner"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 import { ThemeProvider } from "@/components/theme-provider"
+import { KeyboardShortcutsProvider } from "@/contexts/keyboard-shortcuts-context"
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -71,15 +72,17 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           )}
         >
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <div className="relative flex min-h-dvh flex-col">
-              <SiteHeader account={account} />
-              {account && <StorageBanner />}
-              <Toaster />
-              {children}
-              <CommandMenu />
-              <div className="flex-1"></div>
-            </div>
-            <TailwindIndicator />
+            <KeyboardShortcutsProvider>
+              <div className="relative flex min-h-dvh flex-col">
+                <SiteHeader account={account} />
+                {account && <StorageBanner />}
+                <Toaster />
+                {children}
+                <CommandMenu />
+                <div className="flex-1"></div>
+              </div>
+              <TailwindIndicator />
+            </KeyboardShortcutsProvider>
           </ThemeProvider>
         </body>
       </html>

@@ -10,7 +10,12 @@ import { useDropzone } from "react-dropzone"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
-import { Database, Entity } from "@/types/supabase"
+import { Database } from "@/types/supabase"
+
+type Entity = (Database["public"]["Tables"]["funds"]["Row"] | Database["public"]["Tables"]["companies"]["Row"]) & {
+  type: "fund" | "company"
+  contact_id?: string
+}
 import { clientLogger } from "@/lib/client-logger"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -140,10 +145,10 @@ export default function AccountForm({ account }: { account: User | null }) {
         ...form.getValues(),
         type: firstEntity.type,
         entity_name: firstEntity.name || "",
-        byline: firstEntity.byline || "",
+        byline: firstEntity.type === "fund" && "byline" in firstEntity ? firstEntity.byline || "" : "",
         street: firstEntity.street || "",
         city_state_zip: firstEntity.city_state_zip || "",
-        state_of_incorporation: firstEntity.state_of_incorporation || "",
+        state_of_incorporation: firstEntity.type === "company" && "state_of_incorporation" in firstEntity ? firstEntity.state_of_incorporation || "" : "",
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -362,13 +367,9 @@ export default function AccountForm({ account }: { account: User | null }) {
         setEntities((prevEntities) => [
           ...prevEntities,
           {
-            id: newFund[0].id,
-            name: data.entity_name || null,
+            ...newFund[0],
             type: "fund" as const,
-            byline: data.byline || null,
-            street: data.street || null,
-            city_state_zip: data.city_state_zip || null,
-            contact_id: contactId,
+            contact_id: contactId || undefined,
           },
         ])
         setSelectedEntity(undefined)
@@ -454,13 +455,9 @@ export default function AccountForm({ account }: { account: User | null }) {
         setEntities((prevEntities) => [
           ...prevEntities,
           {
-            id: newCompany[0].id,
-            name: data.entity_name || null,
+            ...newCompany[0],
             type: "company" as const,
-            street: data.street || null,
-            city_state_zip: data.city_state_zip || null,
-            state_of_incorporation: data.state_of_incorporation || null,
-            contact_id: contactId,
+            contact_id: contactId || undefined,
           },
         ])
         setSelectedEntity(undefined)
@@ -562,11 +559,10 @@ export default function AccountForm({ account }: { account: User | null }) {
           ...form.getValues(),
           type: selectedEntityDetails.type,
           entity_name: selectedEntityDetails.name || "",
-          byline: selectedEntityDetails.byline || "",
+          byline: selectedEntityDetails.type === "fund" && "byline" in selectedEntityDetails ? selectedEntityDetails.byline || "" : "",
           street: selectedEntityDetails.street || "",
           city_state_zip: selectedEntityDetails.city_state_zip || "",
-          state_of_incorporation:
-            selectedEntityDetails.state_of_incorporation || "",
+          state_of_incorporation: selectedEntityDetails.type === "company" && "state_of_incorporation" in selectedEntityDetails ? selectedEntityDetails.state_of_incorporation || "" : "",
         })
       }
     }

@@ -43,28 +43,50 @@ export function WorkspaceSelector() {
         data: { user },
       } = await supabase.auth.getUser()
 
-      if (!user) return
+      if (!user) {
+        console.log("WorkspaceSelector: No user found")
+        return
+      }
+
+      console.log("WorkspaceSelector: Fetching workspaces for user:", user.id)
 
       const { data, error } = await supabase.rpc("get_user_workspaces", {
         user_id_arg: user.id,
       })
 
-      if (error) throw error
+      if (error) {
+        console.error("WorkspaceSelector: Error from RPC:", error)
+        throw error
+      }
+
+      console.log("WorkspaceSelector: Received data:", data)
 
       setWorkspaces(data || [])
 
       // Get current workspace from localStorage or use first one
       const savedWorkspaceId = localStorage.getItem("currentWorkspaceId")
-      const current = savedWorkspaceId
+      console.log("WorkspaceSelector: Saved workspace ID:", savedWorkspaceId)
+
+      let current = savedWorkspaceId
         ? data?.find((w: Workspace) => w.id === savedWorkspaceId)
-        : data?.[0]
+        : null
+
+      // If saved workspace not found, fall back to first one
+      if (!current && data && data.length > 0) {
+        current = data[0]
+        console.log(
+          "WorkspaceSelector: Saved workspace not found, using first workspace"
+        )
+      }
+
+      console.log("WorkspaceSelector: Current workspace:", current)
 
       if (current) {
         setCurrentWorkspace(current)
         localStorage.setItem("currentWorkspaceId", current.id)
       }
     } catch (error) {
-      console.error("Error fetching workspaces:", error)
+      console.error("WorkspaceSelector: Error fetching workspaces:", error)
     } finally {
       setLoading(false)
     }

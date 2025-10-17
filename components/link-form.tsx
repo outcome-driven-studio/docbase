@@ -37,6 +37,7 @@ const linkFormSchema = z
     protectWithPassword: z.boolean(),
     protectWithExpiration: z.boolean(),
     allowDownload: z.boolean(),
+    requireEmail: z.boolean(),
     requireSignature: z.boolean(),
     password: z.string().optional(),
     expires: z.date().nullable(),
@@ -95,6 +96,9 @@ export default function LinkForm({
   const [allowDownload, setAllowDownload] = useState<boolean>(
     link?.allow_download !== false
   )
+  const [requireEmail, setRequireEmail] = useState<boolean>(
+    link?.require_email !== false // Default to true
+  )
   const [requireSignature, setRequireSignature] = useState<boolean>(
     false // TODO: Get from link when we add the column
   )
@@ -105,6 +109,7 @@ export default function LinkForm({
       protectWithPassword: !!link?.password,
       protectWithExpiration: !!link?.expires,
       allowDownload: link?.allow_download !== false,
+      requireEmail: link?.require_email !== false, // Default to true
       requireSignature: false, // TODO: Get from link
       password: link?.password ? "********" : "",
       expires: link?.expires ? new Date(link.expires) : null,
@@ -217,10 +222,13 @@ export default function LinkForm({
             : null,
           filename_arg: data.filename,
         })
-        // Update allow_download separately since it's not in the RPC
+        // Update allow_download and require_email separately since they're not in the RPC
         await supabase
           .from("links")
-          .update({ allow_download: data.allowDownload })
+          .update({
+            allow_download: data.allowDownload,
+            require_email: data.requireEmail,
+          })
           .eq("id", link.id)
       } else {
         // Insert new link
@@ -233,6 +241,7 @@ export default function LinkForm({
             : null,
           filename: data.filename,
           allow_download: data.allowDownload,
+          require_email: data.requireEmail,
           require_signature: data.requireSignature,
           signature_instructions: data.signatureInstructions || null,
           created_by: account.id,
@@ -523,6 +532,31 @@ export default function LinkForm({
                   onCheckedChange={(checked) => {
                     setAllowDownload(checked)
                     form.setValue("allowDownload", checked)
+                  }}
+                />
+              </FormControl>
+            </div>
+            <FormMessage />
+          </FormItem>
+
+          <FormItem className="flex flex-col rounded-lg border p-4">
+            <div className="flex flex-row items-center justify-between">
+              <div className="grow space-y-0.5">
+                <FormLabel className="pr-2 text-base">
+                  Require Email 📧
+                </FormLabel>
+                <FormDescription className="pr-4">
+                  When enabled, viewers must enter their email to view (no
+                  authentication required). Perfect for collecting viewer data
+                  for pitch decks and one-pagers.
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={requireEmail}
+                  onCheckedChange={(checked) => {
+                    setRequireEmail(checked)
+                    form.setValue("requireEmail", checked)
                   }}
                 />
               </FormControl>
