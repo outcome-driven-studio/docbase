@@ -37,12 +37,6 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  // Default to /links instead of /account (signup explicitly sets /account)
-  const redirectTo = next && next !== "/" ? next : "/links"
-  const fullNextUrl = new URL(redirectTo, siteUrl)
-
-  console.log("Redirect URL:", fullNextUrl.href)
-
   // Handle PKCE flow (code-based)
   if (code) {
     const supabase = createClient()
@@ -54,6 +48,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error("Code exchange error:", error)
       const errorUrl = siteUrl + "/error"
+      const redirectTo = next && next !== "/" ? next : "/links"
       return NextResponse.redirect(
         errorUrl +
           "?next=" +
@@ -64,6 +59,28 @@ export async function GET(request: NextRequest) {
     }
 
     console.log("Code exchanged successfully, session established")
+
+    // Check if user has completed profile
+    const { data: { user } } = await supabase.auth.getUser()
+    let redirectTo = next && next !== "/" ? next : "/links"
+
+    if (user) {
+      const { data: userData } = await supabase
+        .from("users")
+        .select("name, title")
+        .eq("id", user.id)
+        .single()
+
+      // If user has filled profile (name or title), redirect to /links
+      // Otherwise, redirect to /account for onboarding
+      if (userData && (userData.name || userData.title)) {
+        redirectTo = "/links"
+      } else if (next === "/account" || next === "/" || !next) {
+        redirectTo = "/account"
+      }
+    }
+
+    const fullNextUrl = new URL(redirectTo, siteUrl)
     console.log("Redirecting to:", fullNextUrl.href)
     return NextResponse.redirect(fullNextUrl.href)
   }
@@ -82,6 +99,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error("Token verification error:", error)
       const errorUrl = siteUrl + "/error"
+      const redirectTo = next && next !== "/" ? next : "/links"
       return NextResponse.redirect(
         errorUrl +
           "?next=" +
@@ -97,6 +115,26 @@ export async function GET(request: NextRequest) {
     const { data: sessionData } = await supabase.auth.getSession()
     console.log("Session data:", sessionData?.session ? "present" : "missing")
 
+    // Check if user has completed profile
+    let redirectTo = next && next !== "/" ? next : "/links"
+
+    if (sessionData?.session?.user) {
+      const { data: userData } = await supabase
+        .from("users")
+        .select("name, title")
+        .eq("id", sessionData.session.user.id)
+        .single()
+
+      // If user has filled profile (name or title), redirect to /links
+      // Otherwise, redirect to /account for onboarding
+      if (userData && (userData.name || userData.title)) {
+        redirectTo = "/links"
+      } else if (next === "/account" || next === "/" || !next) {
+        redirectTo = "/account"
+      }
+    }
+
+    const fullNextUrl = new URL(redirectTo, siteUrl)
     console.log("Redirecting to:", fullNextUrl.href)
     return NextResponse.redirect(fullNextUrl.href)
   }

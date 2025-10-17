@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 
 import { Database } from "@/types/supabase"
+import { useKeyboardShortcuts } from "@/contexts/keyboard-shortcuts-context"
 import { clientLogger } from "@/lib/client-logger"
 import { useDomainCheck } from "@/hooks/use-domain-check"
 import {
@@ -75,6 +76,7 @@ export function ContactsTable({
 }) {
   const supabase = createClient()
   const router = useRouter()
+  const { enabled: shortcutsEnabled } = useKeyboardShortcuts()
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false)
   const [selectedContactEmail, setSelectedContactEmail] = useState("")
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -102,7 +104,7 @@ export function ContactsTable({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "n" && !isTyping()) {
+      if (shortcutsEnabled && e.key === "n" && !isTyping()) {
         e.preventDefault()
         setIsNewContactDialogOpen(true)
       }
@@ -110,7 +112,7 @@ export function ContactsTable({
 
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [])
+  }, [shortcutsEnabled])
 
   useEffect(() => {
     // Check if there's a contact ID in the URL

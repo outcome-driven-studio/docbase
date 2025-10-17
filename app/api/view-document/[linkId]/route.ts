@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/utils/supabase/server"
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server"
 
 import { logger } from "@/lib/logger"
 
@@ -11,17 +11,16 @@ export async function GET(
     const supabase = createClient()
     const linkId = params.linkId
 
-    // Get the authenticated user
+    // Get the authenticated user (may be null for unauthenticated viewers)
     const {
       data: { user },
     } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    // Use service role client to fetch link (allows reading link regardless of auth status)
+    const serviceSupabase = createServiceRoleClient()
 
     // Fetch the link using RPC (bypasses RLS with SECURITY DEFINER)
-    const { data: linkData, error: linkError } = await supabase
+    const { data: linkData, error: linkError } = await serviceSupabase
       .rpc("select_link", {
         link_id: linkId,
       })
@@ -40,6 +39,14 @@ export async function GET(
       return NextResponse.json({ error: "Link not found" }, { status: 404 })
     }
 
+    // For signature-required documents, enforce authentication
+    if (link.require_signature && !user) {
+      return NextResponse.json({ error: "Unauthorized - Signature required documents require authentication" }, { status: 401 })
+    }
+
+    // For view-only documents, allow unauthenticated access (viewer email already captured)
+    // No authentication check needed here
+
     // Check if link has expired
     if (link.expires) {
       const expirationDate = new Date(link.expires)
@@ -48,8 +55,8 @@ export async function GET(
       }
     }
 
-    // Download the file from Supabase storage
-    const { data: fileData, error: downloadError } = await supabase.storage
+    // Download the file from Supabase storage (use service role for unauthenticated access)
+    const { data: fileData, error: downloadError } = await serviceSupabase.storage
       .from("cube")
       .download(linkId)
 

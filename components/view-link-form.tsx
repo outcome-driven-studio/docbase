@@ -22,15 +22,13 @@ import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 
 const linkFormSchema = z.object({
-  email: z
-    .string({
-      required_error: "Please enter a valid email",
-    })
-    .email(),
+  email: z.string().email().optional(),
   password: z.string().optional(),
 })
 
-type Link = Database["public"]["Tables"]["links"]["Row"]
+type Link = Database["public"]["Tables"]["links"]["Row"] & {
+  require_signature?: boolean
+}
 type LinkFormValues = z.infer<typeof linkFormSchema>
 type User = Database["public"]["Tables"]["users"]["Row"]
 
@@ -55,11 +53,20 @@ export default function ViewLinkForm({
   const [progress, setProgress] = useState(0)
   const [showProgressBar, setShowProgressBar] = useState(false)
 
+  // Determine authentication mode
+  // For signature-required docs: ALWAYS require full authentication
+  // For view-only docs: lightweight email capture or no auth based on require_email
+  const requiresFullAuth = link.require_signature === true
+  const requiresEmail = link.require_email !== false // Default to true if not set
+
   useEffect(() => {
-    if (account && !passwordRequired) {
+    // Auto-grant access if:
+    // 1. User is authenticated and no password required, OR
+    // 2. No email required and no password required (open access)
+    if ((account && !passwordRequired) || (!requiresEmail && !passwordRequired)) {
       setShowProgressBar(true)
     }
-  }, [account, passwordRequired])
+  }, [account, passwordRequired, requiresEmail])
 
   useEffect(() => {
     if (showProgressBar) {
@@ -88,33 +95,9 @@ export default function ViewLinkForm({
 
   async function onSubmit(data: LinkFormValues) {
     try {
-      // Log viewer
-      const updates = {
-        link_id: link.id,
-        email: data.email,
-        viewed_at: new Date().toISOString(),
-      }
-      await supabase.from("viewers").insert(updates)
-
-      if (account) {
-        if (passwordRequired) {
-          // Check password
-          if (!data.password || !link.password) {
-            throw new Error("Password is required")
-          }
-
-          const isPasswordCorrect = bcrypt.compareSync(
-            data.password,
-            link.password
-          )
-          if (!isPasswordCorrect) {
-            throw new Error("Incorrect password")
-          }
-        }
-        // Password is correct or not required, show progress bar
-        setShowProgressBar(true)
-      } else {
-        // Send magic link for unauthenticated users
+      // For signature-required docs: ALWAYS require full authentication
+      if (requiresFullAuth && !account) {
+        // Send magic link for authentication
         const response = await fetch("/api/send-view-link", {
           method: "POST",
           headers: {
@@ -131,8 +114,65 @@ export default function ViewLinkForm({
 
         toast({
           title: "Magic link sent to " + data.email,
-          description: "Please click the link in your email to continue",
+          description:
+            "Please click the link in your email to authenticate and sign the document",
         })
+        return
+      }
+
+      // For view-only docs: lightweight email capture
+      if (!requiresFullAuth && requiresEmail && !account) {
+        // Just capture email and grant access (no magic link needed)
+        const response = await fetch("/api/capture-viewer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ linkId: link.id, email: data.email }),
+        })
+
+        const result = await response.json()
+
+        if (!response.ok) {
+          throw new Error(result.error || "Failed to capture email")
+        }
+
+        toast({
+          title: "Email captured",
+          description: "You can now view the document",
+        })
+
+        // Grant immediate access
+        setShowProgressBar(true)
+        return
+      }
+
+      // For authenticated users or no-email-required docs
+      if (account) {
+        // Log viewer
+        const updates = {
+          link_id: link.id,
+          email: data.email,
+          viewed_at: new Date().toISOString(),
+        }
+        await supabase.from("viewers").insert(updates)
+
+        if (passwordRequired) {
+          // Check password
+          if (!data.password || !link.password) {
+            throw new Error("Password is required")
+          }
+
+          const isPasswordCorrect = bcrypt.compareSync(
+            data.password,
+            link.password
+          )
+          if (!isPasswordCorrect) {
+            throw new Error("Incorrect password")
+          }
+        }
+        // Password is correct or not required, show progress bar
+        setShowProgressBar(true)
       }
     } catch (error: any) {
       clientLogger.error("Error in onSubmit", { error })
@@ -169,33 +209,38 @@ export default function ViewLinkForm({
     <div className="mx-auto w-full max-w-2xl">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="grow space-y-0.5">
-                  <FormLabel htmlFor="email" className="pr-2 text-base">
-                    Email
-                  </FormLabel>
-                  <FormDescription className="pr-4">
-                    {account
-                      ? "Your email address will only be shared with the document owner"
-                      : "Please enter your email to receive a magic link"}
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Input
-                    id="email"
-                    className="w-[200px]"
-                    {...field}
-                    autoComplete="off"
-                    disabled={!!account}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+          {(requiresEmail || requiresFullAuth || account) && (
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="grow space-y-0.5">
+                    <FormLabel htmlFor="email" className="pr-2 text-base">
+                      Email{requiresEmail || requiresFullAuth ? " *" : ""}
+                    </FormLabel>
+                    <FormDescription className="pr-4">
+                      {account
+                        ? "Your email address will only be shared with the document owner"
+                        : requiresFullAuth
+                          ? "Please enter your email to receive a magic link for authentication"
+                          : "Your email will be shared with the document owner for analytics"}
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Input
+                      id="email"
+                      className="w-[200px]"
+                      {...field}
+                      autoComplete="off"
+                      disabled={!!account}
+                      required={requiresEmail || requiresFullAuth}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          )}
           {passwordRequired && (
             <FormField
               control={form.control}
@@ -225,7 +270,11 @@ export default function ViewLinkForm({
           )}
           <div className="space-y-4">
             <Button type="submit" className="w-full">
-              {account ? "View Document" : "Send Magic Link"}
+              {account
+                ? "View Document"
+                : requiresFullAuth
+                  ? "Send Magic Link"
+                  : "View Document"}
             </Button>
           </div>
         </form>

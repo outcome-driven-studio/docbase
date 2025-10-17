@@ -8,6 +8,7 @@ import { createClient } from "@/utils/supabase/client"
 import { Mail, Plus, X } from "lucide-react"
 
 import { Database } from "@/types/supabase"
+import { useKeyboardShortcuts } from "@/contexts/keyboard-shortcuts-context"
 import { clientLogger } from "@/lib/client-logger"
 import { useDomainCheck } from "@/hooks/use-domain-check"
 import {
@@ -57,6 +58,7 @@ export function MessagesTable({
   account: User
   domain: Domain | null
 }) {
+  const { enabled: shortcutsEnabled } = useKeyboardShortcuts()
   const [isNewMessageDialogOpen, setIsNewMessageDialogOpen] = useState(false)
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null)
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null)
@@ -129,6 +131,7 @@ export function MessagesTable({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
+      if (!shortcutsEnabled) return
       if (event.key === "Escape" && selectedMessage) {
         setSelectedMessage(null)
         setSelectedIndex(null)
@@ -157,7 +160,7 @@ export function MessagesTable({
         setIsDeleteDialogOpen(true)
       }
     },
-    [selectedMessage, hoveredMessageId, messages]
+    [selectedMessage, hoveredMessageId, messages, shortcutsEnabled]
   )
 
   useEffect(() => {
@@ -190,7 +193,7 @@ export function MessagesTable({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "n" && !isTyping()) {
+      if (shortcutsEnabled && e.key === "n" && !isTyping()) {
         e.preventDefault()
         checkDomain(() => setIsNewMessageDialogOpen(true))
       }
@@ -198,7 +201,7 @@ export function MessagesTable({
 
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [checkDomain])
+  }, [checkDomain, shortcutsEnabled])
 
   return (
     <div className="flex h-screen overflow-hidden">

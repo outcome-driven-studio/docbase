@@ -7,6 +7,7 @@ import { createClient } from "@/utils/supabase/client"
 import { useTheme } from "next-themes"
 import { Moon, Sun } from "lucide-react"
 import { Database } from "@/types/supabase"
+import { useKeyboardShortcuts } from "@/contexts/keyboard-shortcuts-context"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -27,17 +28,18 @@ export function UserNav({ account }: { account: User }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const { theme, setTheme } = useTheme()
+  const { enabled: shortcutsEnabled } = useKeyboardShortcuts()
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "u") {
+      if (shortcutsEnabled && (e.metaKey || e.ctrlKey) && e.key === "u") {
         e.preventDefault()
         setOpen((open) => !open)
       }
     }
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
-  }, [])
+  }, [shortcutsEnabled])
 
   async function handleSignOut() {
     await supabase.auth.signOut()

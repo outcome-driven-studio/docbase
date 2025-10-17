@@ -5,6 +5,7 @@ import { Download, MenuIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
+import { useKeyboardShortcuts } from "@/contexts/keyboard-shortcuts-context"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -39,6 +40,7 @@ type Document = {
 }
 export function Documents({ documents }: { documents: Document[] }) {
   const router = useRouter()
+  const { enabled: shortcutsEnabled } = useKeyboardShortcuts()
   const getEditLink = (document: Document) => {
     const fileName = document.document_name.toLowerCase()
     if (fileName.includes("safe") || fileName.includes("side letter")) {
@@ -87,7 +89,7 @@ export function Documents({ documents }: { documents: Document[] }) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "n" && !isTyping()) {
+      if (shortcutsEnabled && e.key === "n" && !isTyping()) {
         e.preventDefault()
         router.push("/links/new")
       }
@@ -95,7 +97,7 @@ export function Documents({ documents }: { documents: Document[] }) {
 
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [router])
+  }, [router, shortcutsEnabled])
 
   return (
     <TooltipProvider>
