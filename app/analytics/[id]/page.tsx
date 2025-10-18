@@ -20,6 +20,7 @@ export default async function AnalyticsPage({
   const id = params.id
   const supabase = createClient()
 
+  // Fetch link analytics
   const { data, error } = await supabase.rpc("get_link_analytics", {
     link_id_arg: id,
   })
@@ -38,6 +39,13 @@ export default async function AnalyticsPage({
     )
   }
 
+  // Fetch link data to check if signatures are required
+  const { data: linkData, error: linkError } = await supabase.rpc("select_link", {
+    link_id: id,
+  })
+
+  const requireSignature = linkData?.[0]?.require_signature ?? false
+
   const allViewers = data?.[0]?.all_viewers ?? 0
   const uniqueViewers = data?.[0]?.unique_viewers ?? 0
   const allViews = (data?.[0]?.all_views ?? []) as ViewerData[]
@@ -45,12 +53,12 @@ export default async function AnalyticsPage({
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <h1 className="mb-6 text-center text-3xl font-bold">
-        Analytics & Signatures
+        {requireSignature ? "Analytics & Signatures" : "Link Analytics"}
       </h1>
 
       <div className="space-y-6">
-        {/* Signature Status */}
-        <SignatureStatus linkId={id} />
+        {/* Signature Status - only show if signatures are required */}
+        {requireSignature && <SignatureStatus linkId={id} />}
 
         {/* View Analytics */}
         <Analytics
