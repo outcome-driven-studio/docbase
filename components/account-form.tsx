@@ -68,6 +68,11 @@ export default function AccountForm({ account }: { account: User | null }) {
   const [showAdditionalFields, setShowAdditionalFields] = useState(false)
   const [signatureFile, setSignatureFile] = useState<File | null>(null)
   const [parsingSignature, setParsingSignature] = useState(false)
+  const [signatureImageFile, setSignatureImageFile] = useState<File | null>(null)
+  const [signatureImagePreview, setSignatureImagePreview] = useState<string | null>(
+    account?.signature_url || null
+  )
+  const [uploadingSignature, setUploadingSignature] = useState(false)
 
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
@@ -164,10 +169,34 @@ export default function AccountForm({ account }: { account: User | null }) {
     }
 
     try {
+      // Handle signature image upload if provided
+      let signatureUrl = account.signature_url
+      if (signatureImageFile) {
+        setUploadingSignature(true)
+        const signatureFileName = `${account.id}-signature-${Date.now()}`
+        const { error: signatureUploadError } = await supabase.storage
+          .from("cube")
+          .upload(signatureFileName, signatureImageFile, { upsert: true })
+
+        if (signatureUploadError) {
+          setUploadingSignature(false)
+          throw signatureUploadError
+        }
+
+        // Create signed URL for the signature (10 years expiration)
+        const { data: signatureSignedData } = await supabase.storage
+          .from("cube")
+          .createSignedUrl(signatureFileName, 10 * 365 * 24 * 60 * 60)
+
+        signatureUrl = signatureSignedData?.signedUrl || null
+        setUploadingSignature(false)
+      }
+
       const accountUpdates = {
         email: account.email,
         name: data.name,
         title: data.title,
+        signature_url: signatureUrl,
         updated_at: new Date(),
       }
 
@@ -713,6 +742,44 @@ export default function AccountForm({ account }: { account: User | null }) {
     }
   }
 
+  const onSignatureImageDrop = async (acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      const file = acceptedFiles[0]
+
+      // Check if it's an image
+      if (!file.type.startsWith("image/")) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload an image file (PNG, JPG, etc.)",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Check file size (2MB limit for signatures)
+      const maxSizeInBytes = 2 * 1024 * 1024 // 2MB
+      if (file.size > maxSizeInBytes) {
+        toast({
+          title: "File too large",
+          description: `Maximum signature size is 2MB. Your file is ${(
+            file.size /
+            (1024 * 1024)
+          ).toFixed(2)}MB`,
+          variant: "destructive",
+        })
+        return
+      }
+
+      setSignatureImageFile(file)
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file)
+      setSignatureImagePreview(previewUrl)
+      toast({
+        description: "Signature image selected. Click Save to upload.",
+      })
+    }
+  }
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
@@ -721,6 +788,17 @@ export default function AccountForm({ account }: { account: User | null }) {
     disabled: !(
       selectedEntity === "add-new-fund" || selectedEntity === "add-new-company"
     ),
+  })
+
+  const {
+    getRootProps: getSignatureRootProps,
+    getInputProps: getSignatureInputProps,
+    isDragActive: isSignatureDragActive,
+  } = useDropzone({
+    onDrop: onSignatureImageDrop,
+    accept: {
+      "image/*": [".png", ".jpg", ".jpeg", ".svg"],
+    },
   })
 
   return (
@@ -785,6 +863,75 @@ export default function AccountForm({ account }: { account: User | null }) {
                 </FormItem>
               )}
             />
+
+            {/* Personal Signature Upload */}
+            <div className="w-full space-y-2">
+              <FormLabel>Personal Signature</FormLabel>
+              <FormDescription>
+                Upload your handwritten signature to personalize shared documents
+              </FormDescription>
+              <div className="space-y-3">
+                {signatureImagePreview && (
+                  <div className="relative inline-block rounded-lg border border-gray-300 bg-white p-3">
+                    <img
+                      src={signatureImagePreview}
+                      alt="Signature preview"
+                      className="h-16 w-auto object-contain"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute -right-2 -top-2 size-6 rounded-full p-0"
+                      onClick={() => {
+                        setSignatureImageFile(null)
+                        setSignatureImagePreview(null)
+                        // Update the database to remove signature
+                        if (account) {
+                          supabase
+                            .from("users")
+                            .update({ signature_url: null })
+                            .eq("id", account.id)
+                            .then(() => {
+                              toast({
+                                description: "Signature removed",
+                              })
+                            })
+                        }
+                      }}
+                    >
+                      <Icons.trash className="size-3" />
+                    </Button>
+                  </div>
+                )}
+                <div
+                  {...getSignatureRootProps()}
+                  className={cn(
+                    "cursor-pointer rounded-lg border-2 border-dashed border-gray-300 p-4 text-center transition-colors hover:border-indigo-400",
+                    isSignatureDragActive && "border-indigo-500 bg-indigo-50",
+                    uploadingSignature && "pointer-events-none opacity-50"
+                  )}
+                >
+                  <input {...getSignatureInputProps()} />
+                  <div className="flex flex-col items-center gap-2">
+                    <Icons.signature className="size-8 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      {isSignatureDragActive
+                        ? "Drop your signature here"
+                        : uploadingSignature
+                        ? "Uploading..."
+                        : signatureImagePreview
+                        ? "Click or drag to replace signature"
+                        : "Click or drag to upload your signature"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      PNG, JPG, SVG up to 2MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="w-full space-y-4">
               <div className="w-full space-y-2">
                 <FormLabel>Signature Blocks</FormLabel>

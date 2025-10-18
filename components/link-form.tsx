@@ -6,7 +6,7 @@ import { createClient } from "@/utils/supabase/client"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as bcrypt from "bcryptjs"
 import { format } from "date-fns"
-import { CalendarIcon, Copy, ExternalLink, FileText } from "lucide-react"
+import { CalendarIcon, Copy, ExternalLink, FileText, ImageIcon, X } from "lucide-react"
 import { useDropzone } from "react-dropzone"
 import { useForm } from "react-hook-form"
 import { v4 as uuidv4 } from "uuid"
@@ -27,6 +27,15 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import { Switch } from "./ui/switch"
@@ -39,10 +48,17 @@ const linkFormSchema = z
     allowDownload: z.boolean(),
     requireEmail: z.boolean(),
     requireSignature: z.boolean(),
+    showCreatorSignature: z.boolean(),
     password: z.string().optional(),
     expires: z.date().nullable(),
     filename: z.string().min(1, "Filename is required"),
     signatureInstructions: z.string().optional(),
+    viewerPageHeading: z.string().optional(),
+    viewerPageSubheading: z.string().optional(),
+    viewerPageCoverLetter: z.string().optional(),
+    coverLetterFont: z.enum(["cursive", "arial", "times", "georgia", "mono"]).default("cursive"),
+    coverLetterColor: z.string().default("gray-800"),
+    displayMode: z.enum(["auto", "slideshow", "document"]).default("auto"),
   })
   .refine(
     (data) => {
@@ -86,6 +102,10 @@ export default function LinkForm({
   const supabase = createClient()
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(
+    link?.viewer_page_logo_url || null
+  )
   const [isUploading, setIsUploading] = useState<boolean>(false)
   const [protectWithPassword, setProtectWithPassword] = useState<boolean>(
     !!link?.password
@@ -102,6 +122,9 @@ export default function LinkForm({
   const [requireSignature, setRequireSignature] = useState<boolean>(
     false // TODO: Get from link when we add the column
   )
+  const [showCreatorSignature, setShowCreatorSignature] = useState<boolean>(
+    link?.show_creator_signature || false
+  )
 
   const form = useForm<LinkFormValues>({
     resolver: zodResolver(linkFormSchema),
@@ -110,11 +133,18 @@ export default function LinkForm({
       protectWithExpiration: !!link?.expires,
       allowDownload: link?.allow_download !== false,
       requireEmail: link?.require_email !== false, // Default to true
-      requireSignature: false, // TODO: Get from link
+      requireSignature: link?.require_signature || false,
+      showCreatorSignature: link?.show_creator_signature || false,
       password: link?.password ? "********" : "",
       expires: link?.expires ? new Date(link.expires) : null,
       filename: link?.filename || "",
-      signatureInstructions: "", // TODO: Get from link
+      signatureInstructions: link?.signature_instructions || "",
+      viewerPageHeading: link?.viewer_page_heading || "",
+      viewerPageSubheading: link?.viewer_page_subheading || "",
+      viewerPageCoverLetter: link?.viewer_page_cover_letter || "",
+      coverLetterFont: (link?.cover_letter_font as "cursive" | "arial" | "times" | "georgia" | "mono") || "cursive",
+      coverLetterColor: link?.cover_letter_color || "gray-800",
+      displayMode: (link?.display_mode as "auto" | "slideshow" | "document") || "auto",
     },
   })
   const [expiresCalendarOpen, setExpiresCalendarOpen] = useState(false)
@@ -192,6 +222,33 @@ export default function LinkForm({
         setIsUploading(false)
       }
 
+      // Upload logo if provided
+      let logoUrl = link?.viewer_page_logo_url || null
+      if (logoFile) {
+        setIsUploading(true)
+        const logoFileName = `${linkId}-logo-${Date.now()}`
+        const { error: logoUploadError } = await supabase.storage
+          .from("cube")
+          .upload(logoFileName, logoFile, { upsert: true })
+
+        if (logoUploadError) {
+          setIsUploading(false)
+          throw logoUploadError
+        }
+
+        // Create signed URL for the logo with same expiration as document
+        const logoExpirationSeconds = data.protectWithExpiration && data.expires
+          ? Math.floor((new Date(data.expires).getTime() - new Date().getTime()) / 1000)
+          : 10 * 365 * 24 * 60 * 60 // 10 years if no expiration
+
+        const { data: logoSignedData } = await supabase.storage
+          .from("cube")
+          .createSignedUrl(logoFileName, logoExpirationSeconds)
+
+        logoUrl = logoSignedData?.signedUrl || null
+        setIsUploading(false)
+      }
+
       let expirationSeconds: number
       if (data.protectWithExpiration && data.expires) {
         const currentDate = new Date()
@@ -222,12 +279,20 @@ export default function LinkForm({
             : null,
           filename_arg: data.filename,
         })
-        // Update allow_download and require_email separately since they're not in the RPC
+        // Update fields not in the RPC
         await supabase
           .from("links")
           .update({
             allow_download: data.allowDownload,
             require_email: data.requireEmail,
+            viewer_page_heading: data.viewerPageHeading || null,
+            viewer_page_subheading: data.viewerPageSubheading || null,
+            viewer_page_cover_letter: data.viewerPageCoverLetter || null,
+            viewer_page_logo_url: logoUrl,
+            display_mode: data.displayMode,
+            show_creator_signature: data.showCreatorSignature,
+            cover_letter_font: data.coverLetterFont,
+            cover_letter_color: data.coverLetterColor,
           })
           .eq("id", link.id)
       } else {
@@ -244,6 +309,14 @@ export default function LinkForm({
           require_email: data.requireEmail,
           require_signature: data.requireSignature,
           signature_instructions: data.signatureInstructions || null,
+          viewer_page_heading: data.viewerPageHeading || null,
+          viewer_page_subheading: data.viewerPageSubheading || null,
+          viewer_page_cover_letter: data.viewerPageCoverLetter || null,
+          viewer_page_logo_url: logoUrl,
+          display_mode: data.displayMode,
+          show_creator_signature: data.showCreatorSignature,
+          cover_letter_font: data.coverLetterFont,
+          cover_letter_color: data.coverLetterColor,
           created_by: account.id,
         })
       }
@@ -295,8 +368,57 @@ export default function LinkForm({
     }
   }
 
+  const onLogoUpload = async (acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      const uploadedFile = acceptedFiles[0]
+
+      // Check if it's an image
+      if (!uploadedFile.type.startsWith("image/")) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload an image file (PNG, JPG, etc.)",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Check file size (5MB limit for logos)
+      const maxSizeInBytes = 5 * 1024 * 1024 // 5MB
+      if (uploadedFile.size > maxSizeInBytes) {
+        toast({
+          title: "File too large",
+          description: `Maximum logo size is 5MB. Your file is ${(
+            uploadedFile.size /
+            (1024 * 1024)
+          ).toFixed(2)}MB`,
+          variant: "destructive",
+        })
+        return
+      }
+
+      setLogoFile(uploadedFile)
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(uploadedFile)
+      setLogoPreviewUrl(previewUrl)
+      toast({
+        description: "Logo uploaded successfully",
+      })
+    }
+  }
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
+  })
+
+  const {
+    getRootProps: getLogoRootProps,
+    getInputProps: getLogoInputProps,
+    isDragActive: isLogoDragActive,
+  } = useDropzone({
+    onDrop: onLogoUpload,
+    accept: {
+      "image/*": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"],
+    },
   })
 
   return (
@@ -609,6 +731,274 @@ export default function LinkForm({
               )}
             </>
           )}
+
+          {/* Viewer Page Customization Section */}
+          <div className="space-y-4 rounded-lg border-2 border-blue-200 bg-blue-50/30 p-4 dark:border-blue-900 dark:bg-blue-950/30">
+            <div className="mb-2">
+              <h3 className="text-lg font-semibold">Customize Receiver Page</h3>
+              <p className="text-sm text-muted-foreground">
+                Personalize the page your recipients see when they view this
+                document
+              </p>
+            </div>
+
+            {/* Logo Upload */}
+            <FormItem>
+              <FormLabel>Logo (Optional)</FormLabel>
+              <FormDescription>
+                Upload a logo to personalize the viewer page and email entry
+                screen
+              </FormDescription>
+              <div className="space-y-3">
+                {logoPreviewUrl && (
+                  <div className="relative inline-block">
+                    <img
+                      src={logoPreviewUrl}
+                      alt="Logo preview"
+                      className="h-20 w-auto rounded-md border border-gray-300 object-contain"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute -right-2 -top-2 size-6 rounded-full p-0"
+                      onClick={() => {
+                        setLogoFile(null)
+                        setLogoPreviewUrl(null)
+                        toast({
+                          description: "Logo removed",
+                        })
+                      }}
+                    >
+                      <X className="size-3" />
+                    </Button>
+                  </div>
+                )}
+                <div
+                  {...getLogoRootProps()}
+                  className={cn(
+                    "cursor-pointer rounded-lg border-2 border-dashed border-gray-300 p-4 text-center transition-colors hover:border-blue-400",
+                    isLogoDragActive && "border-blue-500 bg-blue-50",
+                    isUploading && "pointer-events-none opacity-50"
+                  )}
+                >
+                  <input {...getLogoInputProps()} />
+                  <div className="flex flex-col items-center gap-2">
+                    <ImageIcon className="size-8 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      {isLogoDragActive
+                        ? "Drop your logo here"
+                        : logoPreviewUrl
+                        ? "Click or drag to replace logo"
+                        : "Click or drag to upload logo"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      PNG, JPG, SVG up to 5MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </FormItem>
+
+            <FormField
+              control={form.control}
+              name="viewerPageHeading"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Page Heading</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., Q4 2024 Pitch Deck"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Main title shown at the top of the viewer page
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="viewerPageSubheading"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Page Subheading</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., Series A Fundraising"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Secondary text shown below the heading
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="viewerPageCoverLetter"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cover Letter (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="e.g., Thank you for taking the time to review our deck. We're excited to share our vision with you..."
+                      className="min-h-[100px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Personal note for investors, customers, or recipients
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Font and Color selectors - only show if cover letter has content */}
+            {form.watch("viewerPageCoverLetter") && (
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="coverLetterFont"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Letter Font</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value)
+                          form.setValue("coverLetterFont", value, { shouldDirty: true })
+                        }}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select font" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="cursive">Cursive (Handwritten)</SelectItem>
+                          <SelectItem value="arial">Arial (Sans-serif)</SelectItem>
+                          <SelectItem value="times">Times New Roman</SelectItem>
+                          <SelectItem value="georgia">Georgia (Serif)</SelectItem>
+                          <SelectItem value="mono">Monospace</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Font style for the cover letter
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="coverLetterColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Text Color</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          console.log("Color changed to:", value)
+                          field.onChange(value)
+                          form.setValue("coverLetterColor", value, { shouldDirty: true })
+                        }}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select color" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="gray-800">Dark Gray</SelectItem>
+                          <SelectItem value="black">Black</SelectItem>
+                          <SelectItem value="blue-600">Blue</SelectItem>
+                          <SelectItem value="indigo-600">Indigo</SelectItem>
+                          <SelectItem value="purple-600">Purple</SelectItem>
+                          <SelectItem value="green-600">Green</SelectItem>
+                          <SelectItem value="red-600">Red</SelectItem>
+                          <SelectItem value="amber-700">Amber</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Color defaults to white in dark mode
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            {/* Show Creator Signature toggle - only if cover letter has content */}
+            {form.watch("viewerPageCoverLetter") && account?.signature_url && (
+              <FormItem className="flex flex-col rounded-lg border border-indigo-200 bg-indigo-50/50 p-4 dark:border-indigo-900 dark:bg-indigo-950/50">
+                <div className="flex flex-row items-center justify-between">
+                  <div className="grow space-y-0.5">
+                    <FormLabel className="pr-2 text-base">
+                      Show Your Signature
+                    </FormLabel>
+                    <FormDescription className="pr-4">
+                      Display your profile signature at the end of the cover letter for a personal, classic touch
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={showCreatorSignature}
+                      onCheckedChange={(checked) => {
+                        setShowCreatorSignature(checked)
+                        form.setValue("showCreatorSignature", checked, { shouldDirty: true })
+                      }}
+                    />
+                  </FormControl>
+                </div>
+              </FormItem>
+            )}
+
+            <FormField
+              control={form.control}
+              name="displayMode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Display Mode</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select display mode" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="auto">
+                        Auto (detect orientation)
+                      </SelectItem>
+                      <SelectItem value="slideshow">
+                        Slideshow (for pitch decks)
+                      </SelectItem>
+                      <SelectItem value="document">
+                        Document (traditional scroll)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    How the document should be displayed. Auto mode shows
+                    landscape PDFs as slideshows.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <div className="space-y-4">
             {link && (

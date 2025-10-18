@@ -61,7 +61,10 @@ export default function ViewLinkForm({
     // Auto-grant access if:
     // 1. User is authenticated and no password required, OR
     // 2. No email required and no password required (open access)
-    if ((account && !passwordRequired) || (!requiresEmail && !passwordRequired)) {
+    if (
+      (account && !passwordRequired) ||
+      (!requiresEmail && !passwordRequired)
+    ) {
       setShowProgressBar(true)
     }
   }, [account, passwordRequired, requiresEmail])
@@ -136,7 +139,7 @@ export default function ViewLinkForm({
         }
 
         toast({
-          title: "Email captured",
+          title: "Email submitted",
           description: "You can now view the document",
         })
 
@@ -204,79 +207,124 @@ export default function ViewLinkForm({
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {(requiresEmail || requiresFullAuth || account) && (
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="grow space-y-0.5">
-                    <FormLabel htmlFor="email" className="pr-2 text-base">
-                      Email{requiresEmail || requiresFullAuth ? " *" : ""}
-                    </FormLabel>
-                    <FormDescription className="pr-4">
-                      {account
-                        ? "Your email address will only be shared with the document owner"
-                        : requiresFullAuth
-                          ? "Please enter your email to receive a magic link for authentication"
-                          : "Your email will be shared with the document owner for analytics"}
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Input
-                      id="email"
-                      className="w-[200px]"
-                      {...field}
-                      autoComplete="off"
-                      disabled={!!account}
-                      required={requiresEmail || requiresFullAuth}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
+    <div className="container mx-auto flex flex-col items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md space-y-8">
+        {/* Logo */}
+        {link.viewer_page_logo_url && (
+          <div className="flex justify-center">
+            <img
+              src={link.viewer_page_logo_url}
+              alt="Logo"
+              className="h-16 w-auto object-contain"
             />
-          )}
-          {passwordRequired && (
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="grow space-y-0.5">
-                    <FormLabel htmlFor="password" className="pr-2 text-base">
-                      Password
-                    </FormLabel>
-                    <FormDescription className="pr-4">
-                      Please enter the password to view this document
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Input
-                      id="password"
-                      type="password"
-                      className="w-[200px]"
-                      {...field}
-                      autoComplete="off"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          )}
-          <div className="space-y-4">
-            <Button type="submit" className="w-full">
-              {account
-                ? "View Document"
-                : requiresFullAuth
-                  ? "Send Magic Link"
-                  : "View Document"}
-            </Button>
           </div>
-        </form>
-      </Form>
+        )}
+
+        {/* Heading and Subheading */}
+        <div className="space-y-3 text-center">
+          {link.viewer_page_heading ? (
+            <h1 className="text-2xl font-medium tracking-tight text-gray-900 dark:text-gray-100 md:text-3xl">
+              {link.viewer_page_heading}
+            </h1>
+          ) : (
+            <h1 className="text-2xl font-medium tracking-tight text-gray-900 dark:text-gray-100 md:text-3xl">
+              {link.filename}
+            </h1>
+          )}
+
+          {link.viewer_page_subheading && (
+            <p className="text-base text-gray-600 dark:text-gray-400">
+              {link.viewer_page_subheading}
+            </p>
+          )}
+        </div>
+
+        {/* Form */}
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {(requiresEmail || requiresFullAuth || account) && (
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel
+                        htmlFor="email"
+                        className="text-sm font-medium"
+                      >
+                        Email Address
+                        {requiresEmail || requiresFullAuth ? " *" : ""}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          id="email"
+                          placeholder="your@email.com"
+                          className="w-full"
+                          {...field}
+                          autoComplete="off"
+                          disabled={!!account}
+                          required={requiresEmail || requiresFullAuth}
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        {account
+                          ? "Your email address will only be shared with the document owner"
+                          : requiresFullAuth
+                          ? "We'll send you a secure link to authenticate"
+                          : "Your email will be shared with the document owner"}
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+              )}
+              {passwordRequired && (
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel
+                        htmlFor="password"
+                        className="text-sm font-medium"
+                      >
+                        Password *
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="Enter password"
+                          className="w-full"
+                          {...field}
+                          autoComplete="off"
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        This document is password protected
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+              )}
+              <div className="pt-2">
+                <Button type="submit" className="w-full" size="lg">
+                  {account
+                    ? "View Document"
+                    : requiresFullAuth
+                    ? "Send Magic Link"
+                    : "View Document"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
+
+        {/* Footer note */}
+        <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+          Powered by DocBase - Secure Document Sharing
+        </p>
+      </div>
     </div>
   )
 }

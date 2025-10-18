@@ -6,12 +6,58 @@ import { createClient } from "@/utils/supabase/client"
 import { Database } from "@/types/supabase"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/use-toast"
+import { GridBackground } from "@/components/grid-background"
 import SecurePDFViewer from "@/components/secure-pdf-viewer"
 import { SignaturePad } from "@/components/signature-pad"
 import ViewLinkForm from "@/components/view-link-form"
 
-type Link = Database["public"]["Tables"]["links"]["Row"]
+type Link = Database["public"]["Tables"]["links"]["Row"] & {
+  creator_name?: string | null
+  creator_signature_url?: string | null
+}
 type User = Database["public"]["Tables"]["users"]["Row"]
+
+// Helper to map font selection to actual font family
+const getFontFamily = (font: string | null) => {
+  switch (font) {
+    case "cursive":
+      return "'Caveat', cursive"
+    case "arial":
+      return "Arial, sans-serif"
+    case "times":
+      return "'Times New Roman', serif"
+    case "georgia":
+      return "Georgia, serif"
+    case "mono":
+      return "'Courier New', monospace"
+    default:
+      return "'Caveat', cursive"
+  }
+}
+
+// Helper to map color selection to CSS classes
+const getColorClass = (color: string | null) => {
+  switch (color) {
+    case "gray-800":
+      return "text-gray-800 dark:text-white"
+    case "black":
+      return "text-black dark:text-white"
+    case "blue-600":
+      return "text-blue-600 dark:text-white"
+    case "indigo-600":
+      return "text-indigo-600 dark:text-white"
+    case "purple-600":
+      return "text-purple-600 dark:text-white"
+    case "green-600":
+      return "text-green-600 dark:text-white"
+    case "red-600":
+      return "text-red-600 dark:text-white"
+    case "amber-700":
+      return "text-amber-700 dark:text-white"
+    default:
+      return "text-gray-800 dark:text-white"
+  }
+}
 
 export default function ViewLinkPage({
   link,
@@ -147,10 +193,71 @@ export default function ViewLinkPage({
   if (canViewDocument) {
     return (
       <div className="w-full">
+        <GridBackground />
+        {/* Logo, Heading, Subheading, and Cover Letter */}
+        {(link.viewer_page_logo_url ||
+          link.viewer_page_heading ||
+          link.viewer_page_subheading ||
+          link.viewer_page_cover_letter) && (
+          <div className="mx-auto max-w-4xl space-y-2 px-4 py-8">
+            {link.viewer_page_cover_letter && (
+              <div
+                className="relative mx-auto max-w-3xl border border-amber-200/60 bg-white bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-orange-50/60 p-8 shadow-md dark:border-amber-900/40 dark:from-amber-950/30 dark:to-orange-950/20"
+                style={{
+                  background: "#fffcf4",
+                  backgroundImage: `
+                    repeating-linear-gradient(
+                      0deg,
+                      transparent,
+                      transparent 2px,
+                      rgba(251, 191, 36, 0.02) 2px,
+                      rgba(251, 191, 36, 0.02) 4px
+                    ),
+                    repeating-linear-gradient(
+                      90deg,
+                      transparent,
+                      transparent 2px,
+                      rgba(251, 191, 36, 0.015) 2px,
+                      rgba(251, 191, 36, 0.015) 4px
+                    )
+                  `,
+                }}
+              >
+                {/* Stamp in top left corner */}
+                <img
+                  src="/VibeTM-Stamp.png"
+                  alt="Stamp"
+                  className="h-24 w-24 object-contain opacity-80 ml-[-8px]"
+                />
+                <p
+                  className={`whitespace-pre-wrap mt-4 text-lg leading-relaxed ${getColorClass(
+                    link.cover_letter_color
+                  )}`}
+                  style={{ fontFamily: getFontFamily(link.cover_letter_font) }}
+                >
+                  {link.viewer_page_cover_letter}
+                </p>
+                {link.show_creator_signature && link.creator_signature_url && (
+                  <div className="mt-12 flex flex-col items-start">
+                    <img
+                      src={link.creator_signature_url}
+                      alt="Signature"
+                      className="h-10 w-auto object-contain"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         <SecurePDFViewer
           linkId={link.id}
           filename={link.filename || "document.pdf"}
           allowDownload={link.allow_download !== false}
+          displayMode={link.display_mode || "auto"}
+          logoUrl={link.viewer_page_logo_url}
+          pageHeading={link.viewer_page_heading}
         />
       </div>
     )
@@ -160,10 +267,90 @@ export default function ViewLinkPage({
   if (isAuthenticated && link.require_signature && !isSigned) {
     return (
       <div className="w-full">
+        <GridBackground />
+        {/* Logo, Heading, Subheading, and Cover Letter */}
+        {(link.viewer_page_logo_url ||
+          link.viewer_page_heading ||
+          link.viewer_page_subheading ||
+          link.viewer_page_cover_letter) && (
+          <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+            {link.viewer_page_logo_url && (
+              <div className="flex justify-center">
+                <img
+                  src={link.viewer_page_logo_url}
+                  alt="Logo"
+                  className="h-12 w-auto object-contain"
+                />
+              </div>
+            )}
+            {link.viewer_page_heading && (
+              <h1 className="text-center text-2xl font-medium tracking-tight md:text-3xl">
+                {link.viewer_page_heading}
+              </h1>
+            )}
+            {link.viewer_page_subheading && (
+              <h2 className="text-center text-xl text-muted-foreground md:text-xl">
+                {link.viewer_page_subheading}
+              </h2>
+            )}
+            {link.viewer_page_cover_letter && (
+              <div
+                className="relative mx-auto max-w-2xl border border-amber-200/60 bg-white bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-orange-50/60 p-8 shadow-md dark:border-amber-900/40 dark:from-amber-950/30 dark:to-orange-950/20"
+                style={{
+                  background: "#fffcf4",
+                  backgroundImage: `
+                    repeating-linear-gradient(
+                      0deg,
+                      transparent,
+                      transparent 2px,
+                      rgba(251, 191, 36, 0.02) 2px,
+                      rgba(251, 191, 36, 0.02) 4px
+                    ),
+                    repeating-linear-gradient(
+                      90deg,
+                      transparent,
+                      transparent 2px,
+                      rgba(251, 191, 36, 0.015) 2px,
+                      rgba(251, 191, 36, 0.015) 4px
+                    )
+                  `,
+                }}
+              >
+                {/* Stamp in top left corner */}
+                <img
+                  src="/VibeTM-Stamp.png"
+                  alt="Stamp"
+                  className="h-24 w-24 object-contain opacity-80 -ml-2"
+                />
+                <p
+                  className={`whitespace-pre-wrap mt-4 text-sm leading-relaxed ${getColorClass(
+                    link.cover_letter_color
+                  )}`}
+                  style={{ fontFamily: getFontFamily(link.cover_letter_font) }}
+                >
+                  {link.viewer_page_cover_letter}
+                </p>
+                {link.show_creator_signature && link.creator_signature_url && (
+                  <div className="mt-12 flex flex-col items-start">
+                    <img
+                      src={link.creator_signature_url}
+                      alt="Signature"
+                      className="h-10 w-auto object-contain"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         <SecurePDFViewer
           linkId={link.id}
           filename={link.filename || "document.pdf"}
           allowDownload={link.allow_download !== false}
+          displayMode={link.display_mode || "auto"}
+          logoUrl={link.viewer_page_logo_url}
+          pageHeading={link.viewer_page_heading}
         />
 
         {/* Floating Sign Button */}
@@ -206,7 +393,7 @@ export default function ViewLinkPage({
 
   return (
     <div className="w-full">
-      <h1 className="mb-6 text-center text-3xl font-bold">{link.filename}</h1>
+      <GridBackground />
       <ViewLinkForm
         link={link}
         account={account}

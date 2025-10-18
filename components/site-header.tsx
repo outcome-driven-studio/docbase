@@ -1,6 +1,8 @@
 "use client"
 
 import Link from "next/link"
+import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 
 import { Database } from "@/types/supabase"
 import { siteConfig } from "@/config/site"
@@ -16,23 +18,27 @@ import { WorkspaceSelector } from "./workspace-selector"
 type User = Database["public"]["Tables"]["users"]["Row"]
 
 export function SiteHeader({ account }: { account: User | null }) {
+  const { theme, resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Determine which logo to show based on theme
+  const currentTheme = mounted ? (theme === "system" ? resolvedTheme : theme) : "light"
+  const logoSrc = currentTheme === "dark" ? "/vibe-docs-white.svg" : "/vibe-docs-black.svg"
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
-          <Link href="/" className="mr-6 hidden text-2xl font-semibold md:flex">
-            <span
-              style={{
-                backgroundImage:
-                  "linear-gradient(48deg, #74EBD5 0%, #9FACE6 100%)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                color: "transparent",
-              }}
-            >
-              Doc
-            </span>
-            base
+          <Link href="/" className="mr-6 hidden md:flex">
+            <img
+              src={logoSrc}
+              alt="Vibe Docs"
+              className="h-8 w-auto"
+            />
           </Link>
           {account ? (
             <>
