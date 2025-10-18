@@ -440,7 +440,7 @@ export default function LinkForm({
                   checked={protectWithPassword}
                   onCheckedChange={(checked) => {
                     setProtectWithPassword(checked)
-                    form.setValue("protectWithPassword", checked)
+                    form.setValue("protectWithPassword", checked, { shouldDirty: true })
                     if (!checked) {
                       form.setValue("password", "")
                     }
@@ -501,7 +501,7 @@ export default function LinkForm({
                   checked={protectWithExpiration}
                   onCheckedChange={(checked) => {
                     setProtectWithExpiration(checked)
-                    form.setValue("protectWithExpiration", checked)
+                    form.setValue("protectWithExpiration", checked, { shouldDirty: true })
                     if (!checked) {
                       form.setValue("expires", null)
                     } else if (!form.getValues("expires")) {
@@ -653,7 +653,7 @@ export default function LinkForm({
                   checked={allowDownload}
                   onCheckedChange={(checked) => {
                     setAllowDownload(checked)
-                    form.setValue("allowDownload", checked)
+                    form.setValue("allowDownload", checked, { shouldDirty: true })
                   }}
                 />
               </FormControl>
@@ -678,7 +678,7 @@ export default function LinkForm({
                   checked={requireEmail}
                   onCheckedChange={(checked) => {
                     setRequireEmail(checked)
-                    form.setValue("requireEmail", checked)
+                    form.setValue("requireEmail", checked, { shouldDirty: true })
                   }}
                 />
               </FormControl>
@@ -705,7 +705,7 @@ export default function LinkForm({
                       checked={requireSignature}
                       onCheckedChange={(checked) => {
                         setRequireSignature(checked)
-                        form.setValue("requireSignature", checked)
+                        form.setValue("requireSignature", checked, { shouldDirty: true })
                       }}
                     />
                   </FormControl>
