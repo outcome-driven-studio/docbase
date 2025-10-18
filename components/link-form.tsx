@@ -873,7 +873,7 @@ export default function LinkForm({
                       <Select
                         onValueChange={(value) => {
                           field.onChange(value)
-                          form.setValue("coverLetterFont", value, { shouldDirty: true })
+                          form.setValue("coverLetterFont", value as "cursive" | "arial" | "times" | "georgia" | "mono", { shouldDirty: true })
                         }}
                         value={field.value}
                       >

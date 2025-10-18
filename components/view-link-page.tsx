@@ -255,7 +255,7 @@ export default function ViewLinkPage({
           linkId={link.id}
           filename={link.filename || "document.pdf"}
           allowDownload={link.allow_download !== false}
-          displayMode={link.display_mode || "auto"}
+          displayMode={(link.display_mode as "auto" | "slideshow" | "document") || "auto"}
           logoUrl={link.viewer_page_logo_url}
           pageHeading={link.viewer_page_heading}
         />
@@ -348,7 +348,7 @@ export default function ViewLinkPage({
           linkId={link.id}
           filename={link.filename || "document.pdf"}
           allowDownload={link.allow_download !== false}
-          displayMode={link.display_mode || "auto"}
+          displayMode={(link.display_mode as "auto" | "slideshow" | "document") || "auto"}
           logoUrl={link.viewer_page_logo_url}
           pageHeading={link.viewer_page_heading}
         />
