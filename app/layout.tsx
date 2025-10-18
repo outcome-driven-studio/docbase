@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/server"
 
 import { siteConfig } from "@/config/site"
 import { validateEnvironmentVariables } from "@/lib/env-validation"
-import { fontSans } from "@/lib/fonts"
+import { fontSans, fontCursive } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
 import { CommandMenu } from "@/components/command-menu"
@@ -59,6 +59,10 @@ export default async function RootLayout({ children }: RootLayoutProps) {
     <>
       <html lang="en" suppressHydrationWarning>
         <head>
+          <link
+            href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+          />
           {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
           <Script
             src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
@@ -68,7 +72,8 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         <body
           className={cn(
             "min-h-dvh bg-background font-sans antialiased",
-            fontSans.variable
+            fontSans.variable,
+            fontCursive.variable
           )}
         >
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

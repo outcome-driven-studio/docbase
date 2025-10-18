@@ -386,8 +386,11 @@ export type Database = {
       links: {
         Row: {
           allow_download: boolean | null
+          cover_letter_color: string | null
+          cover_letter_font: string | null
           created_at: string | null
           created_by: string | null
+          display_mode: string | null
           expires: string | null
           filename: string | null
           groups: string[] | null
@@ -397,15 +400,23 @@ export type Database = {
           require_email: boolean | null
           require_signature: boolean | null
           send_notifications: boolean | null
+          show_creator_signature: boolean | null
           signature_instructions: string | null
           updated_at: string | null
           url: string | null
+          viewer_page_cover_letter: string | null
+          viewer_page_heading: string | null
+          viewer_page_logo_url: string | null
+          viewer_page_subheading: string | null
           workspace_id: string | null
         }
         Insert: {
           allow_download?: boolean | null
+          cover_letter_color?: string | null
+          cover_letter_font?: string | null
           created_at?: string | null
           created_by?: string | null
+          display_mode?: string | null
           expires?: string | null
           filename?: string | null
           groups?: string[] | null
@@ -415,15 +426,23 @@ export type Database = {
           require_email?: boolean | null
           require_signature?: boolean | null
           send_notifications?: boolean | null
+          show_creator_signature?: boolean | null
           signature_instructions?: string | null
           updated_at?: string | null
           url?: string | null
+          viewer_page_cover_letter?: string | null
+          viewer_page_heading?: string | null
+          viewer_page_logo_url?: string | null
+          viewer_page_subheading?: string | null
           workspace_id?: string | null
         }
         Update: {
           allow_download?: boolean | null
+          cover_letter_color?: string | null
+          cover_letter_font?: string | null
           created_at?: string | null
           created_by?: string | null
+          display_mode?: string | null
           expires?: string | null
           filename?: string | null
           groups?: string[] | null
@@ -433,9 +452,14 @@ export type Database = {
           require_email?: boolean | null
           require_signature?: boolean | null
           send_notifications?: boolean | null
+          show_creator_signature?: boolean | null
           signature_instructions?: string | null
           updated_at?: string | null
           url?: string | null
+          viewer_page_cover_letter?: string | null
+          viewer_page_heading?: string | null
+          viewer_page_logo_url?: string | null
+          viewer_page_subheading?: string | null
           workspace_id?: string | null
         }
         Relationships: [
@@ -609,6 +633,7 @@ export type Database = {
           messages: string[] | null
           name: string | null
           onboarding_completed: boolean | null
+          signature_url: string | null
           storage_bucket_name: string | null
           title: string | null
           updated_at: string | null
@@ -620,6 +645,7 @@ export type Database = {
           messages?: string[] | null
           name?: string | null
           onboarding_completed?: boolean | null
+          signature_url?: string | null
           storage_bucket_name?: string | null
           title?: string | null
           updated_at?: string | null
@@ -631,6 +657,7 @@ export type Database = {
           messages?: string[] | null
           name?: string | null
           onboarding_completed?: boolean | null
+          signature_url?: string | null
           storage_bucket_name?: string | null
           title?: string | null
           updated_at?: string | null
@@ -905,6 +932,8 @@ export type Database = {
           created_at: string
           created_by: string
           creator_name: string
+          creator_signature_url: string
+          display_mode: string
           expires: string
           filename: string
           groups: string[]
@@ -914,9 +943,14 @@ export type Database = {
           require_email: boolean
           require_signature: boolean
           send_notifications: boolean
+          show_creator_signature: boolean
           signature_instructions: string
           updated_at: string
           url: string
+          viewer_page_cover_letter: string
+          viewer_page_heading: string
+          viewer_page_logo_url: string
+          viewer_page_subheading: string
         }[]
       }
       update_link: {

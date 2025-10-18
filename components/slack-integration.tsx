@@ -217,6 +217,18 @@ export default function SlackIntegrationTab({
               <li>Someone opens your document</li>
               <li>Someone signs your document</li>
             </ul>
+
+            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-900 dark:bg-yellow-950">
+              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                Important: Connecting to Your Workspace
+              </p>
+              <ul className="mt-2 ml-4 list-disc space-y-1 text-xs text-yellow-700 dark:text-yellow-300">
+                <li>You must be an admin/owner of the Slack workspace</li>
+                <li>If you see the wrong workspace, sign out of Slack first</li>
+                <li>Then sign into your workspace and try again</li>
+              </ul>
+            </div>
+
             <Button onClick={handleConnectSlack} className="w-full">
               <svg
                 className="mr-2 size-4"
@@ -242,14 +254,15 @@ export default function SlackIntegrationTab({
                     </p>
                   )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDisconnect}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  Disconnect
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDisconnect}
+                  >
+                    Switch Workspace
+                  </Button>
+                </div>
               </div>
             </div>
 

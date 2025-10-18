@@ -9,6 +9,7 @@ import ViewLinkPage from "@/components/view-link-page"
 
 type Link = Database["public"]["Tables"]["links"]["Row"] & {
   creator_name: string | null
+  creator_signature_url: string | null
 }
 
 export const dynamic = "force-dynamic"
