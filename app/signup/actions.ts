@@ -6,6 +6,15 @@ import { createClient } from "@/utils/supabase/server"
 import { SignupFormData } from "@/components/signup-form"
 
 export async function signup(formData: SignupFormData) {
+  // Check if signups are disabled
+  const signupsDisabled = process.env.DISABLE_SIGNUPS === "true"
+  if (signupsDisabled) {
+    return {
+      success: false,
+      errorMessage: "New signups are currently disabled. Please contact the administrator.",
+    }
+  }
+
   const supabase = createClient()
   const { email, password } = formData
 

@@ -1,7 +1,23 @@
 {
-  "name": "next-template",
-  "version": "0.0.2",
+  "name": "docbase",
+  "version": "1.0.0",
   "private": true,
+  "description": "Open-source alternative to DocSend for secure document sharing with e-signatures and analytics",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alanagoyal/docbase.git"
+  },
+  "keywords": [
+    "docsend",
+    "document-sharing",
+    "e-signature",
+    "analytics",
+    "nextjs",
+    "supabase",
+    "open-source"
+  ],
+  "author": "Alana Goyal",
+  "license": "MIT",
   "scripts": {
     "setup": "node setup.js",
     "dev": "next dev",
@@ -13,7 +29,7 @@
     "typecheck": "tsc --noEmit",
     "format:write": "prettier --write \"**/*.{ts,tsx,mdx}\" --cache",
     "format:check": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache",
-    "update-types": "npx supabase gen types typescript --project-id \"dgnvviqfnfrqdxuwuyrm\" > types/supabase.ts"
+    "update-types": "npx supabase gen types typescript --linked > types/supabase.ts"
   },
   "dependencies": {
     "@braintrust/vercel-ai-sdk": "^0.0.4",

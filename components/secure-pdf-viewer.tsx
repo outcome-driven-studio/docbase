@@ -213,9 +213,8 @@ export default function SecurePDFViewer({
             <Button
               onClick={goToPrevPage}
               variant="ghost"
-              size="icon"
               disabled={currentPage === 1}
-              className="absolute left-2 top-1/2 z-20 h-12 w-12 -translate-y-1/2 rounded-full bg-black/20 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-30 sm:left-4 sm:h-16 sm:w-16"
+              className="absolute left-2 top-1/2 z-20 h-12 w-12 -translate-y-1/2 rounded-full bg-black/20 p-0 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-30 sm:left-4 sm:h-16 sm:w-16"
             >
               <ChevronLeft className="size-6 sm:size-8" />
             </Button>
@@ -224,9 +223,8 @@ export default function SecurePDFViewer({
             <Button
               onClick={goToNextPage}
               variant="ghost"
-              size="icon"
               disabled={currentPage === totalPages}
-              className="absolute right-2 top-1/2 z-20 h-12 w-12 -translate-y-1/2 rounded-full bg-black/20 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-30 sm:right-4 sm:h-16 sm:w-16"
+              className="absolute right-2 top-1/2 z-20 h-12 w-12 -translate-y-1/2 rounded-full bg-black/20 p-0 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-30 sm:right-4 sm:h-16 sm:w-16"
             >
               <ChevronRight className="size-6 sm:size-8" />
             </Button>

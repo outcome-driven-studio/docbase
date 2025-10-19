@@ -23,6 +23,9 @@ export default async function IndexPage() {
     account = accountData
   }
 
+  // Check if signups are disabled
+  const signupsDisabled = process.env.DISABLE_SIGNUPS === "true"
+
   return (
     <div className="mih-h-dvh flex flex-col">
       <GridBackground />
@@ -55,9 +58,9 @@ export default async function IndexPage() {
                 </Button>
               </Link>
             ) : (
-              <Link href="/signup">
+              <Link href={signupsDisabled ? "/login" : "/signup"}>
                 <Button className="bg-primary text-primary-foreground transition-opacity hover:opacity-70">
-                  Get Started
+                  {signupsDisabled ? "Sign In" : "Get Started"}
                 </Button>
               </Link>
             )}
