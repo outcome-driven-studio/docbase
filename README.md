@@ -5,29 +5,34 @@ An open-source alternative to DocSend for securely sharing documents with tracki
 ## ✨ Features
 
 ### Document Sharing & Security
+
 - 📄 **Secure PDF Sharing** - Upload and share PDFs with password protection and expiration dates
 - 🔐 **Access Control** - Email verification, password protection, and self-hosted signup controls
 - 🎨 **Custom Branding** - Add logos, cover letters, and signatures to shared documents
 - 📱 **Responsive Viewer** - Beautiful slideshow and document modes that work on all devices
 
 ### Signatures & Agreements
+
 - ✍️ **E-Signatures** - Request and collect legally binding signatures on documents
 - 📋 **Signature Tracking** - Track signature status and audit trails
 - 🖊️ **Multiple Signature Methods** - Draw, upload, or type signatures
 - ⚖️ **NDA & Contract Ready** - Perfect for NDAs, contracts, and legal agreements
 
 ### Analytics & Tracking
+
 - 📊 **View Analytics** - Track who views your documents, when, and for how long
 - 👥 **Contact Management** - Organize contacts with groups
 - 📈 **Engagement Insights** - Detailed analytics for each shared link
 - 🔔 **Notifications** - Get notified when documents are viewed or signed
 
 ### Communication
+
 - ✉️ **Email Integration** - Send documents via email with magic links (powered by Resend)
 - 💬 **Slack Integration** - Get notifications in Slack when documents are viewed or signed
 - 🎯 **Personalized Emails** - Custom email templates with your branding
 
 ### Privacy & Control
+
 - 🔒 **Privacy First** - Row-level security and encrypted passwords
 - 🏢 **Self-Hosted Ready** - Full control over your data and users
 - 🚫 **Disable Signups** - Control who can create accounts on your instance
@@ -112,17 +117,21 @@ Your app will be running at **http://localhost:3000**
 ### Optional Features
 
 - **Resend** - Email sending ([Sign up](https://resend.com/))
+
   - Required for: Document sharing emails, magic link authentication, notifications
   - Free tier: 3,000 emails/month
 
 - **OpenAI** - AI-powered features ([Sign up](https://platform.openai.com/))
+
   - Required for: Signature block parsing
   - Uses GPT-4o-mini (cost-effective)
 
 - **Google Maps** - Address autocomplete ([Get API key](https://developers.google.com/maps/documentation/javascript/get-api-key))
+
   - Optional: Enhances contact management with address suggestions
 
 - **Braintrust** - Prompt management and logging ([Sign up](https://braintrust.dev/))
+
   - Optional: AI prompt versioning and monitoring
 
 - **Slack** - Team notifications ([Setup OAuth](https://api.slack.com/apps))
@@ -177,24 +186,28 @@ For detailed deployment instructions with custom domains and email setup, see:
 ## Use Cases
 
 ### For Founders & Fundraising
+
 - 🚀 Share pitch decks with investors and track engagement
 - 📊 See which slides investors spend the most time on
 - 🔒 Protect sensitive financial information with passwords
 - ✍️ Get NDAs signed before sharing confidential materials
 
 ### For Sales & Business Development
+
 - 📄 Share proposals and track when prospects view them
 - 🎯 Follow up at the right time based on engagement data
 - 🖊️ Get contracts and agreements signed electronically
 - 📧 Send personalized documents with custom branding
 
 ### For Legal & HR
+
 - ⚖️ Send contracts and collect signatures
 - 🔐 Secure sharing of sensitive documents
 - 📋 Track document access and maintain audit trails
 - ✅ Ensure compliance with signature timestamps
 
 ### For Self-Hosted Teams
+
 - 🏢 Run your own private DocSend alternative
 - 🚫 Control who can create accounts (disable public signups)
 - 💾 Keep all data on your own infrastructure
@@ -203,6 +216,7 @@ For detailed deployment instructions with custom domains and email setup, see:
 ## Why Docbase?
 
 ### vs. DocSend
+
 - ✅ **Free & Open Source** - No per-document pricing
 - ✅ **Self-Hosted** - Full control over your data
 - ✅ **E-Signatures Built-In** - No need for separate DocuSign/HelloSign
@@ -210,6 +224,7 @@ For detailed deployment instructions with custom domains and email setup, see:
 - ✅ **Modern Stack** - Built with Next.js 14 and TypeScript
 
 ### vs. Building Your Own
+
 - ✅ **Production Ready** - Battle-tested features and security
 - ✅ **Full Feature Set** - Signatures, analytics, notifications, and more
 - ✅ **Active Development** - Regular updates and improvements
@@ -263,4 +278,4 @@ Licensed under the [MIT license](https://github.com/alanagoyal/docbase/blob/main
 
 ---
 
-**Built with ❤️ by the open source community**
+**Built with ❤️ by Outcome Driven Studio**
