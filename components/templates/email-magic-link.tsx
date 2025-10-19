@@ -36,7 +36,7 @@ export const MagicLinkEmail: React.FC<Readonly<MagicLinkEmailProps>> = ({
         margin: "0 0 24px 0",
       }}
     >
-      A document has been shared with you securely via Docbase. Click the button
+      A document has been shared with you securely via VibeDocs. Click the button
       below to view it.
     </p>
 

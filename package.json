@@ -1,22 +1,25 @@
 {
-  "name": "docbase",
+  "name": "vibedocs",
   "version": "1.0.0",
   "private": true,
-  "description": "Open-source alternative to DocSend for secure document sharing with e-signatures and analytics",
+  "description": "Self-hosted document sharing with e-signatures and analytics. Customize everything, own your data. Forked from Docbase by Alana Goyal.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alanagoyal/docbase.git"
+    "url": "https://github.com/outcome-driven-studio/docbase.git"
   },
   "keywords": [
-    "docsend",
     "document-sharing",
     "e-signature",
+    "self-hosted",
     "analytics",
+    "docsend-alternative",
+    "docusign-alternative",
     "nextjs",
     "supabase",
-    "open-source"
+    "open-source",
+    "vibedocs"
   ],
-  "author": "Alana Goyal",
+  "author": "Outcome Driven Studio (forked from Docbase by Alana Goyal)",
   "license": "MIT",
   "scripts": {
     "setup": "node setup.js",
