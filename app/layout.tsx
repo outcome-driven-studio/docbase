@@ -17,10 +17,53 @@ import { KeyboardShortcutsProvider } from "@/contexts/keyboard-shortcuts-context
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
-  title: siteConfig.name,
-  description: siteConfig.tagline,
+  title: {
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  keywords: [
+    "document sharing",
+    "e-signature",
+    "self-hosted",
+    "open source",
+    "docsend alternative",
+    "docusign alternative",
+    "papermark alternative",
+    "document analytics",
+    "pdf sharing",
+  ],
+  authors: [
+    {
+      name: "Outcome Driven Studio",
+    },
+  ],
+  creator: "Outcome Driven Studio",
   openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteConfig.url,
+    title: siteConfig.name,
+    description: siteConfig.description,
+    siteName: siteConfig.name,
+    images: [
+      {
+        url: "/api/og",
+        width: 1200,
+        height: 630,
+        alt: siteConfig.name,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.name,
+    description: siteConfig.description,
     images: ["/api/og"],
+    creator: "@alanaagoyal",
+  },
+  icons: {
+    icon: "/favicon.ico",
   },
 }
 

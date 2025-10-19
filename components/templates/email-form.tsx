@@ -67,7 +67,7 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
                       letterSpacing: "-0.5px",
                     }}
                   >
-                    Docbase
+                    VibeDocs
                   </h1>
                   <p
                     style={{
@@ -76,7 +76,7 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
                       margin: "8px 0 0 0",
                     }}
                   >
-                    Secure Document Sharing
+                    Your vibe, your docs
                   </p>
                 </td>
               </tr>
@@ -176,9 +176,9 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
                     }}
                   >
                     This email was sent from{" "}
-                    <strong style={{ color: "#1a1a1a" }}>Docbase</strong>
+                    <strong style={{ color: "#1a1a1a" }}>VibeDocs</strong>
                     <br />
-                    Open-source document sharing platform
+                    Self-hosted document sharing platform
                   </p>
                 </td>
               </tr>

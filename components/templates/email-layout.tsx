@@ -63,7 +63,7 @@ export const EmailLayout: React.FC<Readonly<EmailLayoutProps>> = ({
                       letterSpacing: "-0.5px",
                     }}
                   >
-                    Docbase
+                    VibeDocs
                   </h1>
                   <p
                     style={{
@@ -72,7 +72,7 @@ export const EmailLayout: React.FC<Readonly<EmailLayoutProps>> = ({
                       margin: "8px 0 0 0",
                     }}
                   >
-                    Secure Document Sharing
+                    Your vibe, your docs
                   </p>
                 </td>
               </tr>
@@ -104,7 +104,7 @@ export const EmailLayout: React.FC<Readonly<EmailLayoutProps>> = ({
                     <a
                       href={
                         process.env.NEXT_PUBLIC_SITE_URL ||
-                        "https://docbase.app"
+                        "http://localhost:3000"
                       }
                       style={{
                         color: "#1a1a1a",
@@ -112,10 +112,10 @@ export const EmailLayout: React.FC<Readonly<EmailLayoutProps>> = ({
                         fontWeight: "500",
                       }}
                     >
-                      Docbase
+                      VibeDocs
                     </a>
                     <br />
-                    Open-source document sharing platform
+                    Self-hosted document sharing platform
                   </p>
                 </td>
               </tr>

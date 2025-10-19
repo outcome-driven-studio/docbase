@@ -251,7 +251,7 @@ export default function AccountForm({ account }: { account: User | null }) {
       // Check if this was first-time onboarding
       if (data.name) {
         toast({
-          title: "Welcome to Docbase!",
+          title: "Welcome to VibeDocs!",
           description: "Your profile is set up. Let's create your first link.",
         })
         router.push("/links")

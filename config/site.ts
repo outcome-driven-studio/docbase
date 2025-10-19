@@ -1,12 +1,12 @@
 export const siteConfig = {
-  name: "Docbase",
-  tagline: "Open-source alternative to Docsend",
+  name: "VibeDocs",
+  tagline: "Your vibe, your docs, your rules",
   description:
-    "Share documents securely with permission controls, passcodes, signatures, and expiration dates",
+    "Self-hosted document sharing with e-signatures and analytics. Customize everything, own your data, skip the SaaS tax. Forked from Docbase by Alana Goyal.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   ogImage: `${
     process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-  }/opengraph-image`,
+  }/api/og`,
   links: {
     twitter: "https://twitter.com/alanaagoyal",
     github: "https://github.com/outcome-driven-studio/docbase",
