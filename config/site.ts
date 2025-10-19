@@ -9,6 +9,6 @@ export const siteConfig = {
   }/opengraph-image`,
   links: {
     twitter: "https://twitter.com/alanaagoyal",
-    github: "https://github.com/alanagoyal/docbase",
+    github: "https://github.com/outcome-driven-studio/docbase",
   },
 }
