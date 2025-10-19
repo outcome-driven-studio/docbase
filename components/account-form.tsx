@@ -11,11 +11,6 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 
 import { Database } from "@/types/supabase"
-
-type Entity = (Database["public"]["Tables"]["funds"]["Row"] | Database["public"]["Tables"]["companies"]["Row"]) & {
-  type: "fund" | "company"
-  contact_id?: string
-}
 import { clientLogger } from "@/lib/client-logger"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -43,6 +38,14 @@ import {
 } from "./ui/card"
 import { Textarea } from "./ui/textarea"
 
+type Entity = (
+  | Database["public"]["Tables"]["funds"]["Row"]
+  | Database["public"]["Tables"]["companies"]["Row"]
+) & {
+  type: "fund" | "company"
+  contact_id?: string
+}
+
 const accountFormSchema = z.object({
   email: z.string().email(),
   name: z.string().optional(),
@@ -68,10 +71,12 @@ export default function AccountForm({ account }: { account: User | null }) {
   const [showAdditionalFields, setShowAdditionalFields] = useState(false)
   const [signatureFile, setSignatureFile] = useState<File | null>(null)
   const [parsingSignature, setParsingSignature] = useState(false)
-  const [signatureImageFile, setSignatureImageFile] = useState<File | null>(null)
-  const [signatureImagePreview, setSignatureImagePreview] = useState<string | null>(
-    account?.signature_url || null
+  const [signatureImageFile, setSignatureImageFile] = useState<File | null>(
+    null
   )
+  const [signatureImagePreview, setSignatureImagePreview] = useState<
+    string | null
+  >(account?.signature_url || null)
   const [uploadingSignature, setUploadingSignature] = useState(false)
 
   const form = useForm<AccountFormValues>({
@@ -150,10 +155,17 @@ export default function AccountForm({ account }: { account: User | null }) {
         ...form.getValues(),
         type: firstEntity.type,
         entity_name: firstEntity.name || "",
-        byline: firstEntity.type === "fund" && "byline" in firstEntity ? firstEntity.byline || "" : "",
+        byline:
+          firstEntity.type === "fund" && "byline" in firstEntity
+            ? firstEntity.byline || ""
+            : "",
         street: firstEntity.street || "",
         city_state_zip: firstEntity.city_state_zip || "",
-        state_of_incorporation: firstEntity.type === "company" && "state_of_incorporation" in firstEntity ? firstEntity.state_of_incorporation || "" : "",
+        state_of_incorporation:
+          firstEntity.type === "company" &&
+          "state_of_incorporation" in firstEntity
+            ? firstEntity.state_of_incorporation || ""
+            : "",
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -588,10 +600,18 @@ export default function AccountForm({ account }: { account: User | null }) {
           ...form.getValues(),
           type: selectedEntityDetails.type,
           entity_name: selectedEntityDetails.name || "",
-          byline: selectedEntityDetails.type === "fund" && "byline" in selectedEntityDetails ? selectedEntityDetails.byline || "" : "",
+          byline:
+            selectedEntityDetails.type === "fund" &&
+            "byline" in selectedEntityDetails
+              ? selectedEntityDetails.byline || ""
+              : "",
           street: selectedEntityDetails.street || "",
           city_state_zip: selectedEntityDetails.city_state_zip || "",
-          state_of_incorporation: selectedEntityDetails.type === "company" && "state_of_incorporation" in selectedEntityDetails ? selectedEntityDetails.state_of_incorporation || "" : "",
+          state_of_incorporation:
+            selectedEntityDetails.type === "company" &&
+            "state_of_incorporation" in selectedEntityDetails
+              ? selectedEntityDetails.state_of_incorporation || ""
+              : "",
         })
       }
     }
@@ -868,7 +888,8 @@ export default function AccountForm({ account }: { account: User | null }) {
             <div className="w-full space-y-2">
               <FormLabel>Personal Signature</FormLabel>
               <FormDescription>
-                Upload your handwritten signature to personalize shared documents
+                Upload your handwritten signature to personalize shared
+                documents
               </FormDescription>
               <div className="space-y-3">
                 {signatureImagePreview && (
@@ -882,7 +903,7 @@ export default function AccountForm({ account }: { account: User | null }) {
                       type="button"
                       variant="destructive"
                       size="sm"
-                      className="absolute -right-2 -top-2 size-6 rounded-full p-0"
+                      className="absolute -right-2 -top-2 size-8 rounded-full p-0"
                       onClick={() => {
                         setSignatureImageFile(null)
                         setSignatureImagePreview(null)

@@ -199,10 +199,10 @@ export default function ViewLinkPage({
           link.viewer_page_heading ||
           link.viewer_page_subheading ||
           link.viewer_page_cover_letter) && (
-          <div className="mx-auto max-w-4xl space-y-2 px-4 py-8">
+          <div className="mx-auto max-w-4xl space-y-2 px-2 py-2 sm:px-4 sm:py-3 mb-4">
             {link.viewer_page_cover_letter && (
               <div
-                className="relative mx-auto max-w-3xl border border-amber-200/60 bg-white bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-orange-50/60 p-8 shadow-md dark:border-amber-900/40 dark:from-amber-950/30 dark:to-orange-950/20"
+                className="relative mx-auto max-w-3xl border border-amber-200/60 bg-white bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-orange-50/60 p-4 shadow-md dark:border-amber-900/40 dark:from-amber-950/30 dark:to-orange-950/20 sm:p-4"
                 style={{
                   background: "#fffcf4",
                   backgroundImage: `
@@ -227,22 +227,24 @@ export default function ViewLinkPage({
                 <img
                   src="/VibeTM-Stamp.png"
                   alt="Stamp"
-                  className="h-24 w-24 object-contain opacity-80 ml-[-8px]"
+                  className="ml-[-8px] h-16 w-16 object-contain opacity-80 sm:h-24 sm:w-24"
                 />
                 <p
-                  className={`whitespace-pre-wrap mt-4 text-lg leading-relaxed ${getColorClass(
+                  className={`mt-4 whitespace-pre-wrap text-sm leading-relaxed sm:text-2xl ${getColorClass(
                     link.cover_letter_color
                   )}`}
-                  style={{ fontFamily: getFontFamily(link.cover_letter_font) }}
+                  style={{
+                    fontFamily: getFontFamily(link.cover_letter_font),
+                  }}
                 >
                   {link.viewer_page_cover_letter}
                 </p>
                 {link.show_creator_signature && link.creator_signature_url && (
-                  <div className="mt-12 flex flex-col items-start">
+                  <div className="mt-8 flex flex-col items-start sm:mt-12">
                     <img
                       src={link.creator_signature_url}
                       alt="Signature"
-                      className="h-10 w-auto object-contain"
+                      className="h-8 w-auto object-contain sm:h-10"
                     />
                   </div>
                 )}
@@ -255,7 +257,9 @@ export default function ViewLinkPage({
           linkId={link.id}
           filename={link.filename || "document.pdf"}
           allowDownload={link.allow_download !== false}
-          displayMode={(link.display_mode as "auto" | "slideshow" | "document") || "auto"}
+          displayMode={
+            (link.display_mode as "auto" | "slideshow" | "document") || "auto"
+          }
           logoUrl={link.viewer_page_logo_url}
           pageHeading={link.viewer_page_heading}
         />
@@ -273,29 +277,29 @@ export default function ViewLinkPage({
           link.viewer_page_heading ||
           link.viewer_page_subheading ||
           link.viewer_page_cover_letter) && (
-          <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+          <div className="mx-auto max-w-4xl space-y-4 px-2 py-4 sm:space-y-6 sm:px-4 sm:py-8">
             {link.viewer_page_logo_url && (
               <div className="flex justify-center">
                 <img
                   src={link.viewer_page_logo_url}
                   alt="Logo"
-                  className="h-12 w-auto object-contain"
+                  className="h-10 w-auto object-contain sm:h-12"
                 />
               </div>
             )}
             {link.viewer_page_heading && (
-              <h1 className="text-center text-2xl font-medium tracking-tight md:text-3xl">
+              <h1 className="text-center text-xl font-medium tracking-tight sm:text-2xl md:text-3xl">
                 {link.viewer_page_heading}
               </h1>
             )}
             {link.viewer_page_subheading && (
-              <h2 className="text-center text-xl text-muted-foreground md:text-xl">
+              <h2 className="text-center text-lg text-muted-foreground sm:text-xl md:text-xl">
                 {link.viewer_page_subheading}
               </h2>
             )}
             {link.viewer_page_cover_letter && (
               <div
-                className="relative mx-auto max-w-2xl border border-amber-200/60 bg-white bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-orange-50/60 p-8 shadow-md dark:border-amber-900/40 dark:from-amber-950/30 dark:to-orange-950/20"
+                className="relative mx-auto max-w-2xl border border-amber-200/60 bg-white bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-orange-50/60 p-4 shadow-md dark:border-amber-900/40 dark:from-amber-950/30 dark:to-orange-950/20 sm:p-8"
                 style={{
                   background: "#fffcf4",
                   backgroundImage: `
@@ -320,10 +324,10 @@ export default function ViewLinkPage({
                 <img
                   src="/VibeTM-Stamp.png"
                   alt="Stamp"
-                  className="h-24 w-24 object-contain opacity-80 -ml-2"
+                  className="-ml-2 h-16 w-16 object-contain opacity-80 sm:h-24 sm:w-24"
                 />
                 <p
-                  className={`whitespace-pre-wrap mt-4 text-sm leading-relaxed ${getColorClass(
+                  className={`mt-4 whitespace-pre-wrap text-xs leading-relaxed sm:text-sm ${getColorClass(
                     link.cover_letter_color
                   )}`}
                   style={{ fontFamily: getFontFamily(link.cover_letter_font) }}
@@ -331,11 +335,11 @@ export default function ViewLinkPage({
                   {link.viewer_page_cover_letter}
                 </p>
                 {link.show_creator_signature && link.creator_signature_url && (
-                  <div className="mt-12 flex flex-col items-start">
+                  <div className="mt-8 flex flex-col items-start sm:mt-12">
                     <img
                       src={link.creator_signature_url}
                       alt="Signature"
-                      className="h-10 w-auto object-contain"
+                      className="h-8 w-auto object-contain sm:h-10"
                     />
                   </div>
                 )}
@@ -348,20 +352,22 @@ export default function ViewLinkPage({
           linkId={link.id}
           filename={link.filename || "document.pdf"}
           allowDownload={link.allow_download !== false}
-          displayMode={(link.display_mode as "auto" | "slideshow" | "document") || "auto"}
+          displayMode={
+            (link.display_mode as "auto" | "slideshow" | "document") || "auto"
+          }
           logoUrl={link.viewer_page_logo_url}
           pageHeading={link.viewer_page_heading}
         />
 
         {/* Floating Sign Button */}
-        <div className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2">
+        <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 sm:bottom-8">
           <Button
             size="lg"
             className="bg-purple-600 text-white shadow-lg hover:bg-purple-700"
             onClick={() => setShowSignatureModal(true)}
           >
             <svg
-              className="mr-2 size-5"
+              className="mr-2 size-4 sm:size-5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -373,7 +379,9 @@ export default function ViewLinkPage({
                 d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
               />
             </svg>
-            Sign Document to Continue
+            <span className="text-sm sm:text-base">
+              Sign Document to Continue
+            </span>
           </Button>
         </div>
 
