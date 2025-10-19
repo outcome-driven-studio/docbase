@@ -18,37 +18,52 @@ function getFallbackOGImage() {
       <div
         style={{
           fontSize: 100,
-          background: "white",
+          background: "#fafafa",
+          backgroundImage:
+            "linear-gradient(#e5e5e5 1px, transparent 1px), linear-gradient(90deg, #e5e5e5 1px, transparent 1px)",
+          backgroundSize: "50px 50px",
           width: "100%",
           height: "100%",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "space-between",
+          padding: "60px",
         }}
       >
-        <div
-          style={{
-            padding: "50px 200px",
-            textAlign: "center",
-            fontSize: "120px",
-            fontWeight: "bold",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <span
+        <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+          <div
             style={{
-              backgroundImage:
-                "linear-gradient(48deg, #74EBD5 0%, #9FACE6 100%)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              color: "transparent",
+              textAlign: "center",
+              fontSize: "120px",
+              fontWeight: "bold",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            Doc
-          </span>
-          <span style={{ color: "black" }}>base</span>
+            <span
+              style={{
+                backgroundImage:
+                  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+              }}
+            >
+              Vibe
+            </span>
+            <span style={{ color: "black" }}>Docs</span>
+          </div>
+        </div>
+        <div
+          style={{
+            fontSize: "16px",
+            color: "#666",
+            display: "flex",
+          }}
+        >
+          Forked from Docbase by Alana Goyal
         </div>
       </div>
     ),
@@ -88,7 +103,10 @@ export async function GET(request: Request) {
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
-            background: "white",
+            background: "#fafafa",
+            backgroundImage:
+              "linear-gradient(#e5e5e5 1px, transparent 1px), linear-gradient(90deg, #e5e5e5 1px, transparent 1px)",
+            backgroundSize: "50px 50px",
             fontFamily: "Arial, sans-serif",
             padding: "40px",
           }}
@@ -97,7 +115,7 @@ export async function GET(request: Request) {
             <span
               style={{
                 backgroundImage:
-                  "linear-gradient(48deg, #74EBD5 0%, #9FACE6 100%)",
+                  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 backgroundClip: "text",
                 WebkitBackgroundClip: "text",
                 color: "transparent",
@@ -105,9 +123,9 @@ export async function GET(request: Request) {
                 alignItems: "center",
               }}
             >
-              Doc
+              Vibe
             </span>
-            <span style={{ color: "black" }}>base</span>
+            <span style={{ color: "black" }}>Docs</span>
           </div>
           <div
             style={{
@@ -142,6 +160,15 @@ export async function GET(request: Request) {
               {fundName} &lt;&gt; {companyName}
             </div>
           </div>
+          <div
+            style={{
+              fontSize: "14px",
+              color: "#666",
+              display: "flex",
+            }}
+          >
+            Forked from Docbase by Alana Goyal
+          </div>
         </div>
       ),
       {
@@ -172,7 +199,10 @@ export async function GET(request: Request) {
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
-            background: "white",
+            background: "#fafafa",
+            backgroundImage:
+              "linear-gradient(#e5e5e5 1px, transparent 1px), linear-gradient(90deg, #e5e5e5 1px, transparent 1px)",
+            backgroundSize: "50px 50px",
             fontFamily: "Arial, sans-serif",
             padding: "40px",
           }}
@@ -181,7 +211,7 @@ export async function GET(request: Request) {
             <span
               style={{
                 backgroundImage:
-                  "linear-gradient(48deg, #74EBD5 0%, #9FACE6 100%)",
+                  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 backgroundClip: "text",
                 WebkitBackgroundClip: "text",
                 color: "transparent",
@@ -189,9 +219,9 @@ export async function GET(request: Request) {
                 alignItems: "center",
               }}
             >
-              Doc
+              Vibe
             </span>
-            <span style={{ color: "black" }}>base</span>
+            <span style={{ color: "black" }}>Docs</span>
           </div>
           <div
             style={{
@@ -225,6 +255,15 @@ export async function GET(request: Request) {
             >
               {filename || "Untitled Document"}
             </div>
+          </div>
+          <div
+            style={{
+              fontSize: "14px",
+              color: "#666",
+              display: "flex",
+            }}
+          >
+            Forked from Docbase by Alana Goyal
           </div>
         </div>
       ),
