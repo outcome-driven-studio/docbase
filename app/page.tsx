@@ -23,12 +23,30 @@ export default async function IndexPage() {
     account = accountData
   }
 
+  // Check if signups are disabled
+  const signupsDisabled = process.env.DISABLE_SIGNUPS === "true"
+
   return (
     <div className="mih-h-dvh flex flex-col">
       <GridBackground />
       <main className="container mx-auto my-48 grow">
         <section className="mx-auto max-w-3xl text-center">
-          <h1 className="mb-2 text-5xl font-semibold">{siteConfig.tagline}</h1>
+          <h1
+            style={{
+              fontFamily: "var(--font-cursive)",
+            }}
+            className="text-8xl font-semibold"
+          >
+            Vibe Docs
+          </h1>
+          <h1
+            style={{
+              fontFamily: "var(--font-sans)",
+            }}
+            className="mb-2 text-2xl"
+          >
+            {siteConfig.tagline}
+          </h1>
           <p className="text-md mx-auto mt-4 max-w-xl">
             {siteConfig.description}
           </p>
@@ -36,20 +54,13 @@ export default async function IndexPage() {
             {user ? (
               <Link href="/links">
                 <Button className="bg-primary text-primary-foreground transition-opacity hover:opacity-70">
-                  <Avatar className="mr-2 size-6">
-                    <AvatarFallback className="text-xs">
-                      {account?.name?.[0]?.toUpperCase() ||
-                        user.email?.[0]?.toUpperCase() ||
-                        "U"}
-                    </AvatarFallback>
-                  </Avatar>
                   Dashboard
                 </Button>
               </Link>
             ) : (
-              <Link href="/signup">
+              <Link href={signupsDisabled ? "/login" : "/signup"}>
                 <Button className="bg-primary text-primary-foreground transition-opacity hover:opacity-70">
-                  Get Started
+                  {signupsDisabled ? "Sign In" : "Get Started"}
                 </Button>
               </Link>
             )}

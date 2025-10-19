@@ -162,32 +162,22 @@ export default function SecurePDFViewer({
   return (
     <div className="flex w-full flex-col items-center">
       {/* Controls */}
-      <div className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-between gap-4 border-b bg-background p-4 shadow-sm">
-        <div className="flex items-center gap-2">
+      <div className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-between gap-2 border-b bg-background shadow-sm sm:gap-4">
+        <div className="flex items-center gap-1 sm:gap-2 mx-auto bg-gray-100 border border-gray-200 rounded-t-lg p-3">
           {isSlideshow && (
-            <>
-              <Button
-                onClick={goToPrevPage}
-                variant="outline"
-                size="sm"
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="size-4" />
-              </Button>
-              <Button
-                onClick={goToNextPage}
-                variant="outline"
-                size="sm"
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight className="size-4" />
-              </Button>
-            </>
+            <span className="text-xs text-muted-foreground sm:text-sm">
+              {currentPage} / {totalPages}
+            </span>
           )}
           {allowDownload && (
-            <Button onClick={handleDownload} variant="default" size="sm">
-              <Download className="mr-2 size-4" />
-              Download
+            <Button
+              onClick={handleDownload}
+              variant="default"
+              size="sm"
+              className="h-8 sm:h-9"
+            >
+              <Download className="size-4 sm:mr-2" />
+              <span className="hidden sm:inline">Download</span>
             </Button>
           )}
         </div>
@@ -203,19 +193,42 @@ export default function SecurePDFViewer({
       >
         {loading && (
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <p className="text-muted-foreground">Loading document...</p>
+            <p className="text-sm text-muted-foreground sm:text-base">
+              Loading document...
+            </p>
           </div>
         )}
 
         {isSlideshow ? (
           <div
             ref={containerRef}
-            className="flex w-full items-center justify-center bg-gray-100 dark:bg-gray-900"
+            className="relative flex w-full items-center justify-center bg-gray-100 p-2 dark:bg-gray-900 sm:p-4"
             style={{
-              height: "calc(100vh - 80px)",
+              minHeight: "calc(100vh - 60px)",
+              maxHeight: "calc(100vh - 60px)",
               overflow: "hidden",
             }}
           >
+            {/* Left Navigation Overlay */}
+            <Button
+              onClick={goToPrevPage}
+              variant="ghost"
+              disabled={currentPage === 1}
+              className="absolute left-2 top-1/2 z-20 h-12 w-12 -translate-y-1/2 rounded-full bg-black/20 p-0 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-30 sm:left-4 sm:h-16 sm:w-16"
+            >
+              <ChevronLeft className="size-6 sm:size-8" />
+            </Button>
+
+            {/* Right Navigation Overlay */}
+            <Button
+              onClick={goToNextPage}
+              variant="ghost"
+              disabled={currentPage === totalPages}
+              className="absolute right-2 top-1/2 z-20 h-12 w-12 -translate-y-1/2 rounded-full bg-black/20 p-0 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-30 sm:right-4 sm:h-16 sm:w-16"
+            >
+              <ChevronRight className="size-6 sm:size-8" />
+            </Button>
+
             {pdfUrl && (
               <Document
                 file={pdfUrl}
@@ -223,8 +236,8 @@ export default function SecurePDFViewer({
                 loading={
                   <div className="flex items-center justify-center">
                     <div className="flex flex-col items-center gap-2">
-                      <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                      <p className="text-sm text-muted-foreground">
+                      <div className="size-6 animate-spin rounded-full border-4 border-primary border-t-transparent sm:size-8" />
+                      <p className="text-xs text-muted-foreground sm:text-sm">
                         Loading presentation...
                       </p>
                     </div>
@@ -233,15 +246,19 @@ export default function SecurePDFViewer({
               >
                 <Page
                   pageNumber={currentPage}
-                  height={window.innerHeight - 80}
+                  width={
+                    containerRef.current
+                      ? Math.min(containerRef.current.offsetWidth - 32, 1200)
+                      : undefined
+                  }
                   renderTextLayer={false}
                   renderAnnotationLayer={false}
-                  className="max-w-full"
+                  className="max-h-full max-w-full shadow-lg"
                   loading={
                     <div className="flex items-center justify-center">
                       <div className="flex flex-col items-center gap-2">
-                        <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                        <p className="text-sm text-muted-foreground">
+                        <div className="size-6 animate-spin rounded-full border-4 border-primary border-t-transparent sm:size-8" />
+                        <p className="text-xs text-muted-foreground sm:text-sm">
                           Loading slide {currentPage}...
                         </p>
                       </div>
@@ -252,19 +269,21 @@ export default function SecurePDFViewer({
             )}
           </div>
         ) : (
-          <iframe
-            ref={iframeRef}
-            src={`/api/view-document/${linkId}#toolbar=${
-              allowDownload ? "1" : "0"
-            }&navpanes=0`}
-            className="h-screen w-full border-0"
-            title={filename}
-            onLoad={() => setLoading(false)}
-            style={{
-              minHeight: "calc(100vh - 80px)",
-              overflow: "auto",
-            }}
-          />
+          <div className="w-full max-w-7xl px-2 sm:px-4">
+            <iframe
+              ref={iframeRef}
+              src={`/api/view-document/${linkId}#toolbar=${
+                allowDownload ? "1" : "0"
+              }&navpanes=0`}
+              className="h-screen w-full border-0"
+              title={filename}
+              onLoad={() => setLoading(false)}
+              style={{
+                minHeight: "calc(100vh - 60px)",
+                overflow: "auto",
+              }}
+            />
+          </div>
         )}
       </div>
     </div>
