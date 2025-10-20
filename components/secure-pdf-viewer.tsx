@@ -78,10 +78,8 @@ export default function SecurePDFViewer({
         const page = await pdf.getPage(1)
         const viewport = page.getViewport({ scale: 1 })
 
-        // If landscape (width > height), use slideshow mode
-        if (viewport.width > viewport.height) {
-          setIsSlideshow(true)
-        }
+        // Use slideshow mode for all documents
+        setIsSlideshow(true)
       }
       reader.readAsArrayBuffer(blob)
     } catch (error) {
@@ -274,9 +272,9 @@ export default function SecurePDFViewer({
               >
                 <Page
                   pageNumber={currentPage}
-                  width={
+                  height={
                     containerRef.current
-                      ? Math.min(containerRef.current.offsetWidth - 32, 1200)
+                      ? containerRef.current.offsetHeight - 32
                       : undefined
                   }
                   renderTextLayer={false}

@@ -39,23 +39,23 @@ const getFontFamily = (font: string | null) => {
 const getColorClass = (color: string | null) => {
   switch (color) {
     case "gray-800":
-      return "text-gray-800 dark:text-white"
+      return "text-gray-800"
     case "black":
-      return "text-black dark:text-white"
+      return "text-black"
     case "blue-600":
-      return "text-blue-600 dark:text-white"
+      return "text-blue-600"
     case "indigo-600":
-      return "text-indigo-600 dark:text-white"
+      return "text-indigo-600"
     case "purple-600":
-      return "text-purple-600 dark:text-white"
+      return "text-purple-600"
     case "green-600":
-      return "text-green-600 dark:text-white"
+      return "text-green-600"
     case "red-600":
-      return "text-red-600 dark:text-white"
+      return "text-red-600"
     case "amber-700":
-      return "text-amber-700 dark:text-white"
+      return "text-amber-700"
     default:
-      return "text-gray-800 dark:text-white"
+      return "text-gray-800"
   }
 }
 
@@ -202,7 +202,7 @@ export default function ViewLinkPage({
           <div className="mx-auto max-w-4xl space-y-2 px-2 py-2 sm:px-4 sm:py-3 mb-4">
             {link.viewer_page_cover_letter && (
               <div
-                className="relative mx-auto max-w-3xl border border-amber-200/60 bg-white bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-orange-50/60 p-4 shadow-md dark:border-amber-900/40 dark:from-amber-950/30 dark:to-orange-950/20 sm:p-4"
+                className="relative mx-auto rounded-xl max-w-3xl border border-amber-200/60 bg-white bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-orange-50/60 p-4 shadow-md dark:border-amber-900/40 dark:from-amber-950/30 dark:to-orange-950/20 sm:p-4"
                 style={{
                   background: "#fffcf4",
                   backgroundImage: `
