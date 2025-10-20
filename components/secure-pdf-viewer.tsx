@@ -164,12 +164,12 @@ export default function SecurePDFViewer({
   return (
     <div className="flex w-full flex-col items-center">
       {/* Controls */}
-      <div className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-between gap-2 border-b bg-background shadow-sm sm:gap-4">
+      <div className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-between gap-2 bg-background sm:gap-4">
         {isSlideshow && (
           <div className="flex w-full items-center justify-center gap-3 sm:gap-6 pt-2">
             {/* Center - Browser tab style with logo and filename */}
             {(logoUrl || pageHeading || filename) && (
-              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-t-lg px-4 py-2 shadow-sm max-w-xs sm:max-w-md">
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-t-lg px-4 py-2 shadow-sm max-w-xs sm:max-w-md">
                 {logoUrl && (
                   <div className="flex-shrink-0">
                     <Image
@@ -213,7 +213,7 @@ export default function SecurePDFViewer({
 
       {/* PDF Viewer */}
       <div
-        className="flex w-full flex-col items-center bg-gray-100 dark:bg-gray-900"
+        className="flex w-full flex-col items-center bg-gray-100 dark:bg-gray-900 rounded-lg"
         onContextMenu={disableContextMenu}
         style={{
           overflow: isSlideshow ? "hidden" : "auto",
@@ -242,7 +242,7 @@ export default function SecurePDFViewer({
               onClick={goToPrevPage}
               variant="ghost"
               disabled={currentPage === 1}
-              className="absolute left-2 top-1/2 z-20 h-12 w-12 -translate-y-1/2 rounded-full bg-black/20 p-0 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-30 sm:left-4 sm:h-16 sm:w-16"
+              className="absolute left-2 top-1/2 z-20 h-12 w-12 -translate-y-1/2 rounded-full p-0 text-gray-400 transition-all disabled:opacity-30 sm:left-4 sm:h-16 sm:w-16"
             >
               <ChevronLeft className="size-6 sm:size-8" />
             </Button>
@@ -252,7 +252,7 @@ export default function SecurePDFViewer({
               onClick={goToNextPage}
               variant="ghost"
               disabled={currentPage === totalPages}
-              className="absolute right-2 top-1/2 z-20 h-12 w-12 -translate-y-1/2 rounded-full bg-black/20 p-0 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-30 sm:right-4 sm:h-16 sm:w-16"
+              className="absolute right-2 top-1/2 z-20 h-12 w-12 -translate-y-1/2 rounded-full p-0 text-gray-400 transition-all disabled:opacity-30 sm:right-4 sm:h-16 sm:w-16"
             >
               <ChevronRight className="size-6 sm:size-8" />
             </Button>
