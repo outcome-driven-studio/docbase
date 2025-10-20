@@ -6,6 +6,8 @@ import { Document, Page, pdfjs } from "react-pdf"
 
 import "react-pdf/dist/esm/Page/AnnotationLayer.css"
 import "react-pdf/dist/esm/Page/TextLayer.css"
+import Image from "next/image"
+
 import { clientLogger } from "@/lib/client-logger"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/components/ui/use-toast"
@@ -163,24 +165,50 @@ export default function SecurePDFViewer({
     <div className="flex w-full flex-col items-center">
       {/* Controls */}
       <div className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-between gap-2 border-b bg-background shadow-sm sm:gap-4">
-        <div className="flex items-center gap-1 sm:gap-2 mx-auto bg-gray-100 border border-gray-200 rounded-t-lg p-3">
-          {isSlideshow && (
-            <span className="text-xs text-muted-foreground sm:text-sm">
-              {currentPage} / {totalPages}
-            </span>
-          )}
-          {allowDownload && (
-            <Button
-              onClick={handleDownload}
-              variant="default"
-              size="sm"
-              className="h-8 sm:h-9"
-            >
-              <Download className="size-4 sm:mr-2" />
-              <span className="hidden sm:inline">Download</span>
-            </Button>
-          )}
-        </div>
+        {isSlideshow && (
+          <div className="flex w-full items-center justify-center gap-3 sm:gap-6 pt-2">
+            {/* Center - Browser tab style with logo and filename */}
+            {(logoUrl || pageHeading || filename) && (
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-t-lg px-4 py-2 shadow-sm max-w-xs sm:max-w-md">
+                {logoUrl && (
+                  <div className="flex-shrink-0">
+                    <Image
+                      src={logoUrl}
+                      alt="Logo"
+                      width={22}
+                      height={22}
+                      className="h-6 w-6 object-contain"
+                      unoptimized
+                    />
+                  </div>
+                )}
+                <span className="truncate text-xs font-medium text-gray-700 dark:text-gray-300 sm:text-sm">
+                  {pageHeading || filename}
+                </span>
+                <div className="flex items-center gap-1 sm:gap-2 bg-gray-800 border border-gray-200 rounded-lg px-2 py-1">
+                  <span className="text-xs text-white sm:text-sm">
+                    {currentPage} / {totalPages}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Right side - Download button */}
+            {allowDownload && (
+              <div className="flex items-center gap-1 sm:gap-2 bg-gray-100 border border-gray-200 rounded-lg px-2 py-2">
+                <Button
+                  onClick={handleDownload}
+                  variant="default"
+                  size="sm"
+                  className="h-8 sm:h-9"
+                >
+                  <Download className="size-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Download</span>
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* PDF Viewer */}
