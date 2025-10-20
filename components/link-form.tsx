@@ -361,7 +361,7 @@ export default function LinkForm({
       }
 
       setFile(droppedFile)
-      form.setValue("filename", droppedFile.name)
+      form.setValue("filename", droppedFile.name, { shouldDirty: true })
       toast({
         description: "File selected successfully",
       })
@@ -720,7 +720,7 @@ export default function LinkForm({
                       placeholder="e.g., Please sign to confirm you agree to these terms"
                       value={form.watch("signatureInstructions") || ""}
                       onChange={(e) =>
-                        form.setValue("signatureInstructions", e.target.value)
+                        form.setValue("signatureInstructions", e.target.value, { shouldDirty: true })
                       }
                     />
                   </FormControl>
@@ -1095,7 +1095,7 @@ export default function LinkForm({
               disabled={
                 isUploading ||
                 (!file && !link) ||
-                (!!link && !file && !form.formState.isDirty)
+                (!!link && !file && !logoFile && !form.formState.isDirty)
               }
             >
               {isUploading
