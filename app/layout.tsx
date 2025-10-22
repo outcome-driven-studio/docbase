@@ -8,6 +8,7 @@ import { validateEnvironmentVariables } from "@/lib/env-validation"
 import { fontSans, fontCursive } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
+import { BuyMeCoffee } from "@/components/buy-me-coffee"
 import { CommandMenu } from "@/components/command-menu"
 import { SiteHeader } from "@/components/site-header"
 import { StorageBanner } from "@/components/storage-banner"
@@ -107,20 +108,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
             strategy="beforeInteractive"
           />
-          {/* Buy Me a Coffee Widget */}
-          <Script
-            data-name="BMC-Widget"
-            data-cfasync="false"
-            src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
-            data-id="ani.ods"
-            data-description="Support me on Buy me a coffee!"
-            data-message="Thank you for using VibeDocs (it's free forever). Want to get my next coffee?"
-            data-color="#FF813F"
-            data-position="Right"
-            data-x_margin="18"
-            data-y_margin="18"
-            strategy="lazyOnload"
-          />
         </head>
         <body
           className={cn(
@@ -140,6 +127,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                 <div className="flex-1"></div>
               </div>
               <TailwindIndicator />
+              <BuyMeCoffee />
             </KeyboardShortcutsProvider>
           </ThemeProvider>
         </body>
