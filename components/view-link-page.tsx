@@ -202,7 +202,7 @@ export default function ViewLinkPage({
           <div className="mx-auto max-w-4xl space-y-2 px-2 py-2 sm:px-4 sm:py-3 mb-4">
             {link.viewer_page_cover_letter && (
               <div
-                className="relative mx-auto rounded-xl max-w-3xl border border-amber-200/60 bg-white bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-orange-50/60 p-4 shadow-md dark:border-amber-900/40 dark:from-amber-950/30 dark:to-orange-950/20 sm:p-4"
+                className="relative mx-auto rounded-xl max-w-4xl border border-amber-200/60 bg-white bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-orange-50/60 p-4 shadow-md dark:border-amber-900/40 dark:from-amber-950/30 dark:to-orange-950/20 sm:p-4"
                 style={{
                   background: "#fffcf4",
                   backgroundImage: `
@@ -230,12 +230,9 @@ export default function ViewLinkPage({
                   className="ml-[-8px] h-16 w-16 object-contain opacity-80 sm:h-24 sm:w-24"
                 />
                 <p
-                  className={`mt-4 whitespace-pre-wrap text-sm leading-relaxed sm:text-2xl ${getColorClass(
+                  className={`mt-4 whitespace-pre-wrap text-sm leading-relaxed font-serif italic sm:text-md ${getColorClass(
                     link.cover_letter_color
                   )}`}
-                  style={{
-                    fontFamily: getFontFamily(link.cover_letter_font),
-                  }}
                 >
                   {link.viewer_page_cover_letter}
                 </p>
