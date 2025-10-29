@@ -230,15 +230,14 @@ export default function ViewLinkPage({
                   className="ml-[-8px] h-16 w-16 object-contain opacity-80 sm:h-24 sm:w-24"
                 />
                 <p
-                  className={`mt-4 whitespace-pre-wrap text-sm leading-relaxed sm:text-lg ${getColorClass(
+                  className={`mt-4 whitespace-pre-wrap text-sm leading-relaxed font-mono sm:text-md ${getColorClass(
                     link.cover_letter_color
                   )}`}
-                  style={{ fontFamily: "var(--font-cursive)" }}
                 >
                   {link.viewer_page_cover_letter}
                 </p>
                 {link.show_creator_signature && link.creator_signature_url && (
-                  <div className="mt-8 flex flex-col items-start sm:mt-12">
+                  <div className="mt-6 flex flex-col items-start sm:mt-8 opacity-80">
                     <img
                       src={link.creator_signature_url}
                       alt="Signature"
@@ -325,10 +324,9 @@ export default function ViewLinkPage({
                   className="-ml-2 h-16 w-16 object-contain opacity-80 sm:h-24 sm:w-24"
                 />
                 <p
-                  className={`mt-4 whitespace-pre-wrap text-xs leading-relaxed sm:text-sm ${getColorClass(
+                  className={`mt-4 whitespace-pre-wrap text-xs leading-relaxed font-mono sm:text-sm ${getColorClass(
                     link.cover_letter_color
                   )}`}
-                  style={{ fontFamily: "var(--font-cursive)" }}
                 >
                   {link.viewer_page_cover_letter}
                 </p>
