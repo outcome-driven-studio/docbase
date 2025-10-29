@@ -230,9 +230,10 @@ export default function ViewLinkPage({
                   className="ml-[-8px] h-16 w-16 object-contain opacity-80 sm:h-24 sm:w-24"
                 />
                 <p
-                  className={`mt-4 whitespace-pre-wrap text-sm leading-relaxed font-serif italic sm:text-md ${getColorClass(
+                  className={`mt-4 whitespace-pre-wrap text-sm leading-relaxed sm:text-lg ${getColorClass(
                     link.cover_letter_color
                   )}`}
+                  style={{ fontFamily: "var(--font-cursive)" }}
                 >
                   {link.viewer_page_cover_letter}
                 </p>
@@ -327,7 +328,7 @@ export default function ViewLinkPage({
                   className={`mt-4 whitespace-pre-wrap text-xs leading-relaxed sm:text-sm ${getColorClass(
                     link.cover_letter_color
                   )}`}
-                  style={{ fontFamily: getFontFamily(link.cover_letter_font) }}
+                  style={{ fontFamily: "var(--font-cursive)" }}
                 >
                   {link.viewer_page_cover_letter}
                 </p>

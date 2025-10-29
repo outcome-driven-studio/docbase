@@ -382,7 +382,7 @@ export default function ApiKeysTab({ account }: { account: User | null }) {
           <DialogHeader>
             <DialogTitle>API Key Created!</DialogTitle>
             <DialogDescription>
-              Make sure to copy your API key now. You won't be able to see it again!
+              Make sure to copy your API key now. You won&apos;t be able to see it again!
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">

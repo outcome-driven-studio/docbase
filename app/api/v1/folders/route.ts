@@ -27,7 +27,7 @@ async function validateApiKey(authHeader: string | null): Promise<{ userId: stri
 
   const { data, error } = await supabase
     .rpc("validate_api_key", { api_key_hash: keyHash })
-    .single()
+    .single<{ user_id: string; is_valid: boolean }>()
 
   if (error || !data) {
     logger.error("API key validation failed", { error })
