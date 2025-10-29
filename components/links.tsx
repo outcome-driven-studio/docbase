@@ -87,6 +87,17 @@ export function Links({ links, account }: { links: Link[]; account: User }) {
   }
 
   const deleteLink = async (linkId: string) => {
+    // First, delete the storage file
+    const { error: storageError } = await supabase.storage
+      .from("cube")
+      .remove([linkId])
+
+    if (storageError) {
+      console.warn("Failed to delete storage file:", storageError)
+      // Continue with link deletion even if storage deletion fails
+    }
+
+    // Then delete the link record
     const { error } = await supabase.rpc("delete_link", {
       link_id: linkId,
       user_id: account.id,

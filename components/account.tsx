@@ -10,6 +10,7 @@ import AccountTabContent from "./account-form"
 import DomainTabContent from "./domain-form"
 import PasswordTabContent from "./password-form"
 import SlackIntegrationTab from "./slack-integration"
+import ApiKeysTab from "./api-keys-tab"
 
 type User = Database["public"]["Tables"]["users"]["Row"]
 type Domain = Database["public"]["Tables"]["domains"]["Row"]
@@ -29,7 +30,7 @@ export default function Account({
     // Get the current tab from the URL query parameter
     const tab = searchParams.get("tab")
     // Set the active tab based on the query parameter, or default to "profile"
-    setActiveTab(tab === "password" || tab === "domain" || tab === "slack" ? tab : "profile")
+    setActiveTab(tab === "password" || tab === "domain" || tab === "slack" || tab === "api-keys" ? tab : "profile")
   }, [searchParams])
 
   const handleTabChange = (value: string) => {
@@ -49,11 +50,12 @@ export default function Account({
         onValueChange={handleTabChange}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="password">Password</TabsTrigger>
           <TabsTrigger value="domain">Domain</TabsTrigger>
           <TabsTrigger value="slack">Slack</TabsTrigger>
+          <TabsTrigger value="api-keys">API Keys</TabsTrigger>
         </TabsList>
         <TabsContent value="profile">
           <AccountTabContent account={account} />
@@ -66,6 +68,9 @@ export default function Account({
         </TabsContent>
         <TabsContent value="slack">
           <SlackIntegrationTab account={account} domain={domain} />
+        </TabsContent>
+        <TabsContent value="api-keys">
+          <ApiKeysTab account={account} />
         </TabsContent>
       </Tabs>
     </div>

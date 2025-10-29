@@ -77,6 +77,53 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          id: string
+          created_at: string
+          user_id: string
+          name: string
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          is_active: boolean
+          expires_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          user_id: string
+          name: string
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          is_active?: boolean
+          expires_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          user_id?: string
+          name?: string
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          is_active?: boolean
+          expires_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_groups: {
         Row: {
           contact_id: string
@@ -858,6 +905,13 @@ export type Database = {
       delete_link: {
         Args: { link_id: string; user_id: string }
         Returns: undefined
+      }
+      validate_api_key: {
+        Args: { api_key_hash: string }
+        Returns: {
+          user_id: string
+          is_valid: boolean
+        }[]
       }
       get_link_analytics: {
         Args: { link_id_arg: string }
