@@ -158,7 +158,8 @@ export default function SlackIntegrationTab({
       "incoming-webhook",
     ].join(",")
 
-    const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}`
+    // Adding user_scope to enable workspace selection
+    const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}&team=`
 
     window.location.href = slackAuthUrl
   }
@@ -198,6 +199,34 @@ export default function SlackIntegrationTab({
     }
   }
 
+  async function handleSwitchWorkspace() {
+    try {
+      // Clear Slack credentials from domain
+      const { error } = await supabase
+        .from("domains")
+        .update({
+          slack_access_token: null,
+          slack_channel_id: null,
+          slack_channel_name: null,
+          slack_team_id: null,
+          slack_team_name: null,
+        })
+        .eq("user_id", account?.id)
+
+      if (error) throw error
+
+      // Redirect to Slack OAuth with workspace picker
+      handleConnectSlack()
+    } catch (error) {
+      clientLogger.error("Failed to switch workspace", { error })
+      toast({
+        title: "Error",
+        description: "Failed to switch workspace",
+        variant: "destructive",
+      })
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -218,14 +247,14 @@ export default function SlackIntegrationTab({
               <li>Someone signs your document</li>
             </ul>
 
-            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-900 dark:bg-yellow-950">
-              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                Important: Connecting to Your Workspace
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950">
+              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                Choose Your Workspace
               </p>
-              <ul className="mt-2 ml-4 list-disc space-y-1 text-xs text-yellow-700 dark:text-yellow-300">
-                <li>You must be an admin/owner of the Slack workspace</li>
-                <li>If you see the wrong workspace, sign out of Slack first</li>
-                <li>Then sign into your workspace and try again</li>
+              <ul className="mt-2 ml-4 list-disc space-y-1 text-xs text-blue-700 dark:text-blue-300">
+                <li>You'll be able to select which workspace to connect</li>
+                <li>You must be an admin/owner of the workspace</li>
+                <li>If logged into multiple workspaces, Slack will show a picker</li>
               </ul>
             </div>
 
@@ -258,9 +287,16 @@ export default function SlackIntegrationTab({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleDisconnect}
+                    onClick={handleSwitchWorkspace}
                   >
                     Switch Workspace
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDisconnect}
+                  >
+                    Disconnect
                   </Button>
                 </div>
               </div>
