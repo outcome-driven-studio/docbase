@@ -85,6 +85,13 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Log the team info for debugging
+    logger.info("Slack OAuth response", {
+      teamId: tokenData.team?.id,
+      teamName: tokenData.team?.name,
+      hasIncomingWebhook: !!tokenData.incoming_webhook,
+    })
+
     // Update or create domain with Slack credentials
     const { error: updateError } = await supabase
       .from("domains")
@@ -112,11 +119,16 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    logger.info("Slack integration successful", { userId: user.id })
+    const teamName = tokenData.team?.name || "workspace"
+    logger.info("Slack integration successful", {
+      userId: user.id,
+      teamId: tokenData.team?.id,
+      teamName,
+    })
 
     return NextResponse.redirect(
       new URL(
-        `/account?success=${encodeURIComponent("Slack connected successfully!")}`,
+        `/account?success=${encodeURIComponent(`Connected to ${teamName} successfully!`)}`,
         request.url
       )
     )
