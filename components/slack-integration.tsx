@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { createClient } from "@/utils/supabase/client"
+
 import { Database } from "@/types/supabase"
+import { clientLogger } from "@/lib/client-logger"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -20,8 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
+
 import { Icons } from "./icons"
-import { clientLogger } from "@/lib/client-logger"
 
 type User = Database["public"]["Tables"]["users"]["Row"]
 type Domain = Database["public"]["Tables"]["domains"]["Row"]
@@ -152,23 +154,23 @@ export default function SlackIntegrationTab({
     const clientId = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
     const redirectUri = `${appUrl}/api/slack/oauth`
-    
+
     // Bot scopes - for the app to post messages
     const scopes = [
       "chat:write",
       "channels:read",
       "groups:read",
       "incoming-webhook",
+      "teams:read",
     ].join(",")
 
     // User scopes - required to show workspace picker dropdown
-    const userScopes = [
-      "channels:read",
-      "groups:read",
-    ].join(",")
+    const userScopes = ["channels:read", "groups:read"].join(",")
 
     // Including user_scope parameter enables workspace selection dropdown
-    const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&user_scope=${userScopes}&redirect_uri=${encodeURIComponent(redirectUri)}`
+    const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&user_scope=${userScopes}&redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}`
 
     window.location.href = slackAuthUrl
   }
@@ -262,8 +264,14 @@ export default function SlackIntegrationTab({
               </p>
               <ul className="mt-2 ml-4 list-disc space-y-1 text-xs text-blue-700 dark:text-blue-300">
                 <li>You must be an admin/owner of the workspace</li>
-                <li>If logged into multiple Slack workspaces, you&apos;ll see a dropdown to choose</li>
-                <li>Look for the workspace name at the top of the authorization page</li>
+                <li>
+                  If logged into multiple Slack workspaces, you&apos;ll see a
+                  dropdown to choose
+                </li>
+                <li>
+                  Look for the workspace name at the top of the authorization
+                  page
+                </li>
               </ul>
             </div>
 
@@ -300,11 +308,7 @@ export default function SlackIntegrationTab({
                   >
                     Switch Workspace
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleDisconnect}
-                  >
+                  <Button variant="ghost" size="sm" onClick={handleDisconnect}>
                     Disconnect
                   </Button>
                 </div>
@@ -312,7 +316,9 @@ export default function SlackIntegrationTab({
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Notification Channel</label>
+              <label className="text-sm font-medium">
+                Notification Channel
+              </label>
               <Select
                 value={selectedChannel}
                 onValueChange={handleChannelChange}
@@ -344,7 +350,8 @@ export default function SlackIntegrationTab({
             {selectedChannel && (
               <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  Notifications for document views and signatures will be sent to{" "}
+                  Notifications for document views and signatures will be sent
+                  to{" "}
                   <strong>
                     #{channels.find((ch) => ch.id === selectedChannel)?.name}
                   </strong>
