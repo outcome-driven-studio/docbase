@@ -61,13 +61,40 @@ export default function ViewLinkForm({
     // Auto-grant access if:
     // 1. User is authenticated and no password required, OR
     // 2. No email required and no password required (open access)
-    if (
+    const shouldAutoGrant = 
       (account && !passwordRequired) ||
       (!requiresEmail && !passwordRequired)
-    ) {
-      setShowProgressBar(true)
+
+    if (shouldAutoGrant) {
+      // Capture viewer and send notifications before granting access
+      const captureViewer = async () => {
+        try {
+          const viewerEmail = account?.email || "anonymous"
+          
+          // Only capture if we have an email (authenticated user)
+          if (account?.email) {
+            await fetch("/api/capture-viewer", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ 
+                linkId: link.id, 
+                email: viewerEmail 
+              }),
+            })
+          }
+        } catch (error) {
+          clientLogger.error("Failed to capture viewer on auto-grant", { error })
+          // Don't block access if viewer capture fails
+        } finally {
+          setShowProgressBar(true)
+        }
+      }
+
+      captureViewer()
     }
-  }, [account, passwordRequired, requiresEmail])
+  }, [account, passwordRequired, requiresEmail, link.id])
 
   useEffect(() => {
     if (showProgressBar) {
@@ -150,16 +177,8 @@ export default function ViewLinkForm({
 
       // For authenticated users or no-email-required docs
       if (account) {
-        // Log viewer
-        const updates = {
-          link_id: link.id,
-          email: data.email,
-          viewed_at: new Date().toISOString(),
-        }
-        await supabase.from("viewers").insert(updates)
-
         if (passwordRequired) {
-          // Check password
+          // Check password first
           if (!data.password || !link.password) {
             throw new Error("Password is required")
           }
@@ -172,6 +191,25 @@ export default function ViewLinkForm({
             throw new Error("Incorrect password")
           }
         }
+
+        // Log viewer via API to trigger Slack notifications
+        const response = await fetch("/api/capture-viewer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            linkId: link.id, 
+            email: data.email || account.email 
+          }),
+        })
+
+        const result = await response.json()
+
+        if (!response.ok) {
+          throw new Error(result.error || "Failed to capture viewer")
+        }
+
         // Password is correct or not required, show progress bar
         setShowProgressBar(true)
       }
