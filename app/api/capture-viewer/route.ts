@@ -94,38 +94,58 @@ export async function POST(req: Request) {
 
     // Send Slack notification if configured (don't fail if Slack notification fails)
     try {
+      console.log("[capture-viewer] Checking Slack notification...")
       if (link.created_by) {
-        const { data: domain } = await supabase
+        console.log("[capture-viewer] Link creator:", link.created_by)
+        const { data: domain, error: domainError } = await supabase
           .from("domains")
           .select("slack_access_token, slack_channel_id")
           .eq("user_id", link.created_by)
           .single()
 
+        console.log("[capture-viewer] Domain query result:", {
+          hasToken: !!domain?.slack_access_token,
+          hasChannel: !!domain?.slack_channel_id,
+          channelId: domain?.slack_channel_id,
+          domainError
+        })
+
         if (
           domain?.slack_access_token &&
           domain?.slack_channel_id
         ) {
+          console.log("[capture-viewer] Sending Slack notification...")
           const documentName = link.name || link.filename || "Document"
           const { text, blocks } = createDocumentViewMessage(
             documentName,
             email
           )
 
-          await sendSlackNotification({
+          const result = await sendSlackNotification({
             accessToken: domain.slack_access_token,
             channelId: domain.slack_channel_id,
             text,
             blocks,
           })
 
+          console.log("[capture-viewer] Slack notification result:", result)
           logger.info("Slack notification sent for document view", {
             linkId,
             viewerEmail: email,
+            success: result.success,
+          })
+        } else {
+          console.log("[capture-viewer] Slack not configured - skipping notification")
+          logger.info("Slack notification skipped - not configured", {
+            linkId,
+            hasToken: !!domain?.slack_access_token,
+            hasChannel: !!domain?.slack_channel_id,
           })
         }
       }
     } catch (slackError) {
       // Log but don't fail the request if Slack notification fails
+      console.error("[capture-viewer] Slack notification error:", slackError)
       logger.error("Failed to send Slack notification for document view", {
         error: slackError,
         linkId,
