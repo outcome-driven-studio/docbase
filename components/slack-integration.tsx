@@ -252,7 +252,7 @@ export default function SlackIntegrationTab({
                 Choose Your Workspace
               </p>
               <ul className="mt-2 ml-4 list-disc space-y-1 text-xs text-blue-700 dark:text-blue-300">
-                <li>You'll be able to select which workspace to connect</li>
+                <li>You&apos;ll be able to select which workspace to connect</li>
                 <li>You must be an admin/owner of the workspace</li>
                 <li>If logged into multiple workspaces, Slack will show a picker</li>
               </ul>
