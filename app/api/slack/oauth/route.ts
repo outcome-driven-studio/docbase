@@ -30,7 +30,8 @@ export async function GET(request: NextRequest) {
     // Exchange code for access token
     const clientId = process.env.SLACK_CLIENT_ID
     const clientSecret = process.env.SLACK_CLIENT_SECRET
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/slack/oauth`
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin
+    const redirectUri = `${appUrl}/api/slack/oauth`
 
     if (!clientId || !clientSecret) {
       logger.error("Slack credentials not configured")

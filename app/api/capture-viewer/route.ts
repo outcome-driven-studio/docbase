@@ -90,6 +90,7 @@ export async function POST(req: Request) {
 
     console.log("[capture-viewer] Success!")
     logger.info("Viewer email captured", { linkId, email })
+    // Note: Contact is automatically created via database trigger on viewers table
 
     // Send Slack notification if configured (don't fail if Slack notification fails)
     try {
