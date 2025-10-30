@@ -161,14 +161,11 @@ export default function SlackIntegrationTab({
       "channels:read",
       "groups:read",
       "incoming-webhook",
-      "teams:read",
     ].join(",")
 
-    // User scopes - required to show workspace picker dropdown
-    const userScopes = ["channels:read", "groups:read"].join(",")
-
-    // Including user_scope parameter enables workspace selection dropdown
-    const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&user_scope=${userScopes}&redirect_uri=${encodeURIComponent(
+    // Note: Workspace picker appears when you're logged into multiple workspaces
+    // To switch workspaces, sign out of Slack first, then sign into the desired workspace
+    const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(
       redirectUri
     )}`
 
@@ -258,19 +255,21 @@ export default function SlackIntegrationTab({
               <li>Someone signs your document</li>
             </ul>
 
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950">
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                Workspace Selection
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950">
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                To Connect a Different Workspace
               </p>
-              <ul className="mt-2 ml-4 list-disc space-y-1 text-xs text-blue-700 dark:text-blue-300">
+              <ul className="mt-2 ml-4 list-disc space-y-1 text-xs text-amber-700 dark:text-amber-300">
                 <li>You must be an admin/owner of the workspace</li>
                 <li>
-                  On the Slack authorization page, look for a dropdown at the
-                  top-right to select your workspace
+                  Click &quot;Sign Out First&quot; below to sign out of your
+                  current Slack workspace
                 </li>
                 <li>
-                  If you don&apos;t see the dropdown, sign out of Slack first,
-                  then sign into the workspace you want to connect
+                  Sign into the Slack workspace you want to connect to DocBase
+                </li>
+                <li>
+                  Return here and click &quot;Connect to Slack&quot; again
                 </li>
               </ul>
             </div>
