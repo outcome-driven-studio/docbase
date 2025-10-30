@@ -119,12 +119,13 @@ export async function GET(request: NextRequest) {
         .eq("user_id", user.id)
       updateError = error
     } else {
-      // Create new domain with a default domain name
+      // Create new domain for Slack integration only
+      // Note: domain_name is nullable after migration, allowing Slack-only setup
       const { error } = await supabase
         .from("domains")
         .insert({
           user_id: user.id,
-          domain_name: "default", // Required field
+          domain_name: null, // Nullable - not required for Slack-only integration
           slack_access_token: tokenData.access_token,
           slack_channel_id: null,
           slack_channel_name: null,
