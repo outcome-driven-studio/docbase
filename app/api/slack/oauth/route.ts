@@ -94,24 +94,45 @@ export async function GET(request: NextRequest) {
       hasAccessToken: !!tokenData.access_token,
     })
 
+    // Check if domain already exists for this user
+    const { data: existingDomain } = await supabase
+      .from("domains")
+      .select("id, domain_name")
+      .eq("user_id", user.id)
+      .single()
+
     // Update or create domain with Slack credentials
     // Note: We're using OAuth with chat:write scope, not incoming webhooks
     // Channel selection happens after connection via the UI
-    const { error: updateError } = await supabase
-      .from("domains")
-      .upsert(
-        {
-          user_id: user.id,
+    let updateError
+    if (existingDomain) {
+      // Update existing domain
+      const { error } = await supabase
+        .from("domains")
+        .update({
           slack_access_token: tokenData.access_token,
           slack_channel_id: null, // Will be set when user selects a channel
           slack_channel_name: null,
           slack_team_id: tokenData.team?.id || null,
           slack_team_name: tokenData.team?.name || null,
-        },
-        {
-          onConflict: "user_id",
-        }
-      )
+        })
+        .eq("user_id", user.id)
+      updateError = error
+    } else {
+      // Create new domain with a default domain name
+      const { error } = await supabase
+        .from("domains")
+        .insert({
+          user_id: user.id,
+          domain_name: "default", // Required field
+          slack_access_token: tokenData.access_token,
+          slack_channel_id: null,
+          slack_channel_name: null,
+          slack_team_id: tokenData.team?.id || null,
+          slack_team_name: tokenData.team?.name || null,
+        })
+      updateError = error
+    }
 
     if (updateError) {
       logger.error("Failed to save Slack credentials", { error: updateError })
