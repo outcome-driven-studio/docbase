@@ -152,6 +152,8 @@ export default function SlackIntegrationTab({
     const clientId = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
     const redirectUri = `${appUrl}/api/slack/oauth`
+    
+    // Bot scopes - for the app to post messages
     const scopes = [
       "chat:write",
       "channels:read",
@@ -159,8 +161,14 @@ export default function SlackIntegrationTab({
       "incoming-webhook",
     ].join(",")
 
-    // Remove team parameter entirely to enable workspace picker
-    const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}`
+    // User scopes - required to show workspace picker dropdown
+    const userScopes = [
+      "channels:read",
+      "groups:read",
+    ].join(",")
+
+    // Including user_scope parameter enables workspace selection dropdown
+    const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&user_scope=${userScopes}&redirect_uri=${encodeURIComponent(redirectUri)}`
 
     window.location.href = slackAuthUrl
   }
