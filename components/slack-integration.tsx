@@ -51,6 +51,7 @@ export default function SlackIntegrationTab({
   const [isLoadingChannels, setIsLoadingChannels] = useState(false)
   const [isSavingChannel, setIsSavingChannel] = useState(false)
   const [teamName, setTeamName] = useState<string | null>(null)
+  const [isTestingConnection, setIsTestingConnection] = useState(false)
 
   useEffect(() => {
     // Check if Slack is connected
@@ -234,6 +235,37 @@ export default function SlackIntegrationTab({
     }
   }
 
+  async function handleTestConnection() {
+    setIsTestingConnection(true)
+    try {
+      const response = await fetch("/api/test-slack")
+      const data = await response.json()
+
+      if (data.success) {
+        toast({
+          title: "Test Successful! 🎉",
+          description: "Check your Slack channel - you should see a test notification!",
+        })
+      } else {
+        toast({
+          title: "Test Failed",
+          description: data.error || data.slackError || "Failed to send test notification",
+          variant: "destructive",
+        })
+        clientLogger.error("Slack test failed", { data })
+      }
+    } catch (error) {
+      clientLogger.error("Failed to test Slack connection", { error })
+      toast({
+        title: "Error",
+        description: "Failed to test Slack connection",
+        variant: "destructive",
+      })
+    } finally {
+      setIsTestingConnection(false)
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -357,15 +389,53 @@ export default function SlackIntegrationTab({
             </div>
 
             {selectedChannel && (
-              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
-                <p className="text-sm text-blue-800 dark:text-blue-200">
-                  Notifications for document views and signatures will be sent
-                  to{" "}
-                  <strong>
-                    #{channels.find((ch) => ch.id === selectedChannel)?.name}
-                  </strong>
-                </p>
-              </div>
+              <>
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    Notifications for document views and signatures will be sent
+                    to{" "}
+                    <strong>
+                      #{channels.find((ch) => ch.id === selectedChannel)?.name}
+                    </strong>
+                  </p>
+                </div>
+
+                <div className="pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleTestConnection}
+                    disabled={isTestingConnection}
+                    className="w-full"
+                  >
+                    {isTestingConnection ? (
+                      <>
+                        <Icons.spinner className="mr-2 size-4 animate-spin" />
+                        Sending Test...
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="mr-2 size-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        Test Slack Connection
+                      </>
+                    )}
+                  </Button>
+                  <p className="mt-2 text-center text-xs text-muted-foreground">
+                    Send a test notification to verify your setup
+                  </p>
+                </div>
+              </>
             )}
           </>
         )}
