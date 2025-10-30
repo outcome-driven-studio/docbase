@@ -150,7 +150,8 @@ export default function SlackIntegrationTab({
 
   function handleConnectSlack() {
     const clientId = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/slack/oauth`
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+    const redirectUri = `${appUrl}/api/slack/oauth`
     const scopes = [
       "chat:write",
       "channels:read",
@@ -158,8 +159,8 @@ export default function SlackIntegrationTab({
       "incoming-webhook",
     ].join(",")
 
-    // Adding user_scope to enable workspace selection
-    const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}&team=`
+    // Remove team parameter entirely to enable workspace picker
+    const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}`
 
     window.location.href = slackAuthUrl
   }
@@ -249,12 +250,12 @@ export default function SlackIntegrationTab({
 
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950">
               <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                Choose Your Workspace
+                Workspace Selection
               </p>
               <ul className="mt-2 ml-4 list-disc space-y-1 text-xs text-blue-700 dark:text-blue-300">
-                <li>You&apos;ll be able to select which workspace to connect</li>
                 <li>You must be an admin/owner of the workspace</li>
-                <li>If logged into multiple workspaces, Slack will show a picker</li>
+                <li>If logged into multiple Slack workspaces, you&apos;ll see a dropdown to choose</li>
+                <li>Look for the workspace name at the top of the authorization page</li>
               </ul>
             </div>
 
