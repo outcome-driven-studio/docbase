@@ -155,12 +155,11 @@ export default function SlackIntegrationTab({
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
     const redirectUri = `${appUrl}/api/slack/oauth`
 
-    // Bot scopes - for the app to post messages
+    // Bot scopes - for the app to post messages to channels
     const scopes = [
       "chat:write",
       "channels:read",
       "groups:read",
-      "incoming-webhook",
     ].join(",")
 
     // Note: Workspace picker appears when you're logged into multiple workspaces

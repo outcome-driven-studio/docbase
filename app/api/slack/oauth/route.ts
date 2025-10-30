@@ -90,18 +90,21 @@ export async function GET(request: NextRequest) {
     logger.info("Slack OAuth response", {
       teamId: tokenData.team?.id,
       teamName: tokenData.team?.name,
-      hasIncomingWebhook: !!tokenData.incoming_webhook,
+      botUserId: tokenData.bot_user_id,
+      hasAccessToken: !!tokenData.access_token,
     })
 
     // Update or create domain with Slack credentials
+    // Note: We're using OAuth with chat:write scope, not incoming webhooks
+    // Channel selection happens after connection via the UI
     const { error: updateError } = await supabase
       .from("domains")
       .upsert(
         {
           user_id: user.id,
           slack_access_token: tokenData.access_token,
-          slack_channel_id: tokenData.incoming_webhook?.channel_id || null,
-          slack_channel_name: tokenData.incoming_webhook?.channel || null,
+          slack_channel_id: null, // Will be set when user selects a channel
+          slack_channel_name: null,
           slack_team_id: tokenData.team?.id || null,
           slack_team_name: tokenData.team?.name || null,
         },
