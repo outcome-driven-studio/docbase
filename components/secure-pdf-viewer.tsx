@@ -22,6 +22,7 @@ interface SecurePDFViewerProps {
   displayMode?: "auto" | "slideshow" | "document"
   logoUrl?: string | null
   pageHeading?: string | null
+  viewerId?: string | null
 }
 
 export default function SecurePDFViewer({
@@ -31,6 +32,7 @@ export default function SecurePDFViewer({
   displayMode = "auto",
   logoUrl,
   pageHeading,
+  viewerId,
 }: SecurePDFViewerProps) {
   const [loading, setLoading] = useState<boolean>(true)
   const [isSlideshow, setIsSlideshow] = useState<boolean>(false)
@@ -40,6 +42,11 @@ export default function SecurePDFViewer({
   const [pdfUrl, setPdfUrl] = useState<string>("")
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  
+  // Page tracking state
+  const [sessionId] = useState<string>(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
+  const [pageStartTime, setPageStartTime] = useState<number>(Date.now())
+  const pageTrackingRef = useRef<{[key: number]: number}>({}) // Track cumulative time per page
 
   useEffect(() => {
     // Fetch PDF URL
@@ -123,16 +130,47 @@ export default function SecurePDFViewer({
     e.preventDefault()
   }
 
+  // Track time spent on current page and send to API
+  async function trackPageTime(pageNum: number, timeSpent: number) {
+    try {
+      await fetch("/api/track-page-view", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          linkId,
+          viewerId,
+          sessionId,
+          pageNumber: pageNum,
+          timeSpentSeconds: Math.round(timeSpent),
+        }),
+      })
+    } catch (error) {
+      clientLogger.error("Error tracking page view", { error })
+    }
+  }
+
   // Navigation handlers for slideshow
   const goToNextPage = () => {
+    // Track time spent on current page before moving
+    const timeSpent = (Date.now() - pageStartTime) / 1000 // Convert to seconds
+    pageTrackingRef.current[currentPage] = (pageTrackingRef.current[currentPage] || 0) + timeSpent
+    trackPageTime(currentPage, pageTrackingRef.current[currentPage])
+    
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1)
+      setPageStartTime(Date.now())
     }
   }
 
   const goToPrevPage = () => {
+    // Track time spent on current page before moving
+    const timeSpent = (Date.now() - pageStartTime) / 1000 // Convert to seconds
+    pageTrackingRef.current[currentPage] = (pageTrackingRef.current[currentPage] || 0) + timeSpent
+    trackPageTime(currentPage, pageTrackingRef.current[currentPage])
+    
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1)
+      setPageStartTime(Date.now())
     }
   }
 
@@ -140,6 +178,22 @@ export default function SecurePDFViewer({
     setTotalPages(numPages)
     setLoading(false)
   }
+
+  // Track page time on component unmount or page leave
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const timeSpent = (Date.now() - pageStartTime) / 1000
+      pageTrackingRef.current[currentPage] = (pageTrackingRef.current[currentPage] || 0) + timeSpent
+      trackPageTime(currentPage, pageTrackingRef.current[currentPage])
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload)
+    
+    return () => {
+      handleBeforeUnload()
+      window.removeEventListener("beforeunload", handleBeforeUnload)
+    }
+  }, [currentPage, pageStartTime])
 
   // Keyboard navigation for slideshow
   useEffect(() => {

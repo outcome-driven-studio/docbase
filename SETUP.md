@@ -75,6 +75,62 @@ npx supabase db push
 4. Make it **public**
 5. Click "Create bucket"
 
+#### Apply Additional Migrations
+
+After running `npx supabase db push`, you need to apply three additional migrations manually in the Supabase SQL Editor for advanced features.
+
+**Migration 1: Document Consolidation**
+
+This migration creates the foundation for having multiple links per document.
+
+1. Open Supabase Dashboard > SQL Editor
+2. Click "New query"
+3. Copy and paste the contents of `supabase/migrations/20241231000000_consolidate_docs_structure.sql`
+4. Click "Run"
+5. Expected output: Functions and RPC endpoints created
+
+**Migration 2: Page Time Tracking**
+
+This migration enables detailed page-level analytics.
+
+1. Open new SQL Editor query
+2. Copy and paste the contents of `supabase/migrations/20241231000002_add_page_view_tracking.sql`
+3. Click "Run"
+4. Expected output: 
+   - `page_views` table created
+   - Functions created
+   - Success notice displayed
+
+**Migration 3: Home Dashboard Analytics**
+
+This migration powers the home dashboard with aggregated analytics.
+
+1. Open new SQL Editor query
+2. Copy and paste the contents of `supabase/migrations/20241231000003_add_home_analytics.sql`
+3. Click "Run"
+4. Expected output:
+   - `get_user_home_analytics()` function created
+   - `get_user_views_timeline()` function created
+   - Success notice displayed
+
+**Why manual migrations?**
+
+These migrations use complex functions with `SECURITY DEFINER` that need to be created in the Supabase dashboard for proper permissions. Running them via the SQL Editor ensures they have the correct security context.
+
+**Verify migrations:**
+
+After running all migrations, verify they worked:
+
+```sql
+-- Check if page_views table exists
+SELECT * FROM information_schema.tables WHERE table_name = 'page_views';
+
+-- Check if functions exist
+SELECT proname FROM pg_proc WHERE proname IN ('get_user_home_analytics', 'get_user_views_timeline', 'get_link_page_analytics');
+```
+
+If you see results, migrations were successful! ✅
+
 ### 4. Set Up Optional Services
 
 #### Resend (for emails)
@@ -117,13 +173,25 @@ Open [http://localhost:3000](http://localhost:3000) in your browser!
 
 After setup, verify everything works:
 
+### Basic Functionality
 - [ ] Homepage loads without errors
 - [ ] You can sign up with email
 - [ ] Email confirmation link works (check inbox)
 - [ ] You can access /account after confirming
-- [ ] You can create a new link by uploading a PDF
-- [ ] The link appears in /links with view count
-- [ ] You can share the link and view it in incognito mode
+
+### Document & Link Management
+- [ ] You can create a document by uploading a PDF
+- [ ] Document appears in /docs
+- [ ] You can create multiple links for the same document
+- [ ] Clone link functionality works (click ⋮ menu → Clone Link)
+- [ ] You can share a link and view it in incognito mode
+
+### Analytics & Dashboard
+- [ ] /home dashboard displays after login
+- [ ] Home shows correct stats (documents, links, views counts)
+- [ ] View analytics page works (/analytics/[id])
+- [ ] Page-level tracking shows time per page (after viewing multi-page doc)
+- [ ] Timeline chart appears on home (after getting views)
 
 ## Troubleshooting
 
@@ -137,12 +205,33 @@ npx supabase db push
 
 ### "Storage bucket not found" error
 
-Create the `cube` bucket in Supabase Dashboard > Storage
+Create the `cube` bucket in Supabase Dashboard > Storage (must be public)
+
+### "function get_user_home_analytics does not exist"
+
+You need to run Migration 3 (Home Analytics) in the SQL Editor. See instructions above.
+
+### "relation page_views does not exist"
+
+You need to run Migration 2 (Page Tracking) in the SQL Editor. See instructions above.
+
+### Home dashboard shows no data
+
+This is normal for new accounts. Data will appear as you:
+- Create documents
+- Share links
+- Get views from visitors
+
+### Page time tracking not working
+
+Make sure:
+1. Migration 2 was applied successfully
+2. Document has multiple pages
+3. Viewer navigates between pages (tracking is sent on page change)
 
 ### Email sending fails
 
 Make sure:
-
 1. RESEND_API_KEY is set in .env
 2. For production, your domain is verified in Resend
 
@@ -150,11 +239,40 @@ Make sure:
 
 Make sure OPENAI_API_KEY is set in .env. Note: This feature is optional.
 
+## Features Enabled
+
+After completing setup with all migrations, you'll have:
+
+### Document Management
+- ✅ Upload and share PDFs
+- ✅ Multiple links per document
+- ✅ Clone links with one click
+- ✅ Password protection and expiration
+- ✅ Custom branding (logos, cover letters)
+
+### Analytics
+- ✅ Home dashboard with aggregated stats
+- ✅ Top documents by views
+- ✅ Recent activity feed
+- ✅ 30-day timeline chart
+- ✅ Per-link analytics
+- ✅ Page-level time tracking
+- ✅ Engagement insights
+
+### Signatures
+- ✅ E-signature collection
+- ✅ Signature tracking and audit trails
+- ✅ Multiple signature methods
+
+### Notifications
+- ✅ Email notifications (via Resend)
+- ✅ Slack integration (optional)
+
 ## Next Steps
 
-- Read [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for production deployment
-- Check out the [Contributing Guidelines](#) to start developing
-- Join our community discussions
+- Check out [CONTRIBUTING.md](CONTRIBUTING.md) to start developing
+- Read [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for API details
+- Join our [GitHub Discussions](https://github.com/alanagoyal/docbase/discussions)
 
 ## Getting Help
 

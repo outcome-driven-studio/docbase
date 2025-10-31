@@ -254,7 +254,7 @@ export default function AccountForm({ account }: { account: User | null }) {
           title: "Welcome to VibeDocs!",
           description: "Your profile is set up. Let's create your first link.",
         })
-        router.push("/links")
+        router.push("/home")
       } else {
         router.refresh()
       }

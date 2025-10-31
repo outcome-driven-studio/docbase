@@ -5,6 +5,7 @@ import { logger } from "@/lib/logger"
 import { Button } from "@/components/ui/button"
 import Analytics from "@/components/analytics"
 import { SignatureStatus } from "@/components/signature-status"
+import { PageTimeChart } from "@/components/page-time-chart"
 
 type ViewerData = {
   id: string
@@ -32,7 +33,7 @@ export default async function AnalyticsPage({
         <h1 className="mb-6 text-center text-2xl font-bold">
           Error fetching analytics
         </h1>
-        <Link href="/links">
+        <Link href="/docs">
           <Button variant="outline">Go Back</Button>
         </Link>
       </div>
@@ -50,6 +51,11 @@ export default async function AnalyticsPage({
   const uniqueViewers = data?.[0]?.unique_viewers ?? 0
   const allViews = (data?.[0]?.all_views ?? []) as ViewerData[]
 
+  // Fetch page-level analytics
+  const { data: pageAnalytics } = await supabase.rpc("get_link_page_analytics", {
+    link_id_arg: id,
+  })
+
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <h1 className="mb-6 text-center text-3xl font-bold">
@@ -59,6 +65,9 @@ export default async function AnalyticsPage({
       <div className="space-y-6">
         {/* Signature Status - only show if signatures are required */}
         {requireSignature && <SignatureStatus linkId={id} />}
+
+        {/* Page Time Analytics */}
+        <PageTimeChart data={pageAnalytics || []} />
 
         {/* View Analytics */}
         <Analytics

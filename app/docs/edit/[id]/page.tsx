@@ -6,10 +6,20 @@ import { Database } from "@/types/supabase"
 import { Button } from "@/components/ui/button"
 import LinkForm from "@/components/link-form"
 
-type Link = Database["public"]["Tables"]["links"]["Row"]
+type Link = Database["public"]["Tables"]["links"]["Row"] & {
+  document_id?: string | null
+}
 
-export default async function EditLink({ params }: { params: { id: string } }) {
+export default async function EditLink({ 
+  params,
+  searchParams 
+}: { 
+  params: { id: string }
+  searchParams: { clone?: string }
+}) {
   const id = params.id
+  const isClone = searchParams.clone === 'true'
+  
   const supabase = createClient()
   const {
     data: { user },
@@ -49,15 +59,22 @@ export default async function EditLink({ params }: { params: { id: string } }) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-6 text-center text-3xl font-bold">Edit Link</h1>
+      <h1 className="mb-6 text-center text-3xl font-bold">
+        {isClone ? 'Clone Link' : 'Edit Link'}
+      </h1>
       {link ? (
-        <LinkForm link={link} account={account} />
+        <LinkForm 
+          link={isClone ? null : link} 
+          account={account} 
+          documentId={link.document_id} 
+          cloneData={isClone ? link : undefined} 
+        />
       ) : (
         <div className="container mx-auto flex min-h-screen flex-col items-center justify-center px-4 py-8">
           <h1 className="mb-6 text-center text-2xl font-bold">
             Oops! This link doesn&apos;t exist
           </h1>
-          <Link href="/links">
+          <Link href="/docs">
             <Button variant="outline">Go Back</Button>
           </Link>
         </div>

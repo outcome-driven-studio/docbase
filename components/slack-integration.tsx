@@ -135,10 +135,18 @@ export default function SlackIntegrationTab({
         throw new Error(data.error)
       }
 
-      toast({
-        title: "Success!",
-        description: `Notifications will be sent to #${channel.name}`,
-      })
+      if (data.needsInvite) {
+        toast({
+          title: "Channel Selected",
+          description: data.warning || "Please invite the bot to this channel by typing: /invite @DocBase",
+          variant: "default",
+        })
+      } else {
+        toast({
+          title: "Success!",
+          description: `Notifications will be sent to #${channel.name}`,
+        })
+      }
     } catch (error) {
       clientLogger.error("Failed to update Slack channel", { error })
       toast({
@@ -160,6 +168,7 @@ export default function SlackIntegrationTab({
     const scopes = [
       "chat:write",
       "channels:read",
+      "channels:join", // Allows bot to auto-join public channels
       "groups:read",
     ].join(",")
 

@@ -37,7 +37,7 @@ export async function login(formData: LoginFormData) {
       .single()
 
     // If onboarding not completed AND profile is not filled, send to account page
-    // Users with filled profiles (name or title) should go to /links
+    // Users with filled profiles (name or title) should go to /home
     if (userData && !userData.onboarding_completed && !userData.name && !userData.title) {
       revalidatePath("/", "layout")
       redirect("/account")
@@ -45,5 +45,5 @@ export async function login(formData: LoginFormData) {
   }
 
   revalidatePath("/", "layout")
-  redirect("/links")
+  redirect("/home")
 }

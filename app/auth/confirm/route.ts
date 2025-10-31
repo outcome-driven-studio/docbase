@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error("Code exchange error:", error)
       const errorUrl = siteUrl + "/error"
-      const redirectTo = next && next !== "/" ? next : "/links"
+      const redirectTo = next && next !== "/" ? next : "/home"
       return NextResponse.redirect(
         errorUrl +
           "?next=" +
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
 
     // Check if user has completed profile
     const { data: { user } } = await supabase.auth.getUser()
-    let redirectTo = next && next !== "/" ? next : "/links"
+    let redirectTo = next && next !== "/" ? next : "/home"
 
     if (user) {
       const { data: userData } = await supabase
@@ -71,10 +71,10 @@ export async function GET(request: NextRequest) {
         .eq("id", user.id)
         .single()
 
-      // If user has filled profile (name or title), redirect to /links
+      // If user has filled profile (name or title), redirect to /home
       // Otherwise, redirect to /account for onboarding
       if (userData && (userData.name || userData.title)) {
-        redirectTo = "/links"
+        redirectTo = "/home"
       } else if (next === "/account" || next === "/" || !next) {
         redirectTo = "/account"
       }
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error("Token verification error:", error)
       const errorUrl = siteUrl + "/error"
-      const redirectTo = next && next !== "/" ? next : "/links"
+      const redirectTo = next && next !== "/" ? next : "/home"
       return NextResponse.redirect(
         errorUrl +
           "?next=" +
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
     console.log("Session data:", sessionData?.session ? "present" : "missing")
 
     // Check if user has completed profile
-    let redirectTo = next && next !== "/" ? next : "/links"
+    let redirectTo = next && next !== "/" ? next : "/home"
 
     if (sessionData?.session?.user) {
       const { data: userData } = await supabase
@@ -125,10 +125,10 @@ export async function GET(request: NextRequest) {
         .eq("id", sessionData.session.user.id)
         .single()
 
-      // If user has filled profile (name or title), redirect to /links
+      // If user has filled profile (name or title), redirect to /home
       // Otherwise, redirect to /account for onboarding
       if (userData && (userData.name || userData.title)) {
-        redirectTo = "/links"
+        redirectTo = "/home"
       } else if (next === "/account" || next === "/" || !next) {
         redirectTo = "/account"
       }
