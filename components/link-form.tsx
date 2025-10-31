@@ -96,57 +96,62 @@ export default function LinkForm({
   link,
   account,
   documentId,
+  cloneData,
 }: {
   link: Link | null
   account: User | null
   documentId?: string | null
+  cloneData?: Link
 }) {
+  // Use cloneData for defaults if cloning, otherwise use link
+  const sourceData = cloneData || link
+  
   const supabase = createClient()
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(
-    link?.viewer_page_logo_url || null
+    sourceData?.viewer_page_logo_url || null
   )
   const [isUploading, setIsUploading] = useState<boolean>(false)
   const [protectWithPassword, setProtectWithPassword] = useState<boolean>(
-    !!link?.password
+    !!sourceData?.password
   )
   const [protectWithExpiration, setProtectWithExpiration] = useState<boolean>(
-    !!link?.expires
+    !!sourceData?.expires
   )
   const [allowDownload, setAllowDownload] = useState<boolean>(
-    link?.allow_download !== false
+    sourceData?.allow_download !== false
   )
   const [requireEmail, setRequireEmail] = useState<boolean>(
-    link?.require_email !== false // Default to true
+    sourceData?.require_email !== false // Default to true
   )
   const [requireSignature, setRequireSignature] = useState<boolean>(
-    false // TODO: Get from link when we add the column
+    sourceData?.require_signature || false
   )
   const [showCreatorSignature, setShowCreatorSignature] = useState<boolean>(
-    link?.show_creator_signature || false
+    sourceData?.show_creator_signature || false
   )
 
   const form = useForm<LinkFormValues>({
     resolver: zodResolver(linkFormSchema),
     defaultValues: {
-      protectWithPassword: !!link?.password,
-      protectWithExpiration: !!link?.expires,
-      allowDownload: link?.allow_download !== false,
-      requireEmail: link?.require_email !== false, // Default to true
-      requireSignature: link?.require_signature || false,
-      showCreatorSignature: link?.show_creator_signature || false,
-      password: link?.password ? "********" : "",
-      expires: link?.expires ? new Date(link.expires) : null,
-      filename: link?.filename || "",
-      signatureInstructions: link?.signature_instructions || "",
-      viewerPageHeading: link?.viewer_page_heading || "",
-      viewerPageSubheading: link?.viewer_page_subheading || "",
-      viewerPageCoverLetter: link?.viewer_page_cover_letter || "",
-      coverLetterFont: (link?.cover_letter_font as "cursive" | "arial" | "times" | "georgia" | "mono") || "cursive",
-      coverLetterColor: link?.cover_letter_color || "gray-800",
-      displayMode: (link?.display_mode as "auto" | "slideshow" | "document") || "auto",
+      protectWithPassword: !!sourceData?.password,
+      protectWithExpiration: !!sourceData?.expires,
+      allowDownload: sourceData?.allow_download !== false,
+      requireEmail: sourceData?.require_email !== false, // Default to true
+      requireSignature: sourceData?.require_signature || false,
+      showCreatorSignature: sourceData?.show_creator_signature || false,
+      password: sourceData?.password ? "********" : "",
+      expires: sourceData?.expires ? new Date(sourceData.expires) : null,
+      filename: sourceData?.filename || "",
+      signatureInstructions: sourceData?.signature_instructions || "",
+      viewerPageHeading: cloneData?.viewer_page_heading ? `${cloneData.viewer_page_heading} (Copy)` : sourceData?.viewer_page_heading || "",
+      viewerPageSubheading: sourceData?.viewer_page_subheading || "",
+      viewerPageCoverLetter: sourceData?.viewer_page_cover_letter || "",
+      coverLetterFont: (sourceData?.cover_letter_font as "cursive" | "arial" | "times" | "georgia" | "mono") || "cursive",
+      coverLetterColor: sourceData?.cover_letter_color || "gray-800",
+      displayMode: (sourceData?.display_mode as "auto" | "slideshow" | "document") || "auto",
     },
   })
   const [expiresCalendarOpen, setExpiresCalendarOpen] = useState(false)
@@ -370,7 +375,7 @@ export default function LinkForm({
           ? "Your link has been updated successfully"
           : "Your link has been created successfully",
       })
-      router.push("/links")
+      router.push("/docs")
       router.refresh()
     } catch (error: any) {
       clientLogger.error("Error saving link", { error })

@@ -7,6 +7,8 @@ An open-source alternative to DocSend for securely sharing documents with tracki
 ### Document Sharing & Security
 
 - 📄 **Secure PDF Sharing** - Upload and share PDFs with password protection and expiration dates
+- 🔗 **Multiple Links Per Document** - Create different links with different settings for the same document
+- 🔄 **Clone Links** - Duplicate existing links with one click to create variations
 - 🔐 **Access Control** - Email verification, password protection, and self-hosted signup controls
 - 🎨 **Custom Branding** - Add logos, cover letters, and signatures to shared documents
 - 📱 **Responsive Viewer** - Beautiful slideshow and document modes that work on all devices
@@ -20,10 +22,13 @@ An open-source alternative to DocSend for securely sharing documents with tracki
 
 ### Analytics & Tracking
 
+- 🏠 **Home Dashboard** - Aggregated overview of all your documents and activity
 - 📊 **View Analytics** - Track who views your documents, when, and for how long
+- ⏱️ **Page-Level Tracking** - See time spent on each page with engagement insights
 - 👥 **Contact Management** - Organize contacts with groups
 - 📈 **Engagement Insights** - Detailed analytics for each shared link
 - 🔔 **Notifications** - Get notified when documents are viewed or signed
+- 📈 **Timeline Charts** - 30-day views history and trends
 
 ### Communication
 
@@ -87,6 +92,10 @@ npx supabase db push
 3. Create storage bucket:
    - Go to Supabase Dashboard > Storage
    - Create a new public bucket named `cube`
+
+4. **Important:** Apply additional migrations for advanced features:
+   - See [SETUP.md](SETUP.md) for detailed migration instructions
+   - Required for: Home dashboard, page-level tracking, and document consolidation
 
 ### 5. Start Development Server
 
@@ -176,12 +185,8 @@ Deploy using [Vercel](https://vercel.com):
 1. Push code to GitHub
 2. Import repository to Vercel
 3. Add all environment variables from your `.env` file
-4. Deploy!
-
-For detailed deployment instructions with custom domains and email setup, see:
-
-- [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) - Complete walkthrough
-- [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) - Step-by-step checklist
+4. Apply database migrations (see [SETUP.md](SETUP.md))
+5. Deploy!
 
 ## Use Cases
 
@@ -260,8 +265,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
 
 ## Roadmap
 
+- [x] Multiple links per document
+- [x] Clone links functionality
+- [x] Page-level time tracking
+- [x] Home dashboard with aggregated analytics
 - [ ] Multi-document packages
-- [ ] Advanced analytics (heatmaps, time-based insights)
+- [ ] Advanced analytics (heatmaps)
 - [ ] Mobile apps (React Native)
 - [ ] Video support
 - [ ] Custom domains for shared links

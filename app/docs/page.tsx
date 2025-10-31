@@ -4,11 +4,11 @@ import { createClient } from "@/utils/supabase/server"
 import { Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Links } from "@/components/links"
+import { DocsCard } from "@/components/docs-card"
 
 export const dynamic = "force-dynamic"
 
-export default async function LinksPage({
+export default async function DocsPage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
@@ -16,7 +16,7 @@ export default async function LinksPage({
   // If there's a code parameter, redirect to /auth/confirm to handle it
   if (searchParams.code) {
     const code = searchParams.code as string
-    redirect(`/auth/confirm?code=${code}&next=${encodeURIComponent("/links")}`)
+    redirect(`/auth/confirm?code=${code}&next=${encodeURIComponent("/docs")}`)
   }
 
   const supabase = createClient()
@@ -34,7 +34,8 @@ export default async function LinksPage({
     .eq("id", user.id)
     .single()
 
-  const { data: links } = await supabase.rpc("get_user_links_with_views", {
+  // Get documents with their links
+  const { data: documents } = await supabase.rpc("get_user_documents_with_links", {
     id_arg: user.id,
   })
 
@@ -74,14 +75,14 @@ export default async function LinksPage({
       return hasOtherSignature && !creatorHasSigned
     }) || []
 
-  return links && links.length > 0 ? (
+  return documents && documents.length > 0 ? (
     <div className="container mx-auto px-4 py-8">
       <div className="relative mx-auto flex max-w-5xl items-center justify-between py-4">
         <div className="w-[150px]" />
         <h1 className="absolute left-1/2 -translate-x-1/2 text-2xl font-bold">
-          Links
+          Docs
         </h1>
-        <Link href="/links/new">
+        <Link href="/docs/new">
           <Button variant="ghost" className="w-[150px]">
             <Plus className="size-4" />
             <span className="ml-2 hidden sm:inline-block">New</span>
@@ -130,16 +131,21 @@ export default async function LinksPage({
         </div>
       )}
 
-      <div className="mx-auto max-w-5xl">
-        <Links links={links} account={account} />
+      {/* Documents Grid */}
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {documents.map((document: any) => (
+            <DocsCard key={document.document_id} document={document} />
+          ))}
+        </div>
       </div>
     </div>
   ) : (
     <div className="container mx-auto flex min-h-screen flex-col items-center justify-center px-4 py-8">
       <h1 className="mb-6 text-center text-2xl font-bold">
-        You haven&apos;t created <br /> any links yet
+        You haven&apos;t created <br /> any docs yet
       </h1>
-      <Link href="/links/new">
+      <Link href="/docs/new">
         <Button variant="outline">Get Started</Button>
       </Link>
     </div>

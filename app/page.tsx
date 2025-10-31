@@ -52,7 +52,7 @@ export default async function IndexPage() {
           </p>
           <div className="mt-8 flex justify-center gap-4">
             {user ? (
-              <Link href="/links">
+              <Link href="/home">
                 <Button className="bg-primary text-primary-foreground transition-opacity hover:opacity-70">
                   Dashboard
                 </Button>

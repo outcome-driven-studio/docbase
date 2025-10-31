@@ -48,7 +48,7 @@ export function Documents({ documents }: { documents: Document[] }) {
         fileName.includes("side letter") ? "?step=3" : ""
       }`
     }
-    return `/links/edit/${document.id}`
+    return `/docs/edit/${document.id}`
   }
 
   const downloadDocument = (url: string) => {
@@ -91,7 +91,7 @@ export function Documents({ documents }: { documents: Document[] }) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (shortcutsEnabled && e.key === "n" && !isTyping()) {
         e.preventDefault()
-        router.push("/links/new")
+        router.push("/docs/new")
       }
     }
 

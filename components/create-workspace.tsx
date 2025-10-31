@@ -109,7 +109,7 @@ export function CreateWorkspace({ userId }: { userId: string }) {
         })
       }
 
-      router.push("/links")
+      router.push("/home")
       router.refresh()
     } catch (error: any) {
       toast({

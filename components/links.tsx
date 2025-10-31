@@ -46,6 +46,7 @@ import { toast } from "./ui/use-toast"
 type User = Database["public"]["Tables"]["users"]["Row"]
 type Link = Database["public"]["Tables"]["links"]["Row"] & {
   views: number
+  document_id?: string | null
 }
 
 export function Links({ links, account }: { links: Link[]; account: User }) {
@@ -62,7 +63,7 @@ export function Links({ links, account }: { links: Link[]; account: User }) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (shortcutsEnabled && e.key === "n" && !isTyping()) {
         e.preventDefault()
-        router.push("/links/new")
+        router.push("/docs/new")
       }
     }
 
@@ -214,11 +215,11 @@ export function Links({ links, account }: { links: Link[]; account: User }) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>
-                        <Link href={`/links/edit/${link.id}`}>Edit</Link>
+                        <Link href={`/docs/edit/${link.id}`}>Edit</Link>
                       </DropdownMenuItem>
                       {link.document_id && (
                         <DropdownMenuItem>
-                          <Link href={`/links/new-from-document/${link.document_id}`}>
+                          <Link href={`/docs/new-from-document/${link.document_id}`}>
                             Create New Link
                           </Link>
                         </DropdownMenuItem>

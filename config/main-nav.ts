@@ -1,4 +1,4 @@
-import { Link, Briefcase, User, Mail, LucideIcon } from "lucide-react";
+import { Home, FileText, User, Mail, LucideIcon } from "lucide-react";
 
 export interface MainNavItem {
   icon: LucideIcon;
@@ -10,7 +10,8 @@ export interface MainNavItem {
 }
 
 export const mainNavItems: MainNavItem[] = [
-  { href: "/links", label: "Links", shortcut: "L", icon: Link },
+  { href: "/home", label: "Home", shortcut: "H", icon: Home },
+  { href: "/docs", label: "Docs", shortcut: "D", icon: FileText },
   { href: "/contacts", label: "Contacts", shortcut: "C", icon: User },
   { href: "/messages", label: "Messages", shortcut: "M", icon: Mail },
 ];

@@ -14,7 +14,7 @@ export default async function Login() {
   } = await supabase.auth.getUser()
 
   if (user) {
-    redirect("/links")
+    redirect("/home")
   }
 
   // Check if signups are disabled
@@ -27,7 +27,7 @@ export default async function Login() {
           <h1 className="text-xl font-semibold tracking-tight md:text-2xl">
             Sign in to your account
           </h1>
-          <AnimatedLoginTabs login={login} redirect="/links" />
+          <AnimatedLoginTabs login={login} redirect="/home" />
         </div>
         {!signupsDisabled && (
           <p className="px-4 text-center text-sm text-muted-foreground md:px-8">

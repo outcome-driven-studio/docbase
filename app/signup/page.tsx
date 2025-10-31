@@ -20,7 +20,7 @@ export default async function Signup() {
   } = await supabase.auth.getUser()
 
   if (user) {
-    redirect("/links")
+    redirect("/home")
   }
 
   // If signups are disabled, show message

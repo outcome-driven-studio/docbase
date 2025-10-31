@@ -24,7 +24,7 @@ export default async function DocumentsPage() {
             <h1 className="absolute left-1/2 -translate-x-1/2 text-2xl font-bold">
               Documents
             </h1>
-            <Link href="/links/new">
+            <Link href="/docs/new">
               <Button variant="ghost" className="w-[150px]">
                 <Plus className="size-4" />
                 <span className="ml-2 hidden sm:inline-block">New</span>
@@ -40,7 +40,7 @@ export default async function DocumentsPage() {
           <h1 className="mb-6 text-center text-2xl font-bold">
             You haven&apos;t created <br /> any documents yet
           </h1>
-          <Link href="/links/new">
+          <Link href="/docs/new">
             <Button variant="outline">Get Started</Button>
           </Link>
         </div>

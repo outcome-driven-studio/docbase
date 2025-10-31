@@ -52,11 +52,11 @@ export default async function NewLinkFromDocument({
     .single()
 
   if (docError || !document) {
-    redirect("/links")
+    redirect("/docs")
   }
 
   if (document.created_by !== user.id) {
-    redirect("/links") // Don't allow creating links for other people's documents
+    redirect("/docs") // Don't allow creating links for other people's documents
   }
 
   return (
