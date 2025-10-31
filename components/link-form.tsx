@@ -95,9 +95,11 @@ type Link = Database["public"]["Tables"]["links"]["Row"]
 export default function LinkForm({
   link,
   account,
+  documentId,
 }: {
   link: Link | null
   account: User | null
+  documentId?: string | null
 }) {
   const supabase = createClient()
   const router = useRouter()
@@ -296,9 +298,49 @@ export default function LinkForm({
           })
           .eq("id", link.id)
       } else {
+        // Insert new document first (if file was uploaded)
+        // OR use existing documentId if provided (creating additional link)
+        let docId = documentId || linkId // Use provided documentId or linkId for backward compatibility
+        
+        if (file && !documentId) {
+          // Only create new document if uploading a file AND not linking to existing document
+          // Create a document record for the uploaded file
+          const { error: docError } = await supabase.from("documents").insert({
+            id: docId,
+            created_by: account.id,
+            filename: data.filename,
+            storage_path: filePathToUse,
+            display_mode: data.displayMode,
+            file_size: file.size,
+            mime_type: file.type,
+          })
+
+          if (docError) {
+            console.warn("Failed to create document record:", docError)
+            // Don't fail - this is for forward compatibility
+          }
+        } else if (documentId && !file) {
+          // Creating additional link for existing document - no file upload needed
+          // Fetch the document to get its storage path
+          const { data: existingDoc } = await supabase
+            .from("documents")
+            .select("storage_path, filename")
+            .eq("id", documentId)
+            .single()
+          
+          if (existingDoc) {
+            filePathToUse = existingDoc.storage_path
+            // Use document filename if not overridden
+            if (!data.filename || data.filename === existingDoc.filename) {
+              data.filename = existingDoc.filename
+            }
+          }
+        }
+
         // Insert new link
         result = await supabase.from("links").insert({
           id: linkId,
+          document_id: docId, // Link to the document
           url: signedUrl,
           password: passwordHash,
           expires: data.protectWithExpiration
@@ -1049,36 +1091,49 @@ export default function LinkForm({
                 </p>
               </div>
             )}
-            <div
-              {...getRootProps()}
-              className={cn(
-                "cursor-pointer rounded-lg border-2 border-dashed border-gray-300 p-6 text-center",
-                isUploading && "pointer-events-none opacity-50"
-              )}
-            >
-              <input {...getInputProps()} />
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  {isDragActive
-                    ? "Drop the file here ..."
-                    : file
-                    ? `File selected: ${file.name}`
-                    : link
-                    ? "Drag & drop or click to upload a replacement file"
-                    : "Drag & drop or click to upload a file"}
-                </p>
-                {!file && (
-                  <p className="text-xs text-muted-foreground">
-                    Maximum file size: 50MB
-                  </p>
+            {!documentId && (
+              <div
+                {...getRootProps()}
+                className={cn(
+                  "cursor-pointer rounded-lg border-2 border-dashed border-gray-300 p-6 text-center",
+                  isUploading && "pointer-events-none opacity-50"
                 )}
-                {file && (
-                  <p className="text-xs text-muted-foreground">
-                    Size: {(file.size / (1024 * 1024)).toFixed(2)}MB
+              >
+                <input {...getInputProps()} />
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    {isDragActive
+                      ? "Drop the file here ..."
+                      : file
+                      ? `File selected: ${file.name}`
+                      : link
+                      ? "Drag & drop or click to upload a replacement file"
+                      : "Drag & drop or click to upload a file"}
                   </p>
-                )}
+                  {!file && (
+                    <p className="text-xs text-muted-foreground">
+                      Maximum file size: 50MB
+                    </p>
+                  )}
+                  {file && (
+                    <p className="text-xs text-muted-foreground">
+                      Size: {(file.size / (1024 * 1024)).toFixed(2)}MB
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
+            
+            {documentId && (
+              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
+                <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  Creating additional link for existing document
+                </p>
+                <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+                  This link will point to the same document with different settings (password, expiry, branding, etc.)
+                </p>
+              </div>
+            )}
 
             {isUploading && (
               <div className="rounded-lg border bg-muted/50 p-4">
@@ -1094,7 +1149,7 @@ export default function LinkForm({
               className="w-full"
               disabled={
                 isUploading ||
-                (!file && !link) ||
+                (!file && !link && !documentId) || // Allow submit if documentId is provided (creating link from existing document)
                 (!!link && !file && !logoFile && !form.formState.isDirty)
               }
             >
@@ -1102,6 +1157,8 @@ export default function LinkForm({
                 ? "Uploading..."
                 : link
                 ? "Update Link"
+                : documentId
+                ? "Create Additional Link"
                 : "Create Link"}
             </Button>
           </div>
