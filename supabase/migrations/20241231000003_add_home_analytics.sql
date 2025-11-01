@@ -38,21 +38,21 @@ BEGIN
         -- Recent views (last 10)
         (SELECT COALESCE(jsonb_agg(
             jsonb_build_object(
-                'viewer_email', v.email,
-                'viewed_at', v.viewed_at,
-                'link_id', l.id,
-                'document_filename', d.filename
-            ) ORDER BY v.viewed_at DESC
+                'viewer_email', subq.email,
+                'viewed_at', subq.viewed_at,
+                'link_id', subq.link_id,
+                'document_filename', subq.filename
+            ) ORDER BY subq.viewed_at DESC
         ), '[]'::jsonb)
          FROM (
-             SELECT DISTINCT ON (v.id) v.email, v.viewed_at, l.id, d.filename
+             SELECT v.email, v.viewed_at, l.id as link_id, d.filename
              FROM public.viewers v
              INNER JOIN public.links l ON v.link_id = l.id
              LEFT JOIN public.documents d ON l.document_id = d.id
              WHERE l.created_by = user_id_arg
              ORDER BY v.viewed_at DESC
              LIMIT 10
-         ) v(email, viewed_at, id, filename)
+         ) subq
         ) as recent_views,
         
         -- Top 5 documents by views
