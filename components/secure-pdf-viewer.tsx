@@ -39,6 +39,7 @@ export default function SecurePDFViewer({
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [totalPages, setTotalPages] = useState<number>(0)
   const [pageWidth, setPageWidth] = useState<number>(0)
+  const [pageHeight, setPageHeight] = useState<number>(0)
   const [pdfUrl, setPdfUrl] = useState<string>("")
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -285,8 +286,7 @@ export default function SecurePDFViewer({
             ref={containerRef}
             className="relative flex w-full items-center justify-center bg-gray-100 p-2 dark:bg-gray-900 sm:p-4"
             style={{
-              minHeight: "calc(100vh - 80px)",
-              maxHeight: "calc(100vh - 80px)",
+              height: pageHeight ? `${pageHeight + 32}px` : "calc(100vh - 80px)",
               overflow: "hidden",
               width: "100%",
             }}
@@ -336,6 +336,13 @@ export default function SecurePDFViewer({
                   renderTextLayer={false}
                   renderAnnotationLayer={false}
                   className="max-h-full max-w-full shadow-lg"
+                  onLoadSuccess={(page) => {
+                    const viewport = page.getViewport({ scale: 1 })
+                    const containerWidth = containerRef.current?.offsetWidth || window.innerWidth
+                    const scale = Math.min(containerWidth - 16, window.innerHeight * 1.4142) / viewport.width
+                    const scaledHeight = viewport.height * scale
+                    setPageHeight(scaledHeight)
+                  }}
                   loading={
                     <div className="flex items-center justify-center">
                       <div className="flex flex-col items-center gap-2">
