@@ -269,6 +269,7 @@ export default function SecurePDFViewer({
         onContextMenu={disableContextMenu}
         style={{
           overflow: isSlideshow ? "hidden" : "auto",
+          maxWidth: "100%",
         }}
       >
         {loading && (
@@ -284,9 +285,10 @@ export default function SecurePDFViewer({
             ref={containerRef}
             className="relative flex w-full items-center justify-center bg-gray-100 p-2 dark:bg-gray-900 sm:p-4"
             style={{
-              minHeight: "calc(100vh - 60px)",
-              maxHeight: "calc(100vh - 60px)",
+              minHeight: "calc(100vh - 80px)",
+              maxHeight: "calc(100vh - 80px)",
               overflow: "hidden",
+              width: "100%",
             }}
           >
             {/* Left Navigation Overlay */}
@@ -326,9 +328,9 @@ export default function SecurePDFViewer({
               >
                 <Page
                   pageNumber={currentPage}
-                  height={
+                  width={
                     containerRef.current
-                      ? containerRef.current.offsetHeight - 32
+                      ? Math.min(containerRef.current.offsetWidth - 16, containerRef.current.offsetHeight * 1.4142)
                       : undefined
                   }
                   renderTextLayer={false}
