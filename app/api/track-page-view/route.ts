@@ -23,6 +23,16 @@ export async function POST(request: Request) {
 
     const supabase = createClient()
 
+    // Get the current document version for this link
+    const { data: versionData, error: versionError } = await supabase
+      .rpc("get_link_document_version", { link_id_arg: linkId })
+
+    if (versionError) {
+      logger.error("Error fetching document version", { error: versionError, linkId })
+    }
+
+    const documentVersion = versionData || 1
+
     // Get user agent and IP from headers
     const userAgent = request.headers.get("user-agent") || "Unknown"
     const forwardedFor = request.headers.get("x-forwarded-for")
@@ -30,7 +40,7 @@ export async function POST(request: Request) {
       ? forwardedFor.split(",")[0].trim()
       : request.headers.get("x-real-ip") || "Unknown"
 
-    // Insert page view record
+    // Insert page view record with version
     const { data, error } = await supabase
       .from("page_views")
       .insert({
@@ -39,6 +49,7 @@ export async function POST(request: Request) {
         session_id: sessionId,
         page_number: pageNumber,
         time_spent_seconds: Math.round(timeSpentSeconds), // Round to nearest second
+        document_version: documentVersion,
         user_agent: userAgent,
         ip_address: ipAddress,
       })
