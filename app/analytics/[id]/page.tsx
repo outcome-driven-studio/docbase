@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import Analytics from "@/components/analytics"
 import { SignatureStatus } from "@/components/signature-status"
 import { PageTimeChart } from "@/components/page-time-chart"
+import { ViewerSessionAnalytics } from "@/components/viewer-session-analytics"
 
 type ViewerData = {
   id: string
@@ -51,9 +52,16 @@ export default async function AnalyticsPage({
   const uniqueViewers = data?.[0]?.unique_viewers ?? 0
   const allViews = (data?.[0]?.all_views ?? []) as ViewerData[]
 
-  // Fetch page-level analytics
-  const { data: pageAnalytics } = await supabase.rpc("get_link_page_analytics", {
+  // Fetch page-level analytics with version support
+  const { data: pageAnalytics } = await supabase.rpc("get_link_page_analytics_by_version", {
     link_id_arg: id,
+    version_arg: null, // null returns all versions
+  })
+
+  // Fetch viewer session analytics
+  const { data: sessionAnalytics } = await supabase.rpc("get_viewer_session_analytics", {
+    link_id_arg: id,
+    version_arg: null, // null returns all versions
   })
 
   return (
@@ -68,6 +76,9 @@ export default async function AnalyticsPage({
 
         {/* Page Time Analytics */}
         <PageTimeChart data={pageAnalytics || []} />
+
+        {/* Viewer Session History */}
+        <ViewerSessionAnalytics data={sessionAnalytics || []} />
 
         {/* View Analytics */}
         <Analytics

@@ -107,6 +107,12 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
             strategy="beforeInteractive"
           />
+          {/* Midbound Tracking */}
+          <Script
+            src="https://px.midbound.ai/cmi9r2k950001s601t2bbcljf"
+            strategy="afterInteractive"
+            async
+          />
           {/* Buy Me a Coffee Widget */}
           <Script
             data-name="BMC-Widget"
