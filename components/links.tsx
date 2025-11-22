@@ -161,6 +161,7 @@ export function Links({ links, account }: { links: Link[]; account: User }) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-1/6">Filename</TableHead>
+              <TableHead className="w-1/6">Internal Name</TableHead>
               <TableHead className="w-1/6">Link</TableHead>
               <TableHead className="w-1/6">Views</TableHead>
               <TableHead className="w-1/6">Expires</TableHead>
@@ -172,6 +173,9 @@ export function Links({ links, account }: { links: Link[]; account: User }) {
             {links.map((link) => (
               <TableRow key={link.id}>
                 <TableCell className="font-medium">{link.filename}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {link.name || "—"}
+                </TableCell>
                 <TableCell>
                   <Tooltip>
                     <TooltipTrigger asChild>

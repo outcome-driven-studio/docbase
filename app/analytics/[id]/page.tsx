@@ -47,6 +47,8 @@ export default async function AnalyticsPage({
   })
 
   const requireSignature = linkData?.[0]?.require_signature ?? false
+  const internalName = linkData?.[0]?.name
+  const filename = linkData?.[0]?.filename
 
   const allViewers = data?.[0]?.all_viewers ?? 0
   const uniqueViewers = data?.[0]?.unique_viewers ?? 0
@@ -66,9 +68,21 @@ export default async function AnalyticsPage({
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
-      <h1 className="mb-6 text-center text-3xl font-bold">
-        {requireSignature ? "Analytics & Signatures" : "Link Analytics"}
-      </h1>
+      <div className="mb-6 text-center">
+        <h1 className="text-3xl font-bold">
+          {requireSignature ? "Analytics & Signatures" : "Link Analytics"}
+        </h1>
+        {internalName && (
+          <p className="mt-2 text-lg text-muted-foreground">
+            {internalName}
+          </p>
+        )}
+        {filename && (
+          <p className="text-sm text-muted-foreground">
+            {filename}
+          </p>
+        )}
+      </div>
 
       <div className="space-y-6">
         {/* Signature Status - only show if signatures are required */}
