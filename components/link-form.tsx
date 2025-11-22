@@ -52,6 +52,7 @@ const linkFormSchema = z
     password: z.string().optional(),
     expires: z.date().nullable(),
     filename: z.string().min(1, "Filename is required"),
+    internalName: z.string().optional(),
     signatureInstructions: z.string().optional(),
     viewerPageHeading: z.string().optional(),
     viewerPageSubheading: z.string().optional(),
@@ -145,6 +146,7 @@ export default function LinkForm({
       password: sourceData?.password ? "********" : "",
       expires: sourceData?.expires ? new Date(sourceData.expires) : null,
       filename: sourceData?.filename || "",
+      internalName: cloneData?.name ? `${cloneData.name} (Copy)` : sourceData?.name || "",
       signatureInstructions: sourceData?.signature_instructions || "",
       viewerPageHeading: cloneData?.viewer_page_heading ? `${cloneData.viewer_page_heading} (Copy)` : sourceData?.viewer_page_heading || "",
       viewerPageSubheading: sourceData?.viewer_page_subheading || "",
@@ -290,6 +292,7 @@ export default function LinkForm({
         await supabase
           .from("links")
           .update({
+            name: data.internalName || null,
             allow_download: data.allowDownload,
             require_email: data.requireEmail,
             viewer_page_heading: data.viewerPageHeading || null,
@@ -352,6 +355,7 @@ export default function LinkForm({
             ? data.expires?.toISOString()
             : null,
           filename: data.filename,
+          name: data.internalName || null,
           allow_download: data.allowDownload,
           require_email: data.requireEmail,
           require_signature: data.requireSignature,
@@ -659,32 +663,61 @@ export default function LinkForm({
             />
           )}
           {(file || link) && (
-            <FormField
-              control={form.control}
-              name="filename"
-              render={({ field }) => (
-                <FormItem className="flex flex-col rounded-lg border p-4">
-                  <div className="flex flex-row items-center justify-between">
-                    <div className="grow space-y-0.5">
-                      <FormLabel htmlFor="filename" className="pr-2 text-base">
-                        Filename
-                      </FormLabel>
-                      <FormDescription className="pr-4">
-                        Enter a name for your file
-                      </FormDescription>
+            <>
+              <FormField
+                control={form.control}
+                name="filename"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col rounded-lg border p-4">
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="grow space-y-0.5">
+                        <FormLabel htmlFor="filename" className="pr-2 text-base">
+                          Filename
+                        </FormLabel>
+                        <FormDescription className="pr-4">
+                          Enter a name for your file
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Input
+                          id="filename"
+                          className="w-[calc(60%-1rem)]"
+                          {...field}
+                        />
+                      </FormControl>
                     </div>
-                    <FormControl>
-                      <Input
-                        id="filename"
-                        className="w-[calc(60%-1rem)]"
-                        {...field}
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="internalName"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col rounded-lg border p-4">
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="grow space-y-0.5">
+                        <FormLabel htmlFor="internalName" className="pr-2 text-base">
+                          Internal Name (Optional)
+                        </FormLabel>
+                        <FormDescription className="pr-4">
+                          Add a private label for tracking (e.g., &quot;Investor Deck - Series A&quot;, &quot;Client Demo&quot;). Only visible to you.
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Input
+                          id="internalName"
+                          className="w-[calc(60%-1rem)]"
+                          placeholder="e.g., Q4 Investor Pitch"
+                          {...field}
+                        />
+                      </FormControl>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
           )}
           <FormItem className="flex flex-col rounded-lg border p-4">
             <div className="flex flex-row items-center justify-between">

@@ -107,6 +107,20 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
             strategy="beforeInteractive"
           />
+          {/* Google Analytics */}
+          <Script
+            src="https://www.googletagmanager.com/gtag/js?id=G-519R3E0G1V"
+            strategy="afterInteractive"
+            async
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-519R3E0G1V');
+            `}
+          </Script>
           {/* Midbound Tracking */}
           <Script
             src="https://px.midbound.ai/cmi9r2k950001s601t2bbcljf"
