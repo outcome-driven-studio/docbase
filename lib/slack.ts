@@ -50,10 +50,33 @@ export async function sendSlackNotification({
  */
 export function createDocumentViewMessage(
   documentName: string,
-  viewerEmail: string,
+  viewerEmail: string | undefined,
+  requireEmail: boolean = true,
   documentLink?: string
 ) {
-  const text = `📄 Someone opened your document: ${documentName}`
+  const text = viewerEmail 
+    ? `📄 ${viewerEmail} opened your document: ${documentName}`
+    : `📄 Someone opened your document: ${documentName}`
+
+  const fields: any[] = [
+    {
+      type: "mrkdwn",
+      text: `*Document:*\n${documentName}`,
+    },
+  ]
+
+  // Only show viewer email if email was required and provided
+  if (requireEmail && viewerEmail) {
+    fields.push({
+      type: "mrkdwn",
+      text: `*Viewer:*\n${viewerEmail}`,
+    })
+  }
+
+  fields.push({
+    type: "mrkdwn",
+    text: `*Time:*\n${new Date().toLocaleString()}`,
+  })
 
   const blocks: any[] = [
     {
@@ -65,20 +88,7 @@ export function createDocumentViewMessage(
     },
     {
       type: "section",
-      fields: [
-        {
-          type: "mrkdwn",
-          text: `*Document:*\n${documentName}`,
-        },
-        {
-          type: "mrkdwn",
-          text: `*Viewer:*\n${viewerEmail}`,
-        },
-        {
-          type: "mrkdwn",
-          text: `*Time:*\n${new Date().toLocaleString()}`,
-        },
-      ],
+      fields,
     },
   ]
 

@@ -69,21 +69,19 @@ export default function ViewLinkForm({
       // Capture viewer and send notifications before granting access
       const captureViewer = async () => {
         try {
-          const viewerEmail = account?.email || "anonymous"
+          // Only send email if the link requires email AND we have an authenticated user
+          const shouldSendEmail = requiresEmail && account?.email
           
-          // Only capture if we have an email (authenticated user)
-          if (account?.email) {
-            await fetch("/api/capture-viewer", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ 
-                linkId: link.id, 
-                email: viewerEmail 
-              }),
-            })
-          }
+          await fetch("/api/capture-viewer", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ 
+              linkId: link.id, 
+              ...(shouldSendEmail && { email: account?.email })
+            }),
+          })
         } catch (error) {
           clientLogger.error("Failed to capture viewer on auto-grant", { error })
           // Don't block access if viewer capture fails
@@ -193,6 +191,8 @@ export default function ViewLinkForm({
         }
 
         // Log viewer via API to trigger Slack notifications
+        // Only include email if provided by user or if link requires email
+        const viewerEmail = data.email || (requiresEmail && account.email) || undefined
         const response = await fetch("/api/capture-viewer", {
           method: "POST",
           headers: {
@@ -200,7 +200,7 @@ export default function ViewLinkForm({
           },
           body: JSON.stringify({ 
             linkId: link.id, 
-            email: data.email || account.email 
+            ...(viewerEmail && { email: viewerEmail })
           }),
         })
 

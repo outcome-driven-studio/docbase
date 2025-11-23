@@ -9,7 +9,7 @@ import {
 
 const captureViewerSchema = z.object({
   linkId: z.string().uuid(),
-  email: z.string().email(),
+  email: z.string().email().optional(),
 })
 
 export async function POST(req: Request) {
@@ -65,31 +65,36 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Link not found" }, { status: 404 })
     }
 
-    // Insert viewer record (using service role, bypasses RLS)
-    console.log("[capture-viewer] Inserting viewer record")
-    const { error: viewerError } = await supabase.from("viewers").insert({
-      link_id: linkId,
-      email: email,
-      viewed_at: new Date().toISOString(),
-    })
-
-    console.log("[capture-viewer] Viewer insert result:", { viewerError })
-
-    if (viewerError) {
-      console.error("[capture-viewer] Error inserting viewer:", viewerError)
-      logger.error("Error inserting viewer record", {
-        linkId,
-        email,
-        error: viewerError,
+    // Insert viewer record only if email is provided (using service role, bypasses RLS)
+    if (email) {
+      console.log("[capture-viewer] Inserting viewer record")
+      const { error: viewerError } = await supabase.from("viewers").insert({
+        link_id: linkId,
+        email: email,
+        viewed_at: new Date().toISOString(),
       })
-      return NextResponse.json(
-        { error: "Failed to capture viewer email", details: viewerError.message },
-        { status: 500 }
-      )
+
+      console.log("[capture-viewer] Viewer insert result:", { viewerError })
+
+      if (viewerError) {
+        console.error("[capture-viewer] Error inserting viewer:", viewerError)
+        logger.error("Error inserting viewer record", {
+          linkId,
+          email,
+          error: viewerError,
+        })
+        return NextResponse.json(
+          { error: "Failed to capture viewer email", details: viewerError.message },
+          { status: 500 }
+        )
+      }
+
+      console.log("[capture-viewer] Success!")
+      logger.info("Viewer email captured", { linkId, email })
+    } else {
+      console.log("[capture-viewer] No email provided, skipping viewer record")
     }
 
-    console.log("[capture-viewer] Success!")
-    logger.info("Viewer email captured", { linkId, email })
     // Note: Contact is automatically created via database trigger on viewers table
 
     // Send Slack notification if configured (don't fail if Slack notification fails)
@@ -118,7 +123,8 @@ export async function POST(req: Request) {
           const documentName = link.name || link.filename || "Document"
           const { text, blocks } = createDocumentViewMessage(
             documentName,
-            email
+            email,
+            link.require_email
           )
 
           const result = await sendSlackNotification({
