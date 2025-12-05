@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight, Download } from "lucide-react"
 import { Document, Page, pdfjs } from "react-pdf"
 
@@ -43,38 +43,37 @@ export default function SecurePDFViewer({
   const [pdfUrl, setPdfUrl] = useState<string>("")
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  
+
   // Page tracking state
-  const [sessionId] = useState<string>(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
+  const [sessionId] = useState<string>(
+    () => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  )
   const [pageStartTime, setPageStartTime] = useState<number>(Date.now())
-  const pageTrackingRef = useRef<{[key: number]: number}>({}) // Track cumulative time per page
+  const pageTrackingRef = useRef<{ [key: number]: number }>({}) // Track cumulative time per page
 
-  useEffect(() => {
-    // Fetch PDF URL
-    setPdfUrl(`/api/view-document/${linkId}`)
-
-    // Auto-detect orientation if displayMode is "auto"
-    if (displayMode === "auto") {
-      detectOrientation()
-    } else if (displayMode === "slideshow") {
-      setIsSlideshow(true)
-    }
-  }, [displayMode, linkId])
-
-  useEffect(() => {
-    // Update page width when container size changes
-    const updateWidth = () => {
-      if (containerRef.current) {
-        setPageWidth(containerRef.current.offsetWidth)
+  // Track time spent on current page and send to API
+  const trackPageTime = useCallback(
+    async (pageNum: number, timeSpent: number) => {
+      try {
+        await fetch("/api/track-page-view", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            linkId,
+            viewerId,
+            sessionId,
+            pageNumber: pageNum,
+            timeSpentSeconds: Math.round(timeSpent),
+          }),
+        })
+      } catch (error) {
+        clientLogger.error("Error tracking page view", { error })
       }
-    }
+    },
+    [linkId, viewerId, sessionId]
+  )
 
-    updateWidth()
-    window.addEventListener("resize", updateWidth)
-    return () => window.removeEventListener("resize", updateWidth)
-  }, [])
-
-  async function detectOrientation() {
+  const detectOrientation = useCallback(async () => {
     try {
       const response = await fetch(`/api/view-document/${linkId}`)
       const blob = await response.blob()
@@ -94,7 +93,59 @@ export default function SecurePDFViewer({
       clientLogger.error("Error detecting PDF orientation", { error })
       setIsSlideshow(false)
     }
-  }
+  }, [linkId])
+
+  // Navigation handlers for slideshow
+  const goToNextPage = useCallback(() => {
+    // Track time spent on current page before moving
+    const timeSpent = (Date.now() - pageStartTime) / 1000 // Convert to seconds
+    pageTrackingRef.current[currentPage] =
+      (pageTrackingRef.current[currentPage] || 0) + timeSpent
+    trackPageTime(currentPage, pageTrackingRef.current[currentPage])
+
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+      setPageStartTime(Date.now())
+    }
+  }, [currentPage, totalPages, pageStartTime, trackPageTime])
+
+  const goToPrevPage = useCallback(() => {
+    // Track time spent on current page before moving
+    const timeSpent = (Date.now() - pageStartTime) / 1000 // Convert to seconds
+    pageTrackingRef.current[currentPage] =
+      (pageTrackingRef.current[currentPage] || 0) + timeSpent
+    trackPageTime(currentPage, pageTrackingRef.current[currentPage])
+
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+      setPageStartTime(Date.now())
+    }
+  }, [currentPage, pageStartTime, trackPageTime])
+
+  useEffect(() => {
+    // Fetch PDF URL
+    setPdfUrl(`/api/view-document/${linkId}`)
+
+    // Auto-detect orientation if displayMode is "auto"
+    if (displayMode === "auto") {
+      detectOrientation()
+    } else if (displayMode === "slideshow") {
+      setIsSlideshow(true)
+    }
+  }, [displayMode, linkId, detectOrientation])
+
+  useEffect(() => {
+    // Update page width when container size changes
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setPageWidth(containerRef.current.offsetWidth)
+      }
+    }
+
+    updateWidth()
+    window.addEventListener("resize", updateWidth)
+    return () => window.removeEventListener("resize", updateWidth)
+  }, [])
 
   async function handleDownload() {
     try {
@@ -131,50 +182,6 @@ export default function SecurePDFViewer({
     e.preventDefault()
   }
 
-  // Track time spent on current page and send to API
-  async function trackPageTime(pageNum: number, timeSpent: number) {
-    try {
-      await fetch("/api/track-page-view", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          linkId,
-          viewerId,
-          sessionId,
-          pageNumber: pageNum,
-          timeSpentSeconds: Math.round(timeSpent),
-        }),
-      })
-    } catch (error) {
-      clientLogger.error("Error tracking page view", { error })
-    }
-  }
-
-  // Navigation handlers for slideshow
-  const goToNextPage = () => {
-    // Track time spent on current page before moving
-    const timeSpent = (Date.now() - pageStartTime) / 1000 // Convert to seconds
-    pageTrackingRef.current[currentPage] = (pageTrackingRef.current[currentPage] || 0) + timeSpent
-    trackPageTime(currentPage, pageTrackingRef.current[currentPage])
-    
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1)
-      setPageStartTime(Date.now())
-    }
-  }
-
-  const goToPrevPage = () => {
-    // Track time spent on current page before moving
-    const timeSpent = (Date.now() - pageStartTime) / 1000 // Convert to seconds
-    pageTrackingRef.current[currentPage] = (pageTrackingRef.current[currentPage] || 0) + timeSpent
-    trackPageTime(currentPage, pageTrackingRef.current[currentPage])
-    
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1)
-      setPageStartTime(Date.now())
-    }
-  }
-
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setTotalPages(numPages)
     setLoading(false)
@@ -184,17 +191,18 @@ export default function SecurePDFViewer({
   useEffect(() => {
     const handleBeforeUnload = () => {
       const timeSpent = (Date.now() - pageStartTime) / 1000
-      pageTrackingRef.current[currentPage] = (pageTrackingRef.current[currentPage] || 0) + timeSpent
+      pageTrackingRef.current[currentPage] =
+        (pageTrackingRef.current[currentPage] || 0) + timeSpent
       trackPageTime(currentPage, pageTrackingRef.current[currentPage])
     }
 
     window.addEventListener("beforeunload", handleBeforeUnload)
-    
+
     return () => {
       handleBeforeUnload()
       window.removeEventListener("beforeunload", handleBeforeUnload)
     }
-  }, [currentPage, pageStartTime])
+  }, [currentPage, pageStartTime, trackPageTime])
 
   // Keyboard navigation for slideshow
   useEffect(() => {
@@ -212,7 +220,7 @@ export default function SecurePDFViewer({
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isSlideshow, currentPage, totalPages])
+  }, [isSlideshow, goToNextPage, goToPrevPage])
 
   // Make PDF links open in new tab
   useEffect(() => {
@@ -220,30 +228,32 @@ export default function SecurePDFViewer({
 
     const handleLinkClicks = () => {
       // Find all links in the annotation layer
-      const annotationLayer = containerRef.current?.querySelector('.react-pdf__Page__annotations')
+      const annotationLayer = containerRef.current?.querySelector(
+        ".react-pdf__Page__annotations"
+      )
       if (!annotationLayer) return
 
-      const links = annotationLayer.querySelectorAll('a[href]')
+      const links = annotationLayer.querySelectorAll("a[href]")
       links.forEach((link) => {
         const anchor = link as HTMLAnchorElement
         // Skip if already processed
-        if (anchor.dataset.processed === 'true') return
-        
+        if (anchor.dataset.processed === "true") return
+
         // Set target to open in new tab
-        anchor.target = '_blank'
-        anchor.rel = 'noopener noreferrer'
-        anchor.dataset.processed = 'true'
-        
+        anchor.target = "_blank"
+        anchor.rel = "noopener noreferrer"
+        anchor.dataset.processed = "true"
+
         // Also prevent default and handle click manually as backup
         const clickHandler = (e: MouseEvent) => {
-          if (anchor.href && !anchor.href.startsWith('#')) {
+          if (anchor.href && !anchor.href.startsWith("#")) {
             e.preventDefault()
             e.stopPropagation()
-            window.open(anchor.href, '_blank', 'noopener,noreferrer')
+            window.open(anchor.href, "_blank", "noopener,noreferrer")
           }
         }
-        
-        anchor.addEventListener('click', clickHandler, true)
+
+        anchor.addEventListener("click", clickHandler, true)
       })
     }
 
@@ -276,50 +286,53 @@ export default function SecurePDFViewer({
   useEffect(() => {
     if (isSlideshow) return
 
-    const handleIframeClick = (e: MouseEvent) => {
+    const handleIframeLoad = () => {
       // Try to access iframe content (may fail due to CORS/security)
       try {
         const iframe = iframeRef.current
         if (!iframe) return
 
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
+        const iframeDoc =
+          iframe.contentDocument || iframe.contentWindow?.document
         if (!iframeDoc) return
 
         // Find all links in the iframe
-        const links = iframeDoc.querySelectorAll('a[href]')
+        const links = iframeDoc.querySelectorAll("a[href]")
         links.forEach((link) => {
           const anchor = link as HTMLAnchorElement
-          if (anchor.dataset.processed === 'true') return
+          if (anchor.dataset.processed === "true") return
 
-          anchor.target = '_blank'
-          anchor.rel = 'noopener noreferrer'
-          anchor.dataset.processed = 'true'
+          anchor.target = "_blank"
+          anchor.rel = "noopener noreferrer"
+          anchor.dataset.processed = "true"
 
           const clickHandler = (e: MouseEvent) => {
-            if (anchor.href && !anchor.href.startsWith('#')) {
+            if (anchor.href && !anchor.href.startsWith("#")) {
               e.preventDefault()
               e.stopPropagation()
-              window.open(anchor.href, '_blank', 'noopener,noreferrer')
+              window.open(anchor.href, "_blank", "noopener,noreferrer")
             }
           }
 
-          anchor.addEventListener('click', clickHandler, true)
+          anchor.addEventListener("click", clickHandler, true)
         })
       } catch (error) {
         // Iframe access blocked (expected for PDFs in most browsers)
         // This is a limitation of browser-native PDF viewers
-        clientLogger.debug('Cannot access iframe content for link handling', { error })
+        clientLogger.debug("Cannot access iframe content for link handling", {
+          error,
+        })
       }
     }
 
     // Try to process links when iframe loads
     const iframe = iframeRef.current
     if (iframe) {
-      iframe.addEventListener('load', handleIframeClick)
+      iframe.addEventListener("load", handleIframeLoad)
       // Also try after a delay
-      const timeoutId = setTimeout(handleIframeClick, 1000)
+      const timeoutId = setTimeout(handleIframeLoad, 1000)
       return () => {
-        iframe.removeEventListener('load', handleIframeClick)
+        iframe.removeEventListener("load", handleIframeLoad)
         clearTimeout(timeoutId)
       }
     }
@@ -330,18 +343,18 @@ export default function SecurePDFViewer({
       {/* Controls */}
       <div className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-between gap-2 bg-background sm:gap-4">
         {isSlideshow && (
-          <div className="flex w-full items-center justify-center gap-3 sm:gap-6 pt-2">
+          <div className="flex w-full items-center justify-center gap-3 pt-2 sm:gap-6">
             {/* Center - Browser tab style with logo and filename */}
             {(logoUrl || pageHeading || filename) && (
-              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-t-lg px-4 py-2 shadow-sm max-w-xs sm:max-w-md">
+              <div className="flex max-w-xs items-center gap-2 rounded-t-lg border border-gray-100 bg-gray-100 px-4 py-2 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:max-w-md">
                 {logoUrl && (
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <Image
                       src={logoUrl}
                       alt="Logo"
                       width={22}
                       height={22}
-                      className="h-6 w-6 object-contain"
+                      className="size-6 object-contain"
                       unoptimized
                     />
                   </div>
@@ -349,7 +362,7 @@ export default function SecurePDFViewer({
                 <span className="truncate text-xs font-medium text-gray-700 dark:text-gray-300 sm:text-sm">
                   {pageHeading || filename}
                 </span>
-                <div className="flex items-center gap-1 sm:gap-2 bg-gray-800 border border-gray-200 rounded-lg px-2 py-1">
+                <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-800 px-2 py-1 sm:gap-2">
                   <span className="text-xs text-white sm:text-sm">
                     {currentPage} / {totalPages}
                   </span>
@@ -359,7 +372,7 @@ export default function SecurePDFViewer({
 
             {/* Right side - Download button */}
             {allowDownload && (
-              <div className="flex items-center gap-1 sm:gap-2 bg-gray-100 border border-gray-200 rounded-lg px-2 py-2">
+              <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-100 p-2 sm:gap-2">
                 <Button
                   onClick={handleDownload}
                   variant="default"
@@ -377,7 +390,7 @@ export default function SecurePDFViewer({
 
       {/* PDF Viewer */}
       <div
-        className="flex w-full flex-col items-center bg-gray-100 dark:bg-gray-900 rounded-lg"
+        className="flex w-full flex-col items-center rounded-lg bg-gray-100 dark:bg-gray-900"
         onContextMenu={disableContextMenu}
         style={{
           overflow: isSlideshow ? "hidden" : "auto",
@@ -397,7 +410,9 @@ export default function SecurePDFViewer({
             ref={containerRef}
             className="relative flex w-full items-center justify-center bg-gray-100 p-2 dark:bg-gray-900 sm:p-4"
             style={{
-              height: pageHeight ? `${pageHeight + 32}px` : "calc(100vh - 80px)",
+              height: pageHeight
+                ? `${pageHeight + 32}px`
+                : "calc(100vh - 80px)",
               overflow: "hidden",
               width: "100%",
             }}
@@ -407,7 +422,7 @@ export default function SecurePDFViewer({
               onClick={goToPrevPage}
               variant="ghost"
               disabled={currentPage === 1}
-              className="absolute left-2 top-1/2 z-20 h-12 w-12 -translate-y-1/2 rounded-full p-0 text-gray-400 transition-all disabled:opacity-30 sm:left-4 sm:h-16 sm:w-16"
+              className="absolute left-2 top-1/2 z-20 size-12 -translate-y-1/2 rounded-full p-0 text-gray-400 transition-all disabled:opacity-30 sm:left-4 sm:size-16"
             >
               <ChevronLeft className="size-6 sm:size-8" />
             </Button>
@@ -417,7 +432,7 @@ export default function SecurePDFViewer({
               onClick={goToNextPage}
               variant="ghost"
               disabled={currentPage === totalPages}
-              className="absolute right-2 top-1/2 z-20 h-12 w-12 -translate-y-1/2 rounded-full p-0 text-gray-400 transition-all disabled:opacity-30 sm:right-4 sm:h-16 sm:w-16"
+              className="absolute right-2 top-1/2 z-20 size-12 -translate-y-1/2 rounded-full p-0 text-gray-400 transition-all disabled:opacity-30 sm:right-4 sm:size-16"
             >
               <ChevronRight className="size-6 sm:size-8" />
             </Button>
@@ -441,7 +456,10 @@ export default function SecurePDFViewer({
                   pageNumber={currentPage}
                   width={
                     containerRef.current
-                      ? Math.min(containerRef.current.offsetWidth - 16, containerRef.current.offsetHeight * 1.4142)
+                      ? Math.min(
+                          containerRef.current.offsetWidth - 16,
+                          containerRef.current.offsetHeight * 1.4142
+                        )
                       : undefined
                   }
                   renderTextLayer={false}
@@ -449,8 +467,13 @@ export default function SecurePDFViewer({
                   className="max-h-full max-w-full shadow-lg"
                   onLoadSuccess={(page) => {
                     const viewport = page.getViewport({ scale: 1 })
-                    const containerWidth = containerRef.current?.offsetWidth || window.innerWidth
-                    const scale = Math.min(containerWidth - 16, window.innerHeight * 1.4142) / viewport.width
+                    const containerWidth =
+                      containerRef.current?.offsetWidth || window.innerWidth
+                    const scale =
+                      Math.min(
+                        containerWidth - 16,
+                        window.innerHeight * 1.4142
+                      ) / viewport.width
                     const scaledHeight = viewport.height * scale
                     setPageHeight(scaledHeight)
                   }}
