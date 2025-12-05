@@ -214,6 +214,117 @@ export default function SecurePDFViewer({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [isSlideshow, currentPage, totalPages])
 
+  // Make PDF links open in new tab
+  useEffect(() => {
+    if (!isSlideshow) return
+
+    const handleLinkClicks = () => {
+      // Find all links in the annotation layer
+      const annotationLayer = containerRef.current?.querySelector('.react-pdf__Page__annotations')
+      if (!annotationLayer) return
+
+      const links = annotationLayer.querySelectorAll('a[href]')
+      links.forEach((link) => {
+        const anchor = link as HTMLAnchorElement
+        // Skip if already processed
+        if (anchor.dataset.processed === 'true') return
+        
+        // Set target to open in new tab
+        anchor.target = '_blank'
+        anchor.rel = 'noopener noreferrer'
+        anchor.dataset.processed = 'true'
+        
+        // Also prevent default and handle click manually as backup
+        const clickHandler = (e: MouseEvent) => {
+          if (anchor.href && !anchor.href.startsWith('#')) {
+            e.preventDefault()
+            e.stopPropagation()
+            window.open(anchor.href, '_blank', 'noopener,noreferrer')
+          }
+        }
+        
+        anchor.addEventListener('click', clickHandler, true)
+      })
+    }
+
+    // Use MutationObserver to watch for dynamically added links
+    const observer = new MutationObserver(() => {
+      handleLinkClicks()
+    })
+
+    // Start observing the container for changes
+    if (containerRef.current) {
+      observer.observe(containerRef.current, {
+        childList: true,
+        subtree: true,
+      })
+    }
+
+    // Run immediately and after a short delay to catch initial render
+    handleLinkClicks()
+    const timeoutId = setTimeout(handleLinkClicks, 200)
+    const timeoutId2 = setTimeout(handleLinkClicks, 500)
+
+    return () => {
+      observer.disconnect()
+      clearTimeout(timeoutId)
+      clearTimeout(timeoutId2)
+    }
+  }, [isSlideshow, currentPage, pdfUrl])
+
+  // Handle links in iframe mode (document mode)
+  useEffect(() => {
+    if (isSlideshow) return
+
+    const handleIframeClick = (e: MouseEvent) => {
+      // Try to access iframe content (may fail due to CORS/security)
+      try {
+        const iframe = iframeRef.current
+        if (!iframe) return
+
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
+        if (!iframeDoc) return
+
+        // Find all links in the iframe
+        const links = iframeDoc.querySelectorAll('a[href]')
+        links.forEach((link) => {
+          const anchor = link as HTMLAnchorElement
+          if (anchor.dataset.processed === 'true') return
+
+          anchor.target = '_blank'
+          anchor.rel = 'noopener noreferrer'
+          anchor.dataset.processed = 'true'
+
+          const clickHandler = (e: MouseEvent) => {
+            if (anchor.href && !anchor.href.startsWith('#')) {
+              e.preventDefault()
+              e.stopPropagation()
+              window.open(anchor.href, '_blank', 'noopener,noreferrer')
+            }
+          }
+
+          anchor.addEventListener('click', clickHandler, true)
+        })
+      } catch (error) {
+        // Iframe access blocked (expected for PDFs in most browsers)
+        // This is a limitation of browser-native PDF viewers
+        clientLogger.debug('Cannot access iframe content for link handling', { error })
+      }
+    }
+
+    // Try to process links when iframe loads
+    const iframe = iframeRef.current
+    if (iframe) {
+      iframe.addEventListener('load', handleIframeClick)
+      // Also try after a delay
+      const timeoutId = setTimeout(handleIframeClick, 1000)
+      return () => {
+        iframe.removeEventListener('load', handleIframeClick)
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [isSlideshow, linkId])
+
   return (
     <div className="flex w-full flex-col items-center">
       {/* Controls */}
