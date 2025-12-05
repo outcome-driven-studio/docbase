@@ -334,7 +334,7 @@ export default function SecurePDFViewer({
                       : undefined
                   }
                   renderTextLayer={false}
-                  renderAnnotationLayer={false}
+                  renderAnnotationLayer={true}
                   className="max-h-full max-w-full shadow-lg"
                   onLoadSuccess={(page) => {
                     const viewport = page.getViewport({ scale: 1 })
